@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "IDV Calificaciones",
-  description: "Sistema de registro de calificaciones - Esc. Sec. Gral. Instituto Don Vasco",
+  description: "Sistema de registro de calificaciones - Instituto Don Vasco",
 };
 
 export default function RootLayout({
@@ -16,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={inter.className}>{children}</body>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }
