@@ -27,6 +27,7 @@ export default function AdminProfesoresPage() {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPass, setNewPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [newError, setNewError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -257,11 +258,21 @@ export default function AdminProfesoresPage() {
                   />
                 </div>
                 <div>
+                <div>
                   <label className="text-xs font-medium text-gray-700 mb-1 block">Contraseña *</label>
-                  <input
-                    type="text" value={newPass} onChange={(e) => setNewPass(e.target.value)}
-                    className="input-field" placeholder="Mínimo 6 caracteres"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPass ? "text" : "password"} value={newPass} onChange={(e) => setNewPass(e.target.value)}
+                      className="input-field pr-10" placeholder="Mínimo 6 caracteres"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPass(!showPass)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                    >
+                      {showPass ? "🙈" : "👁"}
+                    </button>
+                  </div>
                 </div>
               </div>
               {newError && <p className="text-xs text-red-600 mt-2">{newError}</p>}
