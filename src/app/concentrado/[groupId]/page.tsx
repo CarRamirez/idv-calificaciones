@@ -8,6 +8,13 @@ type Props = {
   params: { groupId: string };
 };
 
+// Misma estructura que captura
+const TRIMESTERS = [
+  { id: 1, name: "1er Trim.", periods: [1, 2] },
+  { id: 2, name: "2do Trim.", periods: [3, 4] },
+  { id: 3, name: "3er Trim.", periods: [5, 6, 7] },
+];
+
 export default async function ConcentradoPage({ params }: Props) {
   const supabase = createServerSupabaseClient();
 
@@ -51,33 +58,65 @@ export default async function ConcentradoPage({ params }: Props) {
     .select("student_id, subject_id, period, score, absences")
     .in("student_id", studentIds);
 
-  const gradeMap: Record<string, Record<string, Record<number, { score: number | null; absences: number }>>> = {};
+  const gradeMap: Record<
+    string,
+    Record<string, Record<number, { score: number | null; absences: number }>>
+  > = {};
   (allGrades || []).forEach((g) => {
     if (!gradeMap[g.student_id]) gradeMap[g.student_id] = {};
-    if (!gradeMap[g.student_id][g.subject_id]) gradeMap[g.student_id][g.subject_id] = {};
+    if (!gradeMap[g.student_id][g.subject_id])
+      gradeMap[g.student_id][g.subject_id] = {};
     gradeMap[g.student_id][g.subject_id][g.period] = {
       score: g.score,
       absences: g.absences,
     };
   });
 
-  function getSubjectAvg(studentId: string, subjectId: string): number | null {
+  function getTrimesterAvg(
+    studentId: string,
+    subjectId: string,
+    trimester: { periods: number[] }
+  ): number | null {
     const subGrades = gradeMap[studentId]?.[subjectId];
     if (!subGrades) return null;
-    const scores = [1, 2, 3]
+    const scores = trimester.periods
       .map((p) => subGrades[p]?.score)
       .filter((s): s is number => s !== null);
     if (scores.length === 0) return null;
     return scores.reduce((a, b) => a + b, 0) / scores.length;
   }
 
+  // Promedio curricular = promedio de 3 trimestres (Julio NO cuenta)
+  function getSubjectCurricular(
+    studentId: string,
+    subjectId: string
+  ): number | null {
+    const avgs = TRIMESTERS.map((t) =>
+      getTrimesterAvg(studentId, subjectId, t)
+    ).filter((a): a is number => a !== null);
+    if (avgs.length === 0) return null;
+    return avgs.reduce((a, b) => a + b, 0) / avgs.length;
+  }
+
   function getGeneralAvg(studentId: string): number | null {
     const avgs = (subjects || [])
       .filter((s) => s.counts_for_avg)
-      .map((s) => getSubjectAvg(studentId, s.id))
+      .map((s) => getSubjectCurricular(studentId, s.id))
       .filter((a): a is number => a !== null);
     if (avgs.length === 0) return null;
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
+  }
+
+  function getTotalAbsences(
+    studentId: string,
+    subjectId: string
+  ): number {
+    const subGrades = gradeMap[studentId]?.[subjectId];
+    if (!subGrades) return 0;
+    return [1, 2, 3, 4, 5, 6, 7, 8].reduce(
+      (sum, p) => sum + (subGrades[p]?.absences ?? 0),
+      0
+    );
   }
 
   function semaforoClass(score: number | null): string {
@@ -98,7 +137,7 @@ export default async function ConcentradoPage({ params }: Props) {
               Concentrado — {group.grade}° {group.letter}
             </h1>
             <p className="text-sm text-gray-500">
-              Equivalente a la hoja BASES del Excel
+              Promedios curriculares por materia — Ciclo 2026-2027
             </p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">
@@ -107,28 +146,49 @@ export default async function ConcentradoPage({ params }: Props) {
         </div>
 
         <div className="flex gap-4 mb-4 text-xs">
-          <span className="px-2 py-1 rounded bg-red-100 text-red-800">5-6.9</span>
-          <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">7-7.9</span>
-          <span className="px-2 py-1 rounded bg-green-100 text-green-800">8-10</span>
+          <span className="px-2 py-1 rounded bg-red-100 text-red-800">
+            5-6.9
+          </span>
+          <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">
+            7-7.9
+          </span>
+          <span className="px-2 py-1 rounded bg-green-100 text-green-800">
+            8-10
+          </span>
         </div>
 
         <div className="card overflow-x-auto">
           <table className="grade-table">
             <thead>
               <tr>
-                <th rowSpan={2} className="w-10">N°</th>
-                <th rowSpan={2} className="min-w-[180px]">Nombre</th>
+                <th rowSpan={2} className="w-10">
+                  N°
+                </th>
+                <th rowSpan={2} className="min-w-[180px]">
+                  Nombre
+                </th>
                 {(subjects || []).map((s) => (
-                  <th key={s.id} colSpan={2} className="text-center text-xs">
+                  <th
+                    key={s.id}
+                    colSpan={2}
+                    className="text-center text-xs border-l border-gray-200"
+                  >
                     {s.short_name}
                   </th>
                 ))}
-                <th rowSpan={2} className="w-16 text-center">Prom. Gral.</th>
+                <th
+                  rowSpan={2}
+                  className="w-16 text-center border-l border-gray-300 bg-gray-100"
+                >
+                  Prom. Gral.
+                </th>
               </tr>
               <tr>
                 {(subjects || []).map((s) => (
                   <React.Fragment key={s.id}>
-                    <th className="text-center text-xs w-14">Cal.</th>
+                    <th className="text-center text-xs w-14 border-l border-gray-200">
+                      Cal.
+                    </th>
                     <th className="text-center text-xs w-12">IA</th>
                   </React.Fragment>
                 ))}
@@ -146,14 +206,21 @@ export default async function ConcentradoPage({ params }: Props) {
                       {student.full_name}
                     </td>
                     {(subjects || []).map((s) => {
-                      const avg = getSubjectAvg(student.id, s.id);
-                      const totalAbs = [1, 2, 3]
-                        .map((p) => gradeMap[student.id]?.[s.id]?.[p]?.absences ?? 0)
-                        .reduce((a, b) => a + b, 0);
+                      const curricular = getSubjectCurricular(
+                        student.id,
+                        s.id
+                      );
+                      const totalAbs = getTotalAbsences(student.id, s.id);
                       return (
                         <React.Fragment key={s.id}>
-                          <td className={`text-center text-xs tabular-nums ${semaforoClass(avg)}`}>
-                            {avg !== null ? avg.toFixed(1) : "—"}
+                          <td
+                            className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(
+                              curricular
+                            )}`}
+                          >
+                            {curricular !== null
+                              ? curricular.toFixed(1)
+                              : "—"}
                           </td>
                           <td className="text-center text-xs tabular-nums text-gray-500">
                             {totalAbs || "—"}
@@ -161,7 +228,11 @@ export default async function ConcentradoPage({ params }: Props) {
                         </React.Fragment>
                       );
                     })}
-                    <td className={`text-center text-xs font-bold tabular-nums ${semaforoClass(genAvg)}`}>
+                    <td
+                      className={`text-center text-xs font-bold tabular-nums border-l border-gray-200 ${semaforoClass(
+                        genAvg
+                      )}`}
+                    >
                       {genAvg !== null ? genAvg.toFixed(1) : "—"}
                     </td>
                   </tr>
