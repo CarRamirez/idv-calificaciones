@@ -70,7 +70,7 @@ export default async function DashboardPage() {
           Bienvenido, {profile.full_name.split(" ")[0]}
         </h1>
         <p className="text-sm text-gray-500 mb-6">
-          Ciclo escolar 2026-2027
+          Mnemósine — Ciclo escolar 2026-2027
         </p>
 
         {profile.role === "teacher" && (

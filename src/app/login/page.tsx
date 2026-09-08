@@ -44,10 +44,10 @@ export default function LoginPage() {
             className="mx-auto mb-4 rounded-full shadow-lg ring-4 ring-white/20"
           />
           <h1 className="text-2xl font-bold text-white">
-            Instituto
+            Mnemósine
           </h1>
-          <h2 className="text-lg font-semibold text-accent-300">
-            &ldquo;Don Vasco&rdquo;
+          <h2 className="text-base font-semibold text-accent-300">
+            Instituto &ldquo;Don Vasco&rdquo;
           </h2>
           <p className="text-sm text-primary-200 mt-2">
             Sistema de Calificaciones
