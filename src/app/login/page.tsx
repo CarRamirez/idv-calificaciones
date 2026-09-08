@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -36,12 +36,12 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Image
+          <img
             src="/logo-idv.png"
             alt="Instituto Don Vasco"
-            width={96}
-            height={96}
-            className="mx-auto mb-4 rounded-full shadow-lg ring-4 ring-white/20"
+            
+            
+            className="mx-auto mb-4 rounded-full shadow-lg ring-4 ring-white/20 w-24 h-24"
           />
           <h1 className="text-2xl font-bold text-white">
             Instituto

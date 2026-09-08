@@ -30,6 +30,10 @@ export default async function DashboardPage() {
   }
 
   let groups: any[] = [];
+  let totalStudents = 0;
+  let totalTeachers = 0;
+  let groupStudentCounts: Record<string, number> = {};
+
   if (profile.role === "admin" || profile.role === "viewer") {
     const { data } = await supabase
       .from("groups")
@@ -37,6 +41,24 @@ export default async function DashboardPage() {
       .order("grade")
       .order("letter");
     groups = data || [];
+
+    // Count students per group
+    const { data: students } = await supabase
+      .from("students")
+      .select("id, group_id")
+      .eq("is_active", true);
+
+    totalStudents = students?.length || 0;
+    (students || []).forEach((s: any) => {
+      groupStudentCounts[s.group_id] = (groupStudentCounts[s.group_id] || 0) + 1;
+    });
+
+    // Count teachers
+    const { data: teachers } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "teacher");
+    totalTeachers = teachers?.length || 0;
   }
 
   return (
@@ -83,23 +105,40 @@ export default async function DashboardPage() {
 
         {(profile.role === "admin" || profile.role === "viewer") && (
           <div className="space-y-6">
+            {/* Stats cards */}
             {profile.role === "admin" && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Link href="/admin/alumnos" className="card p-4 text-center hover:border-primary-300 transition-all">
-                  <p className="text-2xl mb-1">👥</p>
-                  <p className="text-sm font-medium text-gray-700">Alumnos</p>
+                <Link href="/admin/alumnos" className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">👥</span>
+                    <span className="text-2xl font-bold text-primary-600">{totalStudents}</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">Alumnos</p>
+                  <p className="text-xs text-gray-400">activos</p>
                 </Link>
-                <Link href="/admin/profesores" className="card p-4 text-center hover:border-primary-300 transition-all">
-                  <p className="text-2xl mb-1">👨‍🏫</p>
-                  <p className="text-sm font-medium text-gray-700">Profesores</p>
+                <Link href="/admin/profesores" className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">👨‍🏫</span>
+                    <span className="text-2xl font-bold text-primary-600">{totalTeachers}</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">Profesores</p>
+                  <p className="text-xs text-gray-400">registrados</p>
                 </Link>
-                <Link href="/admin/ciclo" className="card p-4 text-center hover:border-primary-300 transition-all">
-                  <p className="text-2xl mb-1">📅</p>
-                  <p className="text-sm font-medium text-gray-700">Ciclo Escolar</p>
+                <Link href="/admin/ciclo" className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">📅</span>
+                    <span className="text-2xl font-bold text-accent-600">{groups.length}</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">Grupos</p>
+                  <p className="text-xs text-gray-400">ciclo actual</p>
                 </Link>
-                <Link href="/captura" className="card p-4 text-center hover:border-primary-300 transition-all">
-                  <p className="text-2xl mb-1">✏️</p>
-                  <p className="text-sm font-medium text-gray-700">Captura</p>
+                <Link href="/captura" className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">✏️</span>
+                    <span className="text-lg font-bold text-accent-600">→</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">Captura</p>
+                  <p className="text-xs text-gray-400">ir a calificar</p>
                 </Link>
               </div>
             )}
@@ -109,17 +148,23 @@ export default async function DashboardPage() {
                 Concentrado por grupo
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                {groups.map((g: any) => (
-                  <Link
-                    key={g.id}
-                    href={`/concentrado/${g.id}`}
-                    className="card p-3 text-center hover:border-primary-300 hover:shadow-md transition-all"
-                  >
-                    <p className="text-lg font-bold text-primary-600">
-                      {g.grade}° {g.letter}
-                    </p>
-                  </Link>
-                ))}
+                {groups.map((g: any) => {
+                  const count = groupStudentCounts[g.id] || 0;
+                  return (
+                    <Link
+                      key={g.id}
+                      href={`/concentrado/${g.id}`}
+                      className="card p-3 text-center hover:border-primary-300 hover:shadow-md transition-all group"
+                    >
+                      <p className="text-lg font-bold text-primary-600 group-hover:text-primary-700 transition-colors">
+                        {g.grade}° {g.letter}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {count} alumno{count !== 1 ? "s" : ""}
+                      </p>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
