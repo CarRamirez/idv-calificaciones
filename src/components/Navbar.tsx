@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
@@ -26,8 +27,17 @@ export default function Navbar({ userName, userRole }: Props) {
         <div className="flex items-center justify-between h-14">
           {/* Logo / Nombre */}
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="text-lg font-bold text-primary-700">IDV</span>
-            <span className="text-sm text-gray-500 hidden sm:inline">Calificaciones</span>
+            <Image
+              src="/logo-idv.png"
+              alt="Instituto Don Vasco"
+              width={36}
+              height={36}
+              className="rounded-full"
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-bold text-primary-700">Instituto Don Vasco</span>
+              <span className="text-[10px] text-accent-600 font-medium hidden sm:block">Sistema de Calificaciones</span>
+            </div>
           </Link>
 
           {/* Links de navegación - Desktop */}
