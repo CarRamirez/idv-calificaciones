@@ -258,7 +258,6 @@ export default function AdminProfesoresPage() {
                   />
                 </div>
                 <div>
-                <div>
                   <label className="text-xs font-medium text-gray-700 mb-1 block">Contraseña *</label>
                   <div className="relative">
                     <input
