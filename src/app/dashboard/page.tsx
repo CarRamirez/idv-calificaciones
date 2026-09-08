@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   let groups: any[] = [];
   let totalStudents = 0;
   let totalTeachers = 0;
-  let groupStudentCounts: Record<string, number> = {};
+  const groupStudentCounts: Record<string, number> = {};
 
   if (profile.role === "admin" || profile.role === "viewer") {
     const { data } = await supabase
