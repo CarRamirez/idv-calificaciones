@@ -92,6 +92,10 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
     return gradeMap[studentId]?.[subjectId]?.[period]?.score ?? null;
   }
 
+  function getAbsences(studentId: string, subjectId: string, period: number): number {
+    return gradeMap[studentId]?.[subjectId]?.[period]?.absences ?? 0;
+  }
+
   // Trimester general average (for trimester view)
   function getTrimGeneralAvg(studentId: string, trimester: { periods: number[] }): number | null {
     const avgs = subjects
@@ -192,33 +196,48 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
           <table className="grade-table">
             <thead>
               <tr>
-                <th rowSpan={2} className="w-10">N°</th>
-                <th rowSpan={2} className="min-w-[180px]">Nombre</th>
+                <th rowSpan={3} className="w-10">N°</th>
+                <th rowSpan={3} className="min-w-[180px]">Nombre</th>
                 {subjects.map((s) => (
                   <th
                     key={s.id}
-                    colSpan={activeTrimester.periods.length + 2}
+                    colSpan={activeTrimester.periods.length * 2 + 2}
                     className="text-center text-xs border-l border-gray-200"
                   >
                     {s.short_name}
                   </th>
                 ))}
-                <th rowSpan={2} className="w-16 text-center border-l border-gray-300 bg-gray-100">
+                <th rowSpan={3} className="w-16 text-center border-l border-gray-300 bg-gray-100">
                   Prom. Trim.
                 </th>
               </tr>
+              {/* Row 2: period names spanning Cal + IA each, then Prom + IA */}
               <tr>
                 {subjects.map((s) => (
                   <React.Fragment key={s.id}>
                     {activeTrimester.periods.map((p) => (
-                      <th key={p} className="text-center text-xs w-14 border-l border-gray-200">
+                      <th key={p} colSpan={2} className="text-center text-xs border-l border-gray-200">
                         {periodShort(p)}
                       </th>
                     ))}
-                    <th className="text-center text-xs w-14 border-l border-gray-200 bg-primary-50/50 font-bold">
-                      Prom.
+                    <th colSpan={2} className="text-center text-xs border-l border-gray-200 bg-primary-50/50 font-bold">
+                      Trimestre
                     </th>
-                    <th className="text-center text-xs w-10">IA</th>
+                  </React.Fragment>
+                ))}
+              </tr>
+              {/* Row 3: Cal / IA under each period and under Trimestre */}
+              <tr>
+                {subjects.map((s) => (
+                  <React.Fragment key={s.id}>
+                    {activeTrimester.periods.map((p) => (
+                      <React.Fragment key={p}>
+                        <th className="text-center text-xs w-12 border-l border-gray-200">Cal.</th>
+                        <th className="text-center text-xs w-10">IA</th>
+                      </React.Fragment>
+                    ))}
+                    <th className="text-center text-xs w-12 border-l border-gray-200 bg-primary-50/50">Prom.</th>
+                    <th className="text-center text-xs w-10 bg-primary-50/50">IA</th>
                   </React.Fragment>
                 ))}
               </tr>
@@ -237,19 +256,22 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                         <React.Fragment key={s.id}>
                           {activeTrimester.periods.map((p) => {
                             const score = getScore(student.id, s.id, p);
+                            const abs = getAbsences(student.id, s.id, p);
                             return (
-                              <td
-                                key={p}
-                                className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)}`}
-                              >
-                                {score !== null ? score.toFixed(1) : "—"}
-                              </td>
+                              <React.Fragment key={p}>
+                                <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)}`}>
+                                  {score !== null ? score.toFixed(1) : "—"}
+                                </td>
+                                <td className="text-center text-xs tabular-nums text-gray-400">
+                                  {abs || "—"}
+                                </td>
+                              </React.Fragment>
                             );
                           })}
                           <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${semaforoClass(trimAvg)}`}>
                             {trimAvg !== null ? trimAvg.toFixed(1) : "—"}
                           </td>
-                          <td className="text-center text-xs tabular-nums text-gray-500">
+                          <td className="text-center text-xs tabular-nums text-gray-500 font-medium">
                             {trimAbs || "—"}
                           </td>
                         </React.Fragment>
