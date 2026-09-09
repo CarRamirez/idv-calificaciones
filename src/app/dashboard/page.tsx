@@ -33,9 +33,9 @@ export default async function DashboardPage() {
     teacherAssignments = data || [];
 
     // Unique group IDs
-    teacherGroupIds = [
-      ...new Set(teacherAssignments.map((a: any) => a.groups.id)),
-    ];
+    teacherGroupIds = Array.from(
+      new Set(teacherAssignments.map((a: any) => a.groups.id))
+    );
 
     // Student counts per group
     if (teacherGroupIds.length > 0) {
