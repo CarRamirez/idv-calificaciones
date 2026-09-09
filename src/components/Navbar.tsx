@@ -160,7 +160,7 @@ export default function Navbar({ userName, userRole }: Props) {
               >
                 Inicio
               </Link>
-              {(userRole === "teacher" || userRole === "admin") && (
+              {userRole === "admin" && (
                 <Link
                   href="/captura"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -240,7 +240,7 @@ export default function Navbar({ userName, userRole }: Props) {
               <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                 Inicio
               </Link>
-              {(userRole === "teacher" || userRole === "admin") && (
+              {userRole === "admin" && (
                 <Link href="/captura" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Captura
                 </Link>
