@@ -149,56 +149,86 @@ export default async function DashboardPage() {
             </div>
 
             {/* Mis grupos con materias */}
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+              Mis grupos
+            </h2>
             {Object.keys(teacherByGroup).length === 0 ? (
               <div className="card p-8 text-center text-gray-500 text-sm">
                 No tienes asignaturas asignadas. Contacta al administrador.
               </div>
             ) : (
-              Object.entries(teacherByGroup)
-                .sort(
-                  ([, a], [, b]) =>
-                    a.group.grade - b.group.grade ||
-                    a.group.letter.localeCompare(b.group.letter)
-                )
-                .map(([gId, { group, subjects }]) => {
-                  const studentCount = teacherStudentCounts[gId] || 0;
-                  return (
-                    <div key={gId}>
-                      <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-sm font-semibold text-primary-600 uppercase tracking-wide">
-                          {group.grade}° {group.letter}
-                          <span className="ml-2 text-gray-400 font-normal normal-case">
-                            — {studentCount} alumno
-                            {studentCount !== 1 ? "s" : ""}
-                          </span>
-                        </h2>
-                        <Link
-                          href={`/concentrado/${gId}`}
-                          className="text-xs text-primary-600 hover:text-primary-800 font-medium transition-colors"
-                        >
-                          Ver concentrado →
-                        </Link>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {subjects.map((s: any) => (
-                          <Link
-                            key={s.id}
-                            href={`/captura/${gId}/${s.id}`}
-                            className="card px-4 py-3 hover:border-primary-300 hover:shadow-md transition-all group flex items-center justify-between"
-                          >
-                            <p className="text-sm font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
-                              {s.name}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(teacherByGroup)
+                  .sort(
+                    ([, a], [, b]) =>
+                      a.group.grade - b.group.grade ||
+                      a.group.letter.localeCompare(b.group.letter)
+                  )
+                  .map(([gId, { group, subjects }]) => {
+                    const studentCount = teacherStudentCounts[gId] || 0;
+                    return (
+                      <div
+                        key={gId}
+                        className="card overflow-hidden"
+                      >
+                        {/* Header del grupo */}
+                        <div className="bg-primary-600 px-4 py-3 flex items-center justify-between">
+                          <div>
+                            <p className="text-lg font-bold text-white">
+                              {group.grade}° {group.letter}
                             </p>
-                            <span className="text-xs text-gray-400 font-mono">
-                              {s.short_name}
-                            </span>
+                            <p className="text-xs text-primary-200">
+                              {studentCount} alumno{studentCount !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                          <span className="text-3xl font-bold text-white/20">
+                            {group.grade}°{group.letter}
+                          </span>
+                        </div>
+
+                        {/* Materias */}
+                        <div className="px-4 py-3 space-y-1.5">
+                          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Materias asignadas
+                          </p>
+                          {subjects.map((s: any) => (
+                            <div
+                              key={s.id}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-gray-700">{s.name}</span>
+                              <span className="text-xs text-gray-400 font-mono">
+                                {s.short_name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Botones de acción */}
+                        <div className="px-4 pb-4 pt-2 flex gap-2">
+                          <Link
+                            href={`/captura/${gId}/${subjects[0]?.id || ""}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Calificar
                           </Link>
-                        ))}
+                          <Link
+                            href={`/concentrado/${gId}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-primary-600 text-xs font-medium rounded-lg border border-primary-200 hover:bg-primary-50 transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Concentrado
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-            )}
+                    );
+                  })
+              </div>
           </div>
         )}
 
