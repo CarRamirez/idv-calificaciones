@@ -62,7 +62,7 @@ export default function AdminProfesoresPage() {
   const loadTeachers = useCallback(async () => {
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name")
+      .select("id, full_name, email")
       .eq("role", "teacher")
       .order("full_name");
     setTeachers(data || []);
@@ -190,6 +190,7 @@ export default function AdminProfesoresPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-bold text-gray-900 text-sm">{t.full_name}</h3>
+                      <p className="text-xs text-gray-400">{t.email || "Sin correo"}</p>
                       {ta.length === 0 ? (
                         <p className="text-xs text-gray-400 mt-1">Sin materias asignadas</p>
                       ) : (

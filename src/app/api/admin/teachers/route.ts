@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     .insert({
       id: authData.user.id,
       full_name: full_name.toUpperCase(),
+      email: email.toLowerCase(),
       role: "teacher",
     });
 
