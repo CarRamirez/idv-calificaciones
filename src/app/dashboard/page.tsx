@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   // ──── TEACHER DATA ────
   let teacherAssignments: any[] = [];
   let teacherGroupIds: string[] = [];
-  let teacherStudentCounts: Record<string, number> = {};
+  const teacherStudentCounts: Record<string, number> = {};
 
   if (profile.role === "teacher") {
     const { data } = await supabase
