@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 type Props = {
   userName: string;
@@ -13,6 +13,12 @@ type Props = {
 
 const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutos
 const WARNING_BEFORE = 2 * 60 * 1000; // Aviso 2 min antes
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Administrador",
+  teacher: "Profesor",
+  viewer: "Consulta",
+};
 
 export default function Navbar({ userName, userRole }: Props) {
   const router = useRouter();
@@ -24,6 +30,14 @@ export default function Navbar({ userName, userRole }: Props) {
   const [showTimeout, setShowTimeout] = useState(false);
   const lastActivity = useRef(Date.now());
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Marca de agua SVG generada dinámicamente
+  const watermarkBg = useMemo(() => {
+    const label = `${userName}  ·  ${ROLE_LABELS[userRole] || userRole}`;
+    const encoded = encodeURIComponent(label);
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-25 200 100)' font-family='system-ui,sans-serif' font-size='14' font-weight='500' fill='%23000' fill-opacity='0.04' letter-spacing='1'>${encoded}</text></svg>`;
+    return `url("data:image/svg+xml,${svg}")`;
+  }, [userName, userRole]);
 
   // Reloj en tiempo real
   useEffect(() => {
@@ -121,7 +135,14 @@ export default function Navbar({ userName, userRole }: Props) {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      {/* Marca de agua global */}
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 z-0 pointer-events-none select-none"
+        style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }}
+      />
+
+      <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
