@@ -202,7 +202,15 @@ export default function Navbar({ userName, userRole }: Props) {
                   href="/admin/alumnos"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
                 >
-                  Admin
+                  Alumnos
+                </Link>
+              )}
+              {userRole === "admin" && (
+                <Link
+                  href="/admin/profesores"
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Profesores
                 </Link>
               )}
               {userRole === "admin" && (
@@ -281,7 +289,12 @@ export default function Navbar({ userName, userRole }: Props) {
               )}
               {userRole === "admin" && (
                 <Link href="/admin/alumnos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Admin
+                  Alumnos
+                </Link>
+              )}
+              {userRole === "admin" && (
+                <Link href="/admin/profesores" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Profesores
                 </Link>
               )}
               {userRole === "admin" && (
