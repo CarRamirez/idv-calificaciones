@@ -106,6 +106,19 @@ export default function AdminProfesoresPage() {
     loadTeachers();
   }
 
+  // Download CSV template
+  function downloadTemplate() {
+    const header = "nombre,correo,contrasena";
+    const example = "JUAN PEREZ LOPEZ,juan.perez@ejemplo.com,Pass1234";
+    const blob = new Blob([header + "\n" + example + "\n"], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "plantilla_profesores.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   // CSV parsing
   function handleCsvFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -251,6 +264,16 @@ export default function AdminProfesoresPage() {
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowNew(true)} className="btn-primary text-sm">
               + Nuevo profesor
+            </button>
+            <button
+              onClick={downloadTemplate}
+              className="btn-secondary text-sm inline-flex items-center gap-1"
+              title="Descargar plantilla CSV"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Plantilla
             </button>
             <button
               onClick={() => fileRef.current?.click()}
