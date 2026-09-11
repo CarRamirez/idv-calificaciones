@@ -271,7 +271,8 @@ export default function CapturaPage({ params }: Props) {
     value: string
   ) {
     const num = value === "" ? null : parseFloat(value);
-    if (num !== null && (num < 5 || num > 10)) return;
+    // Permitir escritura libre (no bloquear dígitos intermedios como "1" de "10")
+    if (num !== null && isNaN(num)) return;
 
     setGrades((prev) => ({
       ...prev,
@@ -301,9 +302,29 @@ export default function CapturaPage({ params }: Props) {
 
   function handleBlur(studentId: string, period: number) {
     const data = grades[studentId]?.[period];
-    if (data) {
-      saveGrade(studentId, period, data.score, data.absences);
+    if (!data) return;
+
+    // Validar rango al perder foco: si está fuera de 5-10, corregir
+    let score = data.score;
+    if (score !== null) {
+      if (score < 5) score = 5;
+      if (score > 10) score = 10;
+      // Redondear a 1 decimal
+      score = Math.round(score * 10) / 10;
     }
+
+    // Actualizar el estado con el valor corregido
+    if (score !== data.score) {
+      setGrades((prev) => ({
+        ...prev,
+        [studentId]: {
+          ...prev[studentId],
+          [period]: { ...prev[studentId][period], score },
+        },
+      }));
+    }
+
+    saveGrade(studentId, period, score, data.absences);
   }
 
   function getTrimesterAvg(studentId: string, trimesterId: number): string {
