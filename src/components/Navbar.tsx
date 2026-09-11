@@ -205,6 +205,14 @@ export default function Navbar({ userName, userRole }: Props) {
                   Admin
                 </Link>
               )}
+              {userRole === "admin" && (
+                <Link
+                  href="/admin/sesiones"
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Sesiones
+                </Link>
+              )}
 
               {/* Dropdown de usuario */}
               <div className="relative ml-2 pl-4 border-l border-gray-200" ref={dropdownRef}>
@@ -274,6 +282,11 @@ export default function Navbar({ userName, userRole }: Props) {
               {userRole === "admin" && (
                 <Link href="/admin/alumnos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Admin
+                </Link>
+              )}
+              {userRole === "admin" && (
+                <Link href="/admin/sesiones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Sesiones
                 </Link>
               )}
               <div className="px-3 py-2 flex items-center justify-between border-t border-gray-100 mt-1 pt-2">

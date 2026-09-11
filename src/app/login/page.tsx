@@ -29,6 +29,11 @@ export default function LoginPage() {
       return;
     }
 
+    // Registrar el inicio de sesión (no bloquea la navegación)
+    fetch("/api/auth/log-login", { method: "POST" }).catch(() => {
+      // Silencioso — el log es secundario, no debe bloquear el login
+    });
+
     router.push("/dashboard");
   }
 
