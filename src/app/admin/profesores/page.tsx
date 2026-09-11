@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -10,10 +10,12 @@ type Teacher = { id: string; full_name: string; email?: string };
 type Group = { id: string; grade: number; letter: string };
 type Subject = { id: string; name: string; short_name: string; grade: number };
 type Assignment = { id: string; teacher_id: string; group_id: string; subject_id: string };
+type BulkResult = { email: string; ok: boolean; error?: string };
 
 export default function AdminProfesoresPage() {
   const supabase = createClient();
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -30,6 +32,13 @@ export default function AdminProfesoresPage() {
   const [showPass, setShowPass] = useState(false);
   const [newError, setNewError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // CSV bulk upload
+  const [showBulk, setShowBulk] = useState(false);
+  const [csvPreview, setCsvPreview] = useState<{ full_name: string; email: string; password: string }[]>([]);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkResults, setBulkResults] = useState<BulkResult[] | null>(null);
+  const [csvError, setCsvError] = useState("");
 
   // Assignment modal
   const [assignTeacher, setAssignTeacher] = useState<Teacher | null>(null);
@@ -80,7 +89,7 @@ export default function AdminProfesoresPage() {
     if (!newName.trim() || !newEmail.trim() || !newPass.trim()) {
       setNewError("Todos los campos son obligatorios"); return;
     }
-    if (newPass.length < 6) { setNewError("La contraseña debe tener al menos 6 caracteres"); return; }
+    if (newPass.length < 6) { setNewError("La contrasena debe tener al menos 6 caracteres"); return; }
     setSaving(true); setNewError("");
 
     const res = await fetch("/api/admin/teachers", {
@@ -94,6 +103,79 @@ export default function AdminProfesoresPage() {
     setSaving(false);
     setShowNew(false);
     setNewName(""); setNewEmail(""); setNewPass("");
+    loadTeachers();
+  }
+
+  // CSV parsing
+  function handleCsvFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvError("");
+    setBulkResults(null);
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) {
+        setCsvError("El archivo debe tener al menos un encabezado y una fila de datos");
+        return;
+      }
+
+      // Parse header
+      const sep = lines[0].includes(";") ? ";" : ",";
+      const header = lines[0].split(sep).map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+
+      const nameIdx = header.findIndex((h) => h === "nombre" || h === "full_name" || h === "name");
+      const emailIdx = header.findIndex((h) => h === "correo" || h === "email" || h === "mail");
+      const passIdx = header.findIndex((h) => h === "contrasena" || h === "password" || h === "pass" || h === "contraseña");
+
+      if (nameIdx === -1 || emailIdx === -1 || passIdx === -1) {
+        setCsvError("El CSV debe tener columnas: nombre, correo, contrasena (o equivalentes en ingles)");
+        return;
+      }
+
+      const rows = lines.slice(1).map((line) => {
+        const cols = line.split(sep).map((c) => c.trim().replace(/^"|"$/g, ""));
+        return {
+          full_name: cols[nameIdx] || "",
+          email: cols[emailIdx] || "",
+          password: cols[passIdx] || "",
+        };
+      }).filter((r) => r.full_name || r.email);
+
+      if (rows.length === 0) {
+        setCsvError("No se encontraron filas validas en el archivo");
+        return;
+      }
+
+      setCsvPreview(rows);
+      setShowBulk(true);
+    };
+    reader.readAsText(file);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  }
+
+  // Bulk upload
+  async function handleBulkUpload() {
+    setBulkUploading(true);
+    setBulkResults(null);
+
+    const res = await fetch("/api/admin/teachers/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ teachers: csvPreview }),
+    });
+    const data = await res.json();
+    setBulkUploading(false);
+
+    if (!res.ok) {
+      setCsvError(data.error || "Error en la carga");
+      return;
+    }
+
+    setBulkResults(data.results);
     loadTeachers();
   }
 
@@ -132,22 +214,20 @@ export default function AdminProfesoresPage() {
     loadAssignments();
   }
 
-  // Helper: get teacher assignments
   function getTeacherAssignments(teacherId: string) {
     return assignments.filter((a) => a.teacher_id === teacherId);
   }
 
   function groupLabel(gId: string) {
-    const g = groups.find((g) => g.id === gId);
-    return g ? `${g.grade}°${g.letter}` : "";
+    const g = groups.find((gr) => gr.id === gId);
+    return g ? `${g.grade}${g.letter}` : "";
   }
 
   function subjectLabel(sId: string) {
-    const s = subjects.find((s) => s.id === sId);
+    const s = subjects.find((su) => su.id === sId);
     return s ? s.short_name : "";
   }
 
-  // Subjects filtered by selected group's grade
   const selectedGroupObj = groups.find((g) => g.id === assignGroup);
   const filteredSubjects = selectedGroupObj
     ? subjects.filter((s) => s.grade === selectedGroupObj.grade)
@@ -166,20 +246,44 @@ export default function AdminProfesoresPage() {
       <Navbar userName={profile.full_name} userRole={profile.role} />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
           <h1 className="text-lg font-bold text-gray-900">Profesores</h1>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowNew(true)} className="btn-primary text-sm">
               + Nuevo profesor
             </button>
-            <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="btn-secondary text-sm inline-flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Cargar CSV
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv"
+              onChange={handleCsvFile}
+              className="hidden"
+            />
+            <Link href="/usuarios" className="btn-secondary text-sm">← Volver</Link>
           </div>
         </div>
+
+        {/* CSV format hint */}
+        {csvError && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+            {csvError}
+          </div>
+        )}
 
         {/* Teachers list */}
         {teachers.length === 0 ? (
           <div className="card p-8 text-center text-gray-400 text-sm">
-            No hay profesores registrados. Agrega el primero.
+            <p>No hay profesores registrados.</p>
+            <p className="mt-2">Usa el boton <strong>+ Nuevo profesor</strong> o carga un archivo CSV con columnas: <code className="bg-gray-100 px-1 rounded">nombre, correo, contrasena</code></p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -204,9 +308,9 @@ export default function AdminProfesoresPage() {
                               <button
                                 onClick={() => removeAssignment(a.id)}
                                 className="text-primary-400 hover:text-red-600 ml-0.5"
-                                title="Quitar asignación"
+                                title="Quitar asignacion"
                               >
-                                ×
+                                x
                               </button>
                             </span>
                           ))}
@@ -252,25 +356,25 @@ export default function AdminProfesoresPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electrónico *</label>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electronico *</label>
                   <input
                     type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
                     className="input-field" placeholder="profesor@ejemplo.com"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Contraseña *</label>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Contrasena *</label>
                   <div className="relative">
                     <input
                       type={showPass ? "text" : "password"} value={newPass} onChange={(e) => setNewPass(e.target.value)}
-                      className="input-field pr-10" placeholder="Mínimo 6 caracteres"
+                      className="input-field pr-10" placeholder="Minimo 6 caracteres"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPass(!showPass)}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
                     >
-                      {showPass ? "🙈" : "👁"}
+                      {showPass ? "Ocultar" : "Ver"}
                     </button>
                   </div>
                 </div>
@@ -281,6 +385,94 @@ export default function AdminProfesoresPage() {
                 <button onClick={handleCreate} className="btn-primary text-sm" disabled={saving}>
                   {saving ? "Creando..." : "Crear profesor"}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CSV Bulk Upload Modal */}
+        {showBulk && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 p-6 max-h-[80vh] flex flex-col">
+              <h2 className="text-base font-bold text-gray-900 mb-1">Carga masiva de profesores</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                {csvPreview.length} profesor{csvPreview.length !== 1 ? "es" : ""} encontrado{csvPreview.length !== 1 ? "s" : ""} en el archivo
+              </p>
+
+              {/* Preview table */}
+              <div className="overflow-auto flex-1 border border-gray-200 rounded-lg mb-4">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">#</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Nombre</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Correo</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Contrasena</th>
+                      {bulkResults && (
+                        <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Estado</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {csvPreview.map((row, i) => {
+                      const result = bulkResults?.[i];
+                      return (
+                        <tr key={i} className={result ? (result.ok ? "bg-green-50" : "bg-red-50") : ""}>
+                          <td className="px-3 py-2 text-gray-400 text-xs">{i + 1}</td>
+                          <td className="px-3 py-2 text-gray-900">{row.full_name}</td>
+                          <td className="px-3 py-2 text-gray-600">{row.email}</td>
+                          <td className="px-3 py-2 text-gray-400">{"*".repeat(Math.min(row.password.length, 8))}</td>
+                          {bulkResults && (
+                            <td className="px-3 py-2 text-xs">
+                              {result?.ok ? (
+                                <span className="text-green-700 font-medium">Creado</span>
+                              ) : (
+                                <span className="text-red-600">{result?.error || "Error"}</span>
+                              )}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Summary after upload */}
+              {bulkResults && (
+                <div className="mb-4 flex gap-3 text-sm">
+                  <span className="text-green-700 font-medium">
+                    {bulkResults.filter((r) => r.ok).length} creados
+                  </span>
+                  {bulkResults.some((r) => !r.ok) && (
+                    <span className="text-red-600 font-medium">
+                      {bulkResults.filter((r) => !r.ok).length} con error
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setShowBulk(false);
+                    setCsvPreview([]);
+                    setBulkResults(null);
+                    setCsvError("");
+                  }}
+                  className="btn-secondary text-sm"
+                >
+                  {bulkResults ? "Cerrar" : "Cancelar"}
+                </button>
+                {!bulkResults && (
+                  <button
+                    onClick={handleBulkUpload}
+                    className="btn-primary text-sm"
+                    disabled={bulkUploading}
+                  >
+                    {bulkUploading ? "Creando cuentas..." : `Crear ${csvPreview.length} profesor${csvPreview.length !== 1 ? "es" : ""}`}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -302,7 +494,7 @@ export default function AdminProfesoresPage() {
                   >
                     <option value="">Selecciona grupo...</option>
                     {groups.map((g) => (
-                      <option key={g.id} value={g.id}>{g.grade}° {g.letter}</option>
+                      <option key={g.id} value={g.id}>{g.grade} {g.letter}</option>
                     ))}
                   </select>
                 </div>
@@ -339,10 +531,10 @@ export default function AdminProfesoresPage() {
         {deleteTeacher && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-2">¿Eliminar profesor?</h2>
+              <h2 className="text-base font-bold text-gray-900 mb-2">Eliminar profesor?</h2>
               <p className="text-sm text-gray-600 mb-1">{deleteTeacher.full_name}</p>
               <p className="text-xs text-gray-500 mb-5">
-                Se eliminará su cuenta, perfil y todas sus asignaciones.
+                Se eliminara su cuenta, perfil y todas sus asignaciones.
               </p>
               <div className="flex justify-end gap-2">
                 <button onClick={() => setDeleteTeacher(null)} className="btn-secondary text-sm">Cancelar</button>
@@ -350,7 +542,7 @@ export default function AdminProfesoresPage() {
                   onClick={handleDelete}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
                 >
-                  Sí, eliminar
+                  Si, eliminar
                 </button>
               </div>
             </div>

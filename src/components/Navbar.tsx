@@ -183,42 +183,34 @@ export default function Navbar({ userName, userRole }: Props) {
               </Link>
               {userRole === "admin" && (
                 <Link
+                  href="/calificaciones"
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Calificaciones
+                </Link>
+              )}
+              {userRole === "admin" && (
+                <Link
+                  href="/usuarios"
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Usuarios
+                </Link>
+              )}
+              {userRole === "teacher" && (
+                <Link
                   href="/captura"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
                 >
-                  Captura
+                  Mis Materias
                 </Link>
               )}
-              {(userRole === "admin" || userRole === "viewer") && (
+              {userRole === "viewer" && (
                 <Link
                   href="/dashboard"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   Concentrado
-                </Link>
-              )}
-              {userRole === "admin" && (
-                <Link
-                  href="/admin/alumnos"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Alumnos
-                </Link>
-              )}
-              {userRole === "admin" && (
-                <Link
-                  href="/admin/profesores"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Profesores
-                </Link>
-              )}
-              {userRole === "admin" && (
-                <Link
-                  href="/admin/sesiones"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Sesiones
                 </Link>
               )}
 
@@ -278,28 +270,23 @@ export default function Navbar({ userName, userRole }: Props) {
                 Inicio
               </Link>
               {userRole === "admin" && (
-                <Link href="/captura" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Captura
+                <Link href="/calificaciones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Calificaciones
                 </Link>
               )}
-              {(userRole === "admin" || userRole === "viewer") && (
+              {userRole === "admin" && (
+                <Link href="/usuarios" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Usuarios
+                </Link>
+              )}
+              {userRole === "teacher" && (
+                <Link href="/captura" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Mis Materias
+                </Link>
+              )}
+              {userRole === "viewer" && (
                 <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Concentrado
-                </Link>
-              )}
-              {userRole === "admin" && (
-                <Link href="/admin/alumnos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Alumnos
-                </Link>
-              )}
-              {userRole === "admin" && (
-                <Link href="/admin/profesores" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Profesores
-                </Link>
-              )}
-              {userRole === "admin" && (
-                <Link href="/admin/sesiones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Sesiones
                 </Link>
               )}
               <div className="px-3 py-2 flex items-center justify-between border-t border-gray-100 mt-1 pt-2">
