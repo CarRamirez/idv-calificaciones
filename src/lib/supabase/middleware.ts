@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Redirigir a login si no está autenticado (excepto en /login y /api/*)
+  // Redirigir a login si no está autenticado (excepto /login y /api/*)
   if (
     !user &&
     !pathname.startsWith("/login") &&
@@ -48,35 +48,6 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
-  }
-
-  // ── Protección de rutas por rol ──
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    const role = profile?.role;
-
-    // /admin/* → solo admin
-    if (pathname.startsWith("/admin") && role !== "admin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
-    }
-
-    // /captura/* → solo admin y teacher
-    if (
-      pathname.startsWith("/captura") &&
-      role !== "admin" &&
-      role !== "teacher"
-    ) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
-    }
   }
 
   return supabaseResponse;
