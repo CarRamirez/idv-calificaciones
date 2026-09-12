@@ -197,12 +197,20 @@ export default function Navbar({ userName, userRole }: Props) {
                   Usuarios
                 </Link>
               )}
-              {userRole === "teacher" && (
+              {userRole === "admin" && (
                 <Link
-                  href="/captura"
+                  href="/periodos"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
                 >
-                  Mis Materias
+                  Periodos
+                </Link>
+              )}
+              {userRole === "teacher" && (
+                <Link
+                  href="/calificaciones"
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Calificaciones
                 </Link>
               )}
               {userRole === "viewer" && (
@@ -279,9 +287,14 @@ export default function Navbar({ userName, userRole }: Props) {
                   Usuarios
                 </Link>
               )}
+              {userRole === "admin" && (
+                <Link href="/periodos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Periodos
+                </Link>
+              )}
               {userRole === "teacher" && (
-                <Link href="/captura" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Mis Materias
+                <Link href="/calificaciones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Calificaciones
                 </Link>
               )}
               {userRole === "viewer" && (

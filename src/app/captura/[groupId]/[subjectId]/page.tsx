@@ -78,6 +78,15 @@ export default function CapturaPage({ params }: Props) {
   const [missingInfo, setMissingInfo] = useState<MissingInfo>({ count: 0, names: [] });
   const [showMissingModal, setShowMissingModal] = useState(false);
   const [bulkSaving, setBulkSaving] = useState(false);
+  const [openPeriods, setOpenPeriods] = useState<Set<number>>(new Set());
+
+  const isPeriodLocked = useCallback(
+    (periodId: number) => {
+      if (!profile || profile.role === "admin") return false;
+      return !openPeriods.has(periodId);
+    },
+    [profile, openPeriods]
+  );
 
   useEffect(() => {
     async function loadData() {
@@ -131,6 +140,24 @@ export default function CapturaPage({ params }: Props) {
         }
       });
       setGrades(gradeMap);
+
+      // Cargar periodos abiertos
+      try {
+        const periodsRes = await fetch("/api/admin/periods");
+        const periodsData = await periodsRes.json();
+        if (periodsData.periods) {
+          const openSet = new Set<number>(
+            periodsData.periods
+              .filter((p: any) => p.is_open)
+              .map((p: any) => p.period_number)
+          );
+          setOpenPeriods(openSet);
+        }
+      } catch {
+        // Si falla, todos abiertos por defecto
+        setOpenPeriods(new Set(ALL_PERIOD_IDS));
+      }
+
       setLoading(false);
     }
 
@@ -144,6 +171,8 @@ export default function CapturaPage({ params }: Props) {
       score: number | null,
       absences: number
     ) => {
+      // Bloquear guardado si el periodo está cerrado para teachers
+      if (isPeriodLocked(period)) return;
       const key = `${studentId}-${period}`;
       setSaving(key);
 
@@ -170,7 +199,7 @@ export default function CapturaPage({ params }: Props) {
 
       setTimeout(() => setSaving(null), 600);
     },
-    [supabase, subjectId]
+    [supabase, subjectId, isPeriodLocked]
   );
 
   // Obtener los period IDs de la tab actual
@@ -404,6 +433,30 @@ export default function CapturaPage({ params }: Props) {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
+        {/* Banner de periodo cerrado */}
+        {profile?.role === "teacher" && openPeriods.size > 0 && (() => {
+          const currentTrimester = TRIMESTERS.find((t) => t.id === activeTab);
+          const lockedPeriods = currentTrimester
+            ? currentTrimester.periods.filter((p) => !openPeriods.has(p.id))
+            : [];
+          if (lockedPeriods.length === 0) return null;
+          const allLocked = currentTrimester && lockedPeriods.length === currentTrimester.periods.length;
+          return (
+            <div className={`mb-4 rounded-lg px-4 py-3 text-sm flex items-center gap-2 ${
+              allLocked
+                ? "bg-red-50 border border-red-200 text-red-700"
+                : "bg-yellow-50 border border-yellow-200 text-yellow-700"
+            }`}>
+              <span>{allLocked ? "🔒" : "⚠️"}</span>
+              <span>
+                {allLocked
+                  ? "Este trimestre está cerrado para captura. Solo puedes consultar las calificaciones."
+                  : `Periodo(s) cerrado(s): ${lockedPeriods.map((p) => p.name).join(", ")}. Solo lectura en esos periodos.`}
+              </span>
+            </div>
+          );
+        })()}
+
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-lg font-bold text-gray-900">
@@ -555,8 +608,11 @@ export default function CapturaPage({ params }: Props) {
                                   )
                                 }
                                 onBlur={() => handleBlur(student.id, p.id)}
+                                disabled={isPeriodLocked(p.id)}
                                 className={`grade-cell ${
-                                  isSaving
+                                  isPeriodLocked(p.id)
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : isSaving
                                     ? "bg-green-50"
                                     : "bg-transparent"
                                 }`}
@@ -575,8 +631,11 @@ export default function CapturaPage({ params }: Props) {
                                   )
                                 }
                                 onBlur={() => handleBlur(student.id, p.id)}
+                                disabled={isPeriodLocked(p.id)}
                                 className={`grade-cell ${
-                                  isSaving
+                                  isPeriodLocked(p.id)
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : isSaving
                                     ? "bg-green-50"
                                     : "bg-transparent"
                                 }`}
@@ -654,8 +713,11 @@ export default function CapturaPage({ params }: Props) {
                           onBlur={() =>
                             handleBlur(student.id, JULIO_FINAL.id)
                           }
+                          disabled={isPeriodLocked(JULIO_FINAL.id)}
                           className={`grade-cell ${
-                            isSaving ? "bg-green-50" : "bg-transparent"
+                            isPeriodLocked(JULIO_FINAL.id)
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : isSaving ? "bg-green-50" : "bg-transparent"
                           }`}
                         />
                       </td>
@@ -674,8 +736,11 @@ export default function CapturaPage({ params }: Props) {
                           onBlur={() =>
                             handleBlur(student.id, JULIO_FINAL.id)
                           }
+                          disabled={isPeriodLocked(JULIO_FINAL.id)}
                           className={`grade-cell ${
-                            isSaving ? "bg-green-50" : "bg-transparent"
+                            isPeriodLocked(JULIO_FINAL.id)
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : isSaving ? "bg-green-50" : "bg-transparent"
                           }`}
                         />
                       </td>

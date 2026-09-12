@@ -14,12 +14,18 @@ export default async function CalificacionesPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") redirect("/dashboard");
+  if (!profile || (profile.role !== "admin" && profile.role !== "teacher")) {
+    redirect("/dashboard");
+  }
+
+  const isTeacher = profile.role === "teacher";
 
   const options = [
     {
       title: "Captura de Calificaciones",
-      description: "Registra y edita calificaciones por grupo y materia para cada trimestre.",
+      description: isTeacher
+        ? "Registra calificaciones de tus grupos y materias asignadas."
+        : "Registra y edita calificaciones por grupo y materia para cada trimestre.",
       href: "/captura",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,10 +33,13 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "primary",
+      roles: ["admin", "teacher"],
     },
     {
       title: "Concentrado de Calificaciones",
-      description: "Consulta el resumen de calificaciones por grupo con promedios trimestrales y finales.",
+      description: isTeacher
+        ? "Consulta el resumen de calificaciones de tus grupos asignados."
+        : "Consulta el resumen de calificaciones por grupo con promedios trimestrales y finales.",
       href: "/dashboard",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,8 +47,23 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "accent",
+      roles: ["admin", "teacher"],
+    },
+    {
+      title: "Corrección de Calificaciones",
+      description: "Solicita correcciones de calificaciones ya registradas cuando el periodo ha cerrado.",
+      href: "/calificaciones/correccion",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      color: "warning",
+      roles: ["teacher"],
     },
   ];
+
+  const visibleOptions = options.filter((opt) => opt.roles.includes(profile.role));
 
   const colorMap: Record<string, { bg: string; iconBg: string; iconText: string; border: string; hover: string }> = {
     primary: {
@@ -56,19 +80,26 @@ export default async function CalificacionesPage() {
       border: "border-accent-100",
       hover: "hover:border-accent-300 hover:shadow-md",
     },
+    warning: {
+      bg: "bg-white",
+      iconBg: "bg-yellow-100",
+      iconText: "text-yellow-600",
+      border: "border-yellow-100",
+      hover: "hover:border-yellow-300 hover:shadow-md",
+    },
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar userName={profile.full_name} userRole={profile.role} />
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Calificaciones</h1>
           <p className="text-sm text-gray-500 mt-1">Selecciona la sección que deseas consultar</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {options.map((opt) => {
+        <div className={`grid grid-cols-1 ${visibleOptions.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-6`}>
+          {visibleOptions.map((opt) => {
             const c = colorMap[opt.color];
             return (
               <Link
