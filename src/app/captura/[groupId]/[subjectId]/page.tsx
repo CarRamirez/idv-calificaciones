@@ -28,6 +28,7 @@ const TRIMESTERS = [
   {
     id: 1,
     name: "1er Trimestre",
+    short: "1T",
     periods: [
       { id: 1, name: "Septiembre", short: "SEPT" },
       { id: 2, name: "Octubre", short: "OCT" },
@@ -36,6 +37,7 @@ const TRIMESTERS = [
   {
     id: 2,
     name: "2do Trimestre",
+    short: "2T",
     periods: [
       { id: 3, name: "Nov - Dic", short: "NOV-DIC" },
       { id: 4, name: "Ene - Feb", short: "ENE-FEB" },
@@ -44,6 +46,7 @@ const TRIMESTERS = [
   {
     id: 3,
     name: "3er Trimestre",
+    short: "3T",
     periods: [
       { id: 5, name: "Mar - Abr", short: "MAR-ABR" },
       { id: 6, name: "Mayo", short: "MAYO" },
@@ -73,7 +76,6 @@ export default function CapturaPage({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(1);
 
-  // Estado del guardado masivo
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [missingInfo, setMissingInfo] = useState<MissingInfo>({ count: 0, names: [] });
   const [showMissingModal, setShowMissingModal] = useState(false);
@@ -141,7 +143,6 @@ export default function CapturaPage({ params }: Props) {
       });
       setGrades(gradeMap);
 
-      // Cargar periodos abiertos
       try {
         const periodsRes = await fetch("/api/admin/periods");
         const periodsData = await periodsRes.json();
@@ -154,7 +155,6 @@ export default function CapturaPage({ params }: Props) {
           setOpenPeriods(openSet);
         }
       } catch {
-        // Si falla, todos abiertos por defecto
         setOpenPeriods(new Set(ALL_PERIOD_IDS));
       }
 
@@ -171,7 +171,6 @@ export default function CapturaPage({ params }: Props) {
       score: number | null,
       absences: number
     ) => {
-      // Bloquear guardado si el periodo está cerrado para teachers
       if (isPeriodLocked(period)) return;
       const key = `${studentId}-${period}`;
       setSaving(key);
@@ -193,16 +192,13 @@ export default function CapturaPage({ params }: Props) {
         { onConflict: "student_id,subject_id,period" }
       );
 
-      if (error) {
-        console.error("Error al guardar:", error);
-      }
+      if (error) console.error("Error al guardar:", error);
 
       setTimeout(() => setSaving(null), 600);
     },
     [supabase, subjectId, isPeriodLocked]
   );
 
-  // Obtener los period IDs de la tab actual
   function getCurrentPeriodIds(): number[] {
     if (activeTab >= 1 && activeTab <= 3) {
       const trim = TRIMESTERS.find((t) => t.id === activeTab);
@@ -212,32 +208,22 @@ export default function CapturaPage({ params }: Props) {
     return [];
   }
 
-  // Revisar alumnos sin calificación en los periodos actuales
   function checkMissing(): MissingInfo {
     const periodIds = getCurrentPeriodIds();
     const missing: string[] = [];
-
     students.forEach((student) => {
       const data = grades[student.id];
-      if (!data) {
-        missing.push(student.full_name);
-        return;
-      }
+      if (!data) { missing.push(student.full_name); return; }
       const hasAnyMissing = periodIds.some((pid) => data[pid]?.score === null);
-      if (hasAnyMissing) {
-        missing.push(student.full_name);
-      }
+      if (hasAnyMissing) missing.push(student.full_name);
     });
-
     return { count: missing.length, names: missing };
   }
 
-  // Guardado masivo
   async function handleBulkSave(forceSave = false) {
     const periodIds = getCurrentPeriodIds();
     if (periodIds.length === 0) return;
 
-    // Verificar faltantes
     const info = checkMissing();
     setMissingInfo(info);
 
@@ -246,7 +232,6 @@ export default function CapturaPage({ params }: Props) {
       return;
     }
 
-    // Proceder con el guardado
     setBulkSaving(true);
     setSaveStatus("saving");
 
@@ -254,7 +239,6 @@ export default function CapturaPage({ params }: Props) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Construir array de upserts
     const upserts: any[] = [];
     students.forEach((student) => {
       periodIds.forEach((pid) => {
@@ -285,24 +269,13 @@ export default function CapturaPage({ params }: Props) {
       return;
     }
 
-    if (info.count > 0) {
-      setSaveStatus("warning");
-    } else {
-      setSaveStatus("success");
-    }
-
+    setSaveStatus(info.count > 0 ? "warning" : "success");
     setTimeout(() => setSaveStatus("idle"), 4000);
   }
 
-  function handleScoreChange(
-    studentId: string,
-    period: number,
-    value: string
-  ) {
+  function handleScoreChange(studentId: string, period: number, value: string) {
     const num = value === "" ? null : parseFloat(value);
-    // Permitir escritura libre (no bloquear dígitos intermedios como "1" de "10")
     if (num !== null && isNaN(num)) return;
-
     setGrades((prev) => ({
       ...prev,
       [studentId]: {
@@ -312,14 +285,9 @@ export default function CapturaPage({ params }: Props) {
     }));
   }
 
-  function handleAbsencesChange(
-    studentId: string,
-    period: number,
-    value: string
-  ) {
+  function handleAbsencesChange(studentId: string, period: number, value: string) {
     const num = value === "" ? 0 : parseInt(value);
     if (isNaN(num) || num < 0) return;
-
     setGrades((prev) => ({
       ...prev,
       [studentId]: {
@@ -332,17 +300,12 @@ export default function CapturaPage({ params }: Props) {
   function handleBlur(studentId: string, period: number) {
     const data = grades[studentId]?.[period];
     if (!data) return;
-
-    // Validar rango al perder foco: si está fuera de 5-10, corregir
     let score = data.score;
     if (score !== null) {
       if (score < 5) score = 5;
       if (score > 10) score = 10;
-      // Redondear a 1 decimal
       score = Math.round(score * 10) / 10;
     }
-
-    // Actualizar el estado con el valor corregido
     if (score !== data.score) {
       setGrades((prev) => ({
         ...prev,
@@ -352,7 +315,6 @@ export default function CapturaPage({ params }: Props) {
         },
       }));
     }
-
     saveGrade(studentId, period, score, data.absences);
   }
 
@@ -379,18 +341,12 @@ export default function CapturaPage({ params }: Props) {
     return (trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length).toFixed(1);
   }
 
-  function getTrimesterAbsences(
-    studentId: string,
-    trimesterId: number
-  ): number {
+  function getTrimesterAbsences(studentId: string, trimesterId: number): number {
     const trimester = TRIMESTERS.find((t) => t.id === trimesterId);
     if (!trimester) return 0;
     const data = grades[studentId];
     if (!data) return 0;
-    return trimester.periods.reduce(
-      (sum, p) => sum + (data[p.id]?.absences ?? 0),
-      0
-    );
+    return trimester.periods.reduce((sum, p) => sum + (data[p.id]?.absences ?? 0), 0);
   }
 
   function getSemaforoClass(score: number | null): string {
@@ -400,19 +356,34 @@ export default function CapturaPage({ params }: Props) {
     return "semaforo-verde";
   }
 
-  // Nombre legible del tab actual
   function currentTabName(): string {
-    if (activeTab >= 1 && activeTab <= 3) {
+    if (activeTab >= 1 && activeTab <= 3)
       return TRIMESTERS.find((t) => t.id === activeTab)?.name || "";
-    }
     if (activeTab === 4) return "Julio (Final)";
     return "";
   }
 
+  /* --- Stats rápidos --- */
+  function getQuickStats() {
+    let filled = 0;
+    let total = 0;
+    const periodIds = getCurrentPeriodIds();
+    students.forEach((s) => {
+      periodIds.forEach((pid) => {
+        total++;
+        if (grades[s.id]?.[pid]?.score !== null) filled++;
+      });
+    });
+    return { filled, total, pct: total ? Math.round((filled / total) * 100) : 0 };
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Cargando...</p>
+      <div className="bg-mesh flex items-center justify-center">
+        <div className="glass rounded-2xl px-8 py-6 flex items-center gap-4">
+          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 text-sm font-medium">Cargando calificaciones...</p>
+        </div>
       </div>
     );
   }
@@ -424,31 +395,32 @@ export default function CapturaPage({ params }: Props) {
       ? TRIMESTERS.find((t) => t.id === activeTab)!
       : null;
 
-  // Conteo en vivo de faltantes para el badge
   const liveMissing = activeTab !== 0 ? checkMissing() : { count: 0, names: [] };
+  const stats = activeTab !== 0 ? getQuickStats() : null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-mesh">
       <Navbar userName={profile.full_name} userRole={profile.role} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {/* Header */}
         {/* Banner de periodo cerrado */}
         {profile?.role === "teacher" && openPeriods.size > 0 && (() => {
-          const currentTrimester = TRIMESTERS.find((t) => t.id === activeTab);
-          const lockedPeriods = currentTrimester
-            ? currentTrimester.periods.filter((p) => !openPeriods.has(p.id))
-            : [];
+          const ct = TRIMESTERS.find((t) => t.id === activeTab);
+          const lockedPeriods = ct ? ct.periods.filter((p) => !openPeriods.has(p.id)) : [];
           if (lockedPeriods.length === 0) return null;
-          const allLocked = currentTrimester && lockedPeriods.length === currentTrimester.periods.length;
+          const allLocked = ct && lockedPeriods.length === ct.periods.length;
           return (
-            <div className={`mb-4 rounded-lg px-4 py-3 text-sm flex items-center gap-2 ${
+            <div className={`mb-4 glass rounded-xl px-4 py-3 text-sm flex items-center gap-3 ${
               allLocked
-                ? "bg-red-50 border border-red-200 text-red-700"
-                : "bg-yellow-50 border border-yellow-200 text-yellow-700"
+                ? "!border-red-200/60 !bg-red-50/60"
+                : "!border-yellow-200/60 !bg-yellow-50/60"
             }`}>
-              <span>{allLocked ? "🔒" : "⚠️"}</span>
-              <span>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                allLocked ? "bg-red-100/80 text-red-600" : "bg-yellow-100/80 text-yellow-600"
+              }`}>
+                {allLocked ? "🔒" : "⚠️"}
+              </div>
+              <span className={allLocked ? "text-red-700" : "text-yellow-700"}>
                 {allLocked
                   ? "Este trimestre está cerrado para captura. Solo puedes consultar las calificaciones."
                   : `Periodo(s) cerrado(s): ${lockedPeriods.map((p) => p.name).join(", ")}. Solo lectura en esos periodos.`}
@@ -457,201 +429,216 @@ export default function CapturaPage({ params }: Props) {
           );
         })()}
 
-        <div className="flex items-center justify-between mb-4">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-5 gap-4">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">
-              {subject?.name}
-            </h1>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-xl font-bold text-gray-900">
+                {subject?.name}
+              </h1>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-500/10 text-primary-700">
+                {group?.grade}° {group?.letter}
+              </span>
+            </div>
             <p className="text-sm text-gray-500">
-              {group?.grade}° {group?.letter} — Ciclo 2026-2027
+              Ciclo 2026-2027 &middot; {students.length} alumnos
             </p>
           </div>
           <button
             onClick={() => router.back()}
-            className="btn-secondary text-sm"
+            className="btn-secondary text-sm flex items-center gap-1.5"
           >
-            ← Volver
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver
           </button>
         </div>
 
-        {/* Leyenda semáforo */}
-        <div className="flex gap-4 mb-4 text-xs">
-          <span className="px-2 py-1 rounded semaforo-rojo">
+        {/* Semáforo leyenda */}
+        <div className="flex flex-wrap gap-2 mb-5 text-xs">
+          <span className="px-3 py-1.5 rounded-full semaforo-rojo font-medium">
             Requiere Apoyo (5-6.9)
           </span>
-          <span className="px-2 py-1 rounded semaforo-amarillo">
+          <span className="px-3 py-1.5 rounded-full semaforo-amarillo font-medium">
             En Desarrollo (7-7.9)
           </span>
-          <span className="px-2 py-1 rounded semaforo-verde">
+          <span className="px-3 py-1.5 rounded-full semaforo-verde font-medium">
             Nivel Esperado (8-10)
           </span>
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-1 mb-4 border-b border-gray-200">
+        <div className="flex items-center gap-1 mb-5 p-1 glass-subtle rounded-xl w-fit">
           {TRIMESTERS.map((t) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                 activeTab === t.id
-                  ? "bg-primary-600 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
               }`}
             >
-              {t.name}
+              <span className="hidden sm:inline">{t.name}</span>
+              <span className="sm:hidden">{t.short}</span>
             </button>
           ))}
           <button
             onClick={() => setActiveTab(4)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               activeTab === 4
-                ? "bg-primary-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
+                : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
             }`}
           >
-            Julio (Final)
+            <span className="hidden sm:inline">Julio Final</span>
+            <span className="sm:hidden">JUL</span>
           </button>
+          <div className="w-px h-6 bg-gray-200/60 mx-1" />
           <button
             onClick={() => setActiveTab(0)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               activeTab === 0
-                ? "bg-primary-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
+                : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
             }`}
           >
             Resumen
           </button>
         </div>
 
+        {/* Quick Stats */}
+        {stats && activeTab !== 0 && (
+          <div className="flex items-center gap-4 mb-4">
+            <div className="glass-subtle rounded-xl px-4 py-2.5 flex items-center gap-3">
+              <div className="relative w-9 h-9">
+                <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="15" fill="none" stroke={stats.pct === 100 ? "#16a34a" : "#1d4e9e"} strokeWidth="3"
+                    strokeDasharray={`${stats.pct * 0.942} 100`} strokeLinecap="round" />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
+                  {stats.pct}%
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Progreso</p>
+                <p className="text-sm font-semibold text-gray-800">
+                  {stats.filled} / {stats.total}
+                </p>
+              </div>
+            </div>
+
+            {liveMissing.count > 0 ? (
+              <div className="glass-subtle rounded-xl px-4 py-2.5 flex items-center gap-2 !border-amber-200/60 !bg-amber-50/40">
+                <div className="w-7 h-7 rounded-lg bg-amber-100/80 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-amber-700">
+                  {liveMissing.count} sin calificación
+                </span>
+              </div>
+            ) : (
+              <div className="glass-subtle rounded-xl px-4 py-2.5 flex items-center gap-2 !border-green-200/60 !bg-green-50/40">
+                <div className="w-7 h-7 rounded-lg bg-green-100/80 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-green-700">
+                  Completo
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ===== Tabla de captura por trimestre (tabs 1-3) ===== */}
         {currentTrimester && (
-          <div className="card overflow-x-auto">
+          <div className="card overflow-x-auto !p-0">
             <table className="grade-table">
               <thead>
                 <tr>
-                  <th rowSpan={2} className="w-12">
-                    N°
-                  </th>
-                  <th rowSpan={2} className="min-w-[200px]">
-                    Nombre del Alumno
-                  </th>
+                  <th rowSpan={2} className="w-12 !rounded-tl-2xl">N°</th>
+                  <th rowSpan={2} className="min-w-[200px]">Nombre del Alumno</th>
                   {currentTrimester.periods.map((p) => (
-                    <th
-                      key={p.id}
-                      colSpan={2}
-                      className="text-center border-l border-gray-200"
-                    >
+                    <th key={p.id} colSpan={2} className="text-center border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>
                       {p.short}
                     </th>
                   ))}
-                  <th
-                    rowSpan={2}
-                    className="w-16 text-center border-l border-gray-300 bg-gray-100"
-                  >
-                    PROM.
-                  </th>
-                  <th rowSpan={2} className="w-14 text-center bg-gray-100">
-                    IA
-                  </th>
+                  <th rowSpan={2} className="w-16 text-center border-l" style={{ borderColor: 'rgba(29,78,158,0.12)', background: 'rgba(29,78,158,0.06)' }}>PROM.</th>
+                  <th rowSpan={2} className="w-14 text-center !rounded-tr-2xl" style={{ background: 'rgba(29,78,158,0.06)' }}>IA</th>
                 </tr>
                 <tr>
                   {currentTrimester.periods.map((p) => (
                     <React.Fragment key={p.id}>
-                      <th className="text-center text-xs w-16 border-l border-gray-200">
-                        CALIF.
-                      </th>
+                      <th className="text-center text-xs w-16 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>CALIF.</th>
                       <th className="text-center text-xs w-14">ASIST.</th>
                     </React.Fragment>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {students.map((student) => {
+                {students.map((student, idx) => {
                   const trimAvg = getTrimesterAvg(student.id, activeTab);
-                  const trimAvgNum =
-                    trimAvg === "—" ? null : parseFloat(trimAvg);
-                  const totalAbs = getTrimesterAbsences(
-                    student.id,
-                    activeTab
-                  );
+                  const trimAvgNum = trimAvg === "—" ? null : parseFloat(trimAvg);
+                  const totalAbs = getTrimesterAbsences(student.id, activeTab);
                   return (
-                    <tr key={student.id}>
-                      <td className="text-center text-gray-500 tabular-nums">
+                    <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
+                      <td className="text-center text-gray-400 tabular-nums text-xs font-medium">
                         {student.list_num}
                       </td>
-                      <td className="font-medium text-gray-900 text-xs">
+                      <td className="font-medium text-gray-800 text-xs">
                         {student.full_name}
                       </td>
                       {currentTrimester.periods.map((p) => {
                         const data = grades[student.id]?.[p.id];
-                        const isSaving =
-                          saving === `${student.id}-${p.id}`;
+                        const isSaving = saving === `${student.id}-${p.id}`;
+                        const locked = isPeriodLocked(p.id);
                         return (
                           <React.Fragment key={p.id}>
-                            <td
-                              className={`text-center border-l border-gray-100 ${getSemaforoClass(
-                                data?.score ?? null
-                              )}`}
-                            >
+                            <td className={`text-center border-l ${getSemaforoClass(data?.score ?? null)}`} style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
                               <input
-                                type="number"
-                                min="5"
-                                max="10"
-                                step="0.1"
+                                type="number" min="5" max="10" step="0.1"
                                 value={data?.score ?? ""}
-                                onChange={(e) =>
-                                  handleScoreChange(
-                                    student.id,
-                                    p.id,
-                                    e.target.value
-                                  )
-                                }
+                                onChange={(e) => handleScoreChange(student.id, p.id, e.target.value)}
                                 onBlur={() => handleBlur(student.id, p.id)}
-                                disabled={isPeriodLocked(p.id)}
+                                disabled={locked}
                                 className={`grade-cell ${
-                                  isPeriodLocked(p.id)
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  locked
+                                    ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed"
                                     : isSaving
-                                    ? "bg-green-50"
-                                    : "bg-transparent"
+                                    ? "!bg-green-50/60 !border-green-300"
+                                    : ""
                                 }`}
                               />
                             </td>
                             <td className="text-center">
                               <input
-                                type="number"
-                                min="0"
+                                type="number" min="0"
                                 value={data?.absences ?? 0}
-                                onChange={(e) =>
-                                  handleAbsencesChange(
-                                    student.id,
-                                    p.id,
-                                    e.target.value
-                                  )
-                                }
+                                onChange={(e) => handleAbsencesChange(student.id, p.id, e.target.value)}
                                 onBlur={() => handleBlur(student.id, p.id)}
-                                disabled={isPeriodLocked(p.id)}
+                                disabled={locked}
                                 className={`grade-cell ${
-                                  isPeriodLocked(p.id)
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  locked
+                                    ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed"
                                     : isSaving
-                                    ? "bg-green-50"
-                                    : "bg-transparent"
+                                    ? "!bg-green-50/60 !border-green-300"
+                                    : ""
                                 }`}
                               />
                             </td>
                           </React.Fragment>
                         );
                       })}
-                      <td
-                        className={`text-center font-semibold tabular-nums border-l border-gray-200 ${getSemaforoClass(
-                          trimAvgNum
-                        )}`}
-                      >
+                      <td className={`text-center font-bold tabular-nums border-l ${getSemaforoClass(trimAvgNum)}`} style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
                         {trimAvg}
                       </td>
-                      <td className="text-center tabular-nums text-gray-500 text-xs">
+                      <td className="text-center tabular-nums text-gray-400 text-xs">
                         {totalAbs || "—"}
                       </td>
                     </tr>
@@ -664,9 +651,9 @@ export default function CapturaPage({ params }: Props) {
 
         {/* ===== Tab Julio (Final) ===== */}
         {activeTab === 4 && (
-          <div className="card overflow-x-auto">
-            <div className="mb-3 px-1">
-              <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">
+          <div className="card overflow-x-auto !p-0">
+            <div className="px-5 py-3 border-b" style={{ borderColor: 'rgba(0,0,0,0.04)', background: 'rgba(245,158,11,0.04)' }}>
+              <span className="text-xs text-amber-700 font-medium">
                 Julio (Final) es solo referencia — no se incluye en el promedio final.
               </span>
             </div>
@@ -680,68 +667,32 @@ export default function CapturaPage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student) => {
+                {students.map((student, idx) => {
                   const data = grades[student.id]?.[JULIO_FINAL.id];
-                  const isSaving =
-                    saving === `${student.id}-${JULIO_FINAL.id}`;
+                  const isSaving = saving === `${student.id}-${JULIO_FINAL.id}`;
+                  const locked = isPeriodLocked(JULIO_FINAL.id);
                   return (
-                    <tr key={student.id}>
-                      <td className="text-center text-gray-500 tabular-nums">
-                        {student.list_num}
-                      </td>
-                      <td className="font-medium text-gray-900 text-xs">
-                        {student.full_name}
-                      </td>
-                      <td
-                        className={`text-center ${getSemaforoClass(
-                          data?.score ?? null
-                        )}`}
-                      >
+                    <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
+                      <td className="text-center text-gray-400 tabular-nums text-xs font-medium">{student.list_num}</td>
+                      <td className="font-medium text-gray-800 text-xs">{student.full_name}</td>
+                      <td className={`text-center ${getSemaforoClass(data?.score ?? null)}`}>
                         <input
-                          type="number"
-                          min="5"
-                          max="10"
-                          step="0.1"
+                          type="number" min="5" max="10" step="0.1"
                           value={data?.score ?? ""}
-                          onChange={(e) =>
-                            handleScoreChange(
-                              student.id,
-                              JULIO_FINAL.id,
-                              e.target.value
-                            )
-                          }
-                          onBlur={() =>
-                            handleBlur(student.id, JULIO_FINAL.id)
-                          }
-                          disabled={isPeriodLocked(JULIO_FINAL.id)}
-                          className={`grade-cell ${
-                            isPeriodLocked(JULIO_FINAL.id)
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : isSaving ? "bg-green-50" : "bg-transparent"
-                          }`}
+                          onChange={(e) => handleScoreChange(student.id, JULIO_FINAL.id, e.target.value)}
+                          onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
+                          disabled={locked}
+                          className={`grade-cell ${locked ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed" : isSaving ? "!bg-green-50/60 !border-green-300" : ""}`}
                         />
                       </td>
                       <td className="text-center">
                         <input
-                          type="number"
-                          min="0"
+                          type="number" min="0"
                           value={data?.absences ?? 0}
-                          onChange={(e) =>
-                            handleAbsencesChange(
-                              student.id,
-                              JULIO_FINAL.id,
-                              e.target.value
-                            )
-                          }
-                          onBlur={() =>
-                            handleBlur(student.id, JULIO_FINAL.id)
-                          }
-                          disabled={isPeriodLocked(JULIO_FINAL.id)}
-                          className={`grade-cell ${
-                            isPeriodLocked(JULIO_FINAL.id)
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : isSaving ? "bg-green-50" : "bg-transparent"
-                          }`}
+                          onChange={(e) => handleAbsencesChange(student.id, JULIO_FINAL.id, e.target.value)}
+                          onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
+                          disabled={locked}
+                          className={`grade-cell ${locked ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed" : isSaving ? "!bg-green-50/60 !border-green-300" : ""}`}
                         />
                       </td>
                     </tr>
@@ -754,11 +705,11 @@ export default function CapturaPage({ params }: Props) {
 
         {/* ===== Vista Resumen ===== */}
         {activeTab === 0 && (
-          <div className="card overflow-x-auto">
+          <div className="card overflow-x-auto !p-0">
             <table className="grade-table">
               <thead>
                 <tr>
-                  <th className="w-12">N°</th>
+                  <th className="w-12 !rounded-tl-2xl">N°</th>
                   <th className="min-w-[200px]">Nombre del Alumno</th>
                   <th className="text-center w-20">1er Trim.</th>
                   <th className="text-center w-14">IA</th>
@@ -766,60 +717,34 @@ export default function CapturaPage({ params }: Props) {
                   <th className="text-center w-14">IA</th>
                   <th className="text-center w-20">3er Trim.</th>
                   <th className="text-center w-14">IA</th>
-                  <th className="text-center w-20 border-l border-gray-300">
-                    Julio
-                  </th>
-                  <th className="text-center w-20 bg-gray-100 font-bold border-l border-gray-300">
-                    PROM. FINAL
-                  </th>
+                  <th className="text-center w-20 border-l" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>Julio</th>
+                  <th className="text-center w-20 font-bold border-l !rounded-tr-2xl" style={{ borderColor: 'rgba(0,0,0,0.06)', background: 'rgba(29,78,158,0.06)' }}>PROM. FINAL</th>
                 </tr>
               </thead>
               <tbody>
-                {students.map((student) => {
+                {students.map((student, idx) => {
                   const pf = getPromedioFinal(student.id);
                   const pfNum = pf === "—" ? null : parseFloat(pf);
-                  const julioScore =
-                    grades[student.id]?.[JULIO_FINAL.id]?.score ?? null;
+                  const julioScore = grades[student.id]?.[JULIO_FINAL.id]?.score ?? null;
                   return (
-                    <tr key={student.id}>
-                      <td className="text-center text-gray-500 tabular-nums">
-                        {student.list_num}
-                      </td>
-                      <td className="font-medium text-gray-900 text-xs">
-                        {student.full_name}
-                      </td>
+                    <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
+                      <td className="text-center text-gray-400 tabular-nums text-xs font-medium">{student.list_num}</td>
+                      <td className="font-medium text-gray-800 text-xs">{student.full_name}</td>
                       {[1, 2, 3].map((t) => {
                         const avg = getTrimesterAvg(student.id, t);
-                        const avgNum =
-                          avg === "—" ? null : parseFloat(avg);
+                        const avgNum = avg === "—" ? null : parseFloat(avg);
                         const abs = getTrimesterAbsences(student.id, t);
                         return (
                           <React.Fragment key={t}>
-                            <td
-                              className={`text-center tabular-nums font-semibold ${getSemaforoClass(
-                                avgNum
-                              )}`}
-                            >
-                              {avg}
-                            </td>
-                            <td className="text-center tabular-nums text-gray-500 text-xs">
-                              {abs || "—"}
-                            </td>
+                            <td className={`text-center tabular-nums font-semibold ${getSemaforoClass(avgNum)}`}>{avg}</td>
+                            <td className="text-center tabular-nums text-gray-400 text-xs">{abs || "—"}</td>
                           </React.Fragment>
                         );
                       })}
-                      <td
-                        className={`text-center tabular-nums border-l border-gray-200 italic text-gray-500 ${getSemaforoClass(
-                          julioScore
-                        )}`}
-                      >
+                      <td className={`text-center tabular-nums border-l italic text-gray-500 ${getSemaforoClass(julioScore)}`} style={{ borderColor: 'rgba(0,0,0,0.04)' }}>
                         {julioScore !== null ? julioScore.toFixed(1) : "—"}
                       </td>
-                      <td
-                        className={`text-center font-bold tabular-nums border-l border-gray-200 ${getSemaforoClass(
-                          pfNum
-                        )}`}
-                      >
+                      <td className={`text-center font-bold tabular-nums border-l ${getSemaforoClass(pfNum)}`} style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
                         {pf}
                       </td>
                     </tr>
@@ -827,112 +752,86 @@ export default function CapturaPage({ params }: Props) {
                 })}
               </tbody>
             </table>
-            <p className="text-xs text-gray-400 mt-3">
-              Julio (Final) se muestra como referencia — no se incluye en el
-              promedio final.
-            </p>
-          </div>
-        )}
-
-        {/* ===== Barra de guardado (tabs 1-4, no en resumen) ===== */}
-        {activeTab !== 0 && (
-          <div className="mt-4 card p-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              {/* Indicador de faltantes en vivo */}
-              <div className="flex items-center gap-2">
-                {liveMissing.count > 0 ? (
-                  <div className="flex items-center gap-2 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg">
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <span className="text-sm font-medium">
-                      {liveMissing.count} alumno{liveMissing.count !== 1 ? "s" : ""} sin calificación
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-green-700 bg-green-50 px-3 py-1.5 rounded-lg">
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-sm font-medium">
-                      Todos los alumnos tienen calificación
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Botón guardar */}
-              <button
-                onClick={() => handleBulkSave(false)}
-                disabled={bulkSaving}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-                  bulkSaving
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : saveStatus === "success"
-                    ? "bg-green-600 text-white"
-                    : "bg-primary-600 text-white hover:bg-primary-700 active:scale-95"
-                }`}
-              >
-                {bulkSaving ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Guardando...
-                  </>
-                ) : saveStatus === "success" ? (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Guardado
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
-                    Registrar Calificaciones
-                  </>
-                )}
-              </button>
+            <div className="px-5 py-3" style={{ background: 'rgba(0,0,0,0.01)' }}>
+              <p className="text-xs text-gray-400">
+                Julio (Final) se muestra como referencia — no se incluye en el promedio final.
+              </p>
             </div>
-
-            {/* Toast de éxito con warning */}
-            {saveStatus === "warning" && (
-              <div className="mt-3 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg text-sm">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                Calificaciones guardadas, pero {missingInfo.count} alumno{missingInfo.count !== 1 ? "s" : ""} quedaron sin calificación.
-              </div>
-            )}
-            {saveStatus === "success" && (
-              <div className="mt-3 flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 px-3 py-2 rounded-lg text-sm">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Todas las calificaciones se registraron correctamente.
-              </div>
-            )}
           </div>
         )}
 
-        <p className="text-xs text-gray-400 mt-3">
-          Los cambios también se guardan automáticamente al salir de cada celda. IA =
-          Inasistencias Acumuladas.
-        </p>
+        {/* ===== Barra de guardado (tabs 1-4) ===== */}
+        {activeTab !== 0 && (
+          <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <p className="text-xs text-gray-400">
+              Los cambios se guardan automáticamente al salir de cada celda. IA = Inasistencias Acumuladas.
+            </p>
+            <button
+              onClick={() => handleBulkSave(false)}
+              disabled={bulkSaving}
+              className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md ${
+                bulkSaving
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : saveStatus === "success"
+                  ? "bg-green-600 text-white shadow-green-600/20"
+                  : "bg-primary-600 text-white hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/20 active:scale-[0.98]"
+              }`}
+            >
+              {bulkSaving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Guardando...
+                </>
+              ) : saveStatus === "success" ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Guardado
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  Registrar Calificaciones
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Toast de status */}
+        {saveStatus === "warning" && (
+          <div className="mt-3 glass rounded-xl px-4 py-3 flex items-center gap-3 !border-amber-200/60 !bg-amber-50/50 text-sm text-amber-700">
+            <div className="w-7 h-7 rounded-lg bg-amber-100/80 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            Calificaciones guardadas, pero {missingInfo.count} alumno{missingInfo.count !== 1 ? "s" : ""} quedaron sin calificación.
+          </div>
+        )}
+        {saveStatus === "success" && (
+          <div className="mt-3 glass rounded-xl px-4 py-3 flex items-center gap-3 !border-green-200/60 !bg-green-50/50 text-sm text-green-700">
+            <div className="w-7 h-7 rounded-lg bg-green-100/80 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            Todas las calificaciones se registraron correctamente.
+          </div>
+        )}
       </main>
 
       {/* ===== Modal de alumnos sin calificación ===== */}
       {showMissingModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="glass rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden !bg-white/90">
             {/* Header del modal */}
-            <div className="bg-amber-50 px-5 py-4 border-b border-amber-100">
+            <div className="px-5 py-4 border-b" style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(245,158,11,0.06)' }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-100/80 flex items-center justify-center">
                   <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
@@ -948,12 +847,11 @@ export default function CapturaPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Lista de alumnos faltantes */}
             <div className="px-5 py-4 max-h-60 overflow-y-auto">
               <p className="text-sm text-gray-600 mb-3">
-                Los siguientes alumnos no tienen calificación registrada en uno o más periodos:
+                Los siguientes alumnos no tienen calificación en uno o más periodos:
               </p>
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {missingInfo.names.map((name, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
@@ -963,20 +861,16 @@ export default function CapturaPage({ params }: Props) {
               </ul>
             </div>
 
-            {/* Acciones del modal */}
-            <div className="px-5 py-4 bg-gray-50 border-t border-gray-100 flex gap-3 justify-end">
+            <div className="px-5 py-4 border-t flex gap-3 justify-end" style={{ borderColor: 'rgba(0,0,0,0.04)', background: 'rgba(0,0,0,0.01)' }}>
               <button
                 onClick={() => setShowMissingModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="btn-secondary text-sm"
               >
                 Revisar registro
               </button>
               <button
-                onClick={() => {
-                  setShowMissingModal(false);
-                  handleBulkSave(true);
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                onClick={() => { setShowMissingModal(false); handleBulkSave(true); }}
+                className="btn-primary text-sm"
               >
                 Guardar de todos modos
               </button>
