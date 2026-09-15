@@ -455,6 +455,19 @@ export default function CapturaPage({ params }: Props) {
           </button>
         </div>
 
+
+        {/* Banner no curricular */}
+        {subject && subject.counts_for_avg === false && (
+          <div className="mb-5 flex items-center gap-3 px-4 py-3 rounded-xl glass-subtle border border-amber-200/50 text-amber-800 text-sm">
+            <span className="text-lg">ℹ️</span>
+            <div>
+              <span className="font-semibold">Materia no curricular</span>
+              <span className="mx-1.5 text-amber-400">·</span>
+              <span className="text-amber-700">Las calificaciones de esta materia no abonan al promedio general del alumno.</span>
+            </div>
+          </div>
+        )}
+
         {/* Semáforo leyenda */}
         <div className="flex flex-wrap gap-2 mb-5 text-xs">
           <span className="px-3 py-1.5 rounded-full semaforo-rojo font-medium">

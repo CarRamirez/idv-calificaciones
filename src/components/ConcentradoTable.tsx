@@ -132,6 +132,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
         <span className="px-2 py-1 rounded bg-red-100 text-red-800">5-6.9</span>
         <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">7-7.9</span>
         <span className="px-2 py-1 rounded bg-green-100 text-green-800">8-10</span>
+        <span className="px-2 py-1 rounded bg-gray-100 text-gray-500 italic">N/C = No curricular</span>
       </div>
 
       <div className="card overflow-x-auto">
@@ -143,8 +144,9 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                 <th rowSpan={2} className="w-10">N°</th>
                 <th rowSpan={2} className="min-w-[180px]">Nombre</th>
                 {subjects.map((s) => (
-                  <th key={s.id} colSpan={2} className="text-center text-xs border-l border-gray-200">
+                  <th key={s.id} colSpan={2} className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
                     {s.short_name}
+                    {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
                   </th>
                 ))}
                 <th rowSpan={2} className="w-16 text-center border-l border-gray-300 bg-gray-100">
@@ -154,8 +156,8 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
               <tr>
                 {subjects.map((s) => (
                   <React.Fragment key={s.id}>
-                    <th className="text-center text-xs w-14 border-l border-gray-200">Cal.</th>
-                    <th className="text-center text-xs w-12">IA</th>
+                    <th className={`text-center text-xs w-14 border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50" : ""}`}>Cal.</th>
+                    <th className={`text-center text-xs w-12 ${!s.counts_for_avg ? "bg-gray-50" : ""}`}>IA</th>
                   </React.Fragment>
                 ))}
               </tr>
@@ -202,9 +204,10 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                   <th
                     key={s.id}
                     colSpan={activeTrimester.periods.length * 2 + 2}
-                    className="text-center text-xs border-l border-gray-200"
+                    className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}
                   >
                     {s.short_name}
+                    {!s.counts_for_avg && <span className="ml-1 text-[10px] font-normal not-italic text-gray-400">(N/C)</span>}
                   </th>
                 ))}
                 <th rowSpan={3} className="w-16 text-center border-l border-gray-300 bg-gray-100">

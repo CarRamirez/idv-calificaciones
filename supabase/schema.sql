@@ -167,43 +167,56 @@ INSERT INTO groups (grade, letter, school_year_id) VALUES
   (3, 'B', (SELECT id FROM school_years WHERE name = '2026-2027')),
   (3, 'C', (SELECT id FROM school_years WHERE name = '2026-2027'));
 
--- Materias por grado (plan SEP secundaria estándar)
+-- Materias por grado
 -- 1er grado
 INSERT INTO subjects (name, short_name, grade, counts_for_avg, sort_order) VALUES
   ('Español', 'ESP', 1, true, 1),
-  ('Matemáticas', 'MAT', 1, true, 2),
-  ('Ciencias (Biología)', 'BIO', 1, true, 3),
-  ('Geografía', 'GEO', 1, true, 4),
-  ('Formación Cívica y Ética', 'FCE', 1, true, 5),
-  ('Inglés', 'ING', 1, true, 6),
-  ('Educación Física', 'EFI', 1, true, 7),
-  ('Artes', 'ART', 1, true, 8),
+  ('Inglés', 'ING', 1, true, 2),
+  ('Artes', 'ART', 1, true, 3),
+  ('Matemáticas', 'MAT', 1, true, 4),
+  ('Biología', 'BIO', 1, true, 5),
+  ('Geografía', 'GEO', 1, true, 6),
+  ('Historia', 'HIS', 1, true, 7),
+  ('Formación Cívica y Ética', 'FCE', 1, true, 8),
   ('Tecnología', 'TEC', 1, true, 9),
-  ('Tutoría y Educación Socioemocional', 'TUT', 1, false, 10);
+  ('Educación Física', 'EFI', 1, true, 10),
+  ('Tutoría', 'TUT', 1, false, 20),
+  ('Vida Saludable', 'VSAL', 1, false, 21),
+  ('Ortografía', 'ORT', 1, false, 22),
+  ('Salud Mental', 'SMEN', 1, false, 23),
+  ('Valores', 'VAL', 1, false, 24);
 
 -- 2do grado
 INSERT INTO subjects (name, short_name, grade, counts_for_avg, sort_order) VALUES
   ('Español', 'ESP', 2, true, 1),
-  ('Matemáticas', 'MAT', 2, true, 2),
-  ('Ciencias (Física)', 'FIS', 2, true, 3),
-  ('Historia', 'HIS', 2, true, 4),
-  ('Formación Cívica y Ética', 'FCE', 2, true, 5),
-  ('Inglés', 'ING', 2, true, 6),
-  ('Educación Física', 'EFI', 2, true, 7),
-  ('Artes', 'ART', 2, true, 8),
-  ('Tecnología', 'TEC', 2, true, 9),
-  ('Tutoría y Educación Socioemocional', 'TUT', 2, false, 10);
+  ('Inglés', 'ING', 2, true, 2),
+  ('Artes', 'ART', 2, true, 3),
+  ('Matemáticas', 'MAT', 2, true, 4),
+  ('Física', 'FIS', 2, true, 5),
+  ('Historia', 'HIS', 2, true, 6),
+  ('Formación Cívica y Ética', 'FCE', 2, true, 7),
+  ('Tecnología', 'TEC', 2, true, 8),
+  ('Educación Física', 'EFI', 2, true, 9),
+  ('Tutoría', 'TUT', 2, false, 20),
+  ('Vida Saludable', 'VSAL', 2, false, 21),
+  ('Ortografía', 'ORT', 2, false, 22),
+  ('Salud Mental', 'SMEN', 2, false, 23),
+  ('Valores', 'VAL', 2, false, 24);
 
 -- 3er grado
 INSERT INTO subjects (name, short_name, grade, counts_for_avg, sort_order) VALUES
   ('Español', 'ESP', 3, true, 1),
-  ('Matemáticas', 'MAT', 3, true, 2),
-  ('Ciencias (Química)', 'QUI', 3, true, 3),
-  ('Historia', 'HIS', 3, true, 4),
-  ('Formación Cívica y Ética', 'FCE', 3, true, 5),
-  ('Inglés', 'ING', 3, true, 6),
-  ('Educación Física', 'EFI', 3, true, 7),
-  ('Artes', 'ART', 3, true, 8),
-  ('Tecnología', 'TEC', 3, true, 9),
-  ('Tutoría y Educación Socioemocional', 'TUT', 3, false, 10);
+  ('Inglés', 'ING', 3, true, 2),
+  ('Artes', 'ART', 3, true, 3),
+  ('Matemáticas', 'MAT', 3, true, 4),
+  ('Química', 'QUI', 3, true, 5),
+  ('Historia', 'HIS', 3, true, 6),
+  ('Formación Cívica y Ética', 'FCE', 3, true, 7),
+  ('Tecnología', 'TEC', 3, true, 8),
+  ('Educación Física', 'EFI', 3, true, 9),
+  ('Tutoría', 'TUT', 3, false, 20),
+  ('Vida Saludable', 'VSAL', 3, false, 21),
+  ('Ortografía', 'ORT', 3, false, 22),
+  ('Salud Mental', 'SMEN', 3, false, 23),
+  ('Valores', 'VAL', 3, false, 24);
 
