@@ -75,6 +75,18 @@ export default async function CalificacionesPage() {
       color: "warning",
       roles: ["teacher"],
     },
+    {
+      title: "Materias",
+      description: "Administra el cat\u00e1logo de materias: nombre, abreviatura, grado, orden y si abona al promedio.",
+      href: "/admin/materias",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+      color: "indigo",
+      roles: ["admin"],
+    },
   ];
 
   const visibleOptions = options.filter((opt) => opt.roles.includes(profile.role));
@@ -107,6 +119,13 @@ export default async function CalificacionesPage() {
       iconText: "text-yellow-600",
       border: "border-yellow-100",
       hover: "hover:border-yellow-300 hover:shadow-md",
+    },
+    indigo: {
+      bg: "bg-white",
+      iconBg: "bg-indigo-100",
+      iconText: "text-indigo-600",
+      border: "border-indigo-100",
+      hover: "hover:border-indigo-300 hover:shadow-md",
     },
   };
 
