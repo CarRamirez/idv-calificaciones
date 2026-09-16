@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import AnnouncementWall from "@/components/AnnouncementWall";
 
 export default async function DashboardPage() {
   const supabase = createServerSupabaseClient();
@@ -100,13 +101,17 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar userName={profile.full_name} userRole={profile.role} />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <h1 className="text-lg font-bold text-gray-900 mb-1">
           Bienvenido, {profile.full_name.split(" ")[0]}
         </h1>
         <p className="text-sm text-gray-500 mb-6">
           Mnemósine — Ciclo escolar 2026-2027
         </p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        {/* ═══ Columna principal ═══ */}
+        <div>
 
         {/* ════════════ TEACHER DASHBOARD ════════════ */}
         {profile.role === "teacher" && (
@@ -325,6 +330,18 @@ export default async function DashboardPage() {
             </div>
           </div>
         )}
+        </div>
+
+        {/* ═══ Muro de avisos (columna derecha) ═══ */}
+        <div className="hidden lg:block">
+          <AnnouncementWall />
+        </div>
+
+        {/* Muro móvil */}
+        <div className="lg:hidden">
+          <AnnouncementWall />
+        </div>
+        </div>
       </main>
     </div>
   );
