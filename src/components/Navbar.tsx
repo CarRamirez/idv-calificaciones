@@ -205,6 +205,14 @@ export default function Navbar({ userName, userRole }: Props) {
                   Periodos
                 </Link>
               )}
+              {(userRole === "admin" || userRole === "teacher") && (
+                <Link
+                  href="/boleta"
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                >
+                  Boleta
+                </Link>
+              )}
               {userRole === "teacher" && (
                 <Link
                   href="/calificaciones"
@@ -290,6 +298,11 @@ export default function Navbar({ userName, userRole }: Props) {
               {userRole === "admin" && (
                 <Link href="/periodos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Periodos
+                </Link>
+              )}
+              {(userRole === "admin" || userRole === "teacher") && (
+                <Link href="/boleta" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Boleta
                 </Link>
               )}
               {userRole === "teacher" && (
