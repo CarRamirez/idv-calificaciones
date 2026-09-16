@@ -34,7 +34,7 @@ export default function LoginPage() {
       // Silencioso — el log es secundario, no debe bloquear el login
     });
 
-    router.push("/dashboard");
+    router.replace("/dashboard");
   }
 
   return (

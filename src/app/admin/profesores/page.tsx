@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
-type Teacher = { id: string; full_name: string; email?: string };
+type Teacher = { id: string; full_name: string; email?: string; role?: string; label?: string };
 type Group = { id: string; grade: number; letter: string };
 type Subject = { id: string; name: string; short_name: string; grade: number };
 type Assignment = { id: string; teacher_id: string; group_id: string; subject_id: string };
@@ -29,6 +29,8 @@ export default function AdminProfesoresPage() {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPass, setNewPass] = useState("");
+  const [newRole, setNewRole] = useState<"teacher" | "admin">("teacher");
+  const [newLabel, setNewLabel] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [newError, setNewError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -71,8 +73,8 @@ export default function AdminProfesoresPage() {
   const loadTeachers = useCallback(async () => {
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, email")
-      .eq("role", "teacher")
+      .select("id, full_name, email, role, label")
+      .in("role", ["teacher", "admin"])
       .order("full_name");
     setTeachers(data || []);
   }, []);
@@ -95,14 +97,14 @@ export default function AdminProfesoresPage() {
     const res = await fetch("/api/admin/teachers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: newEmail.trim(), password: newPass, full_name: newName.trim() }),
+      body: JSON.stringify({ email: newEmail.trim(), password: newPass, full_name: newName.trim(), role: newRole, label: newLabel.trim() || undefined }),
     });
     const data = await res.json();
     if (!res.ok) { setNewError(data.error || "Error al crear"); setSaving(false); return; }
 
     setSaving(false);
     setShowNew(false);
-    setNewName(""); setNewEmail(""); setNewPass("");
+    setNewName(""); setNewEmail(""); setNewPass(""); setNewRole("teacher"); setNewLabel("");
     loadTeachers();
   }
 
@@ -316,8 +318,20 @@ export default function AdminProfesoresPage() {
                 <div key={t.id} className="card">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-bold text-gray-900 text-sm">{t.full_name}</h3>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-bold text-gray-900 text-sm">{t.full_name}</h3>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          t.role === "admin"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}>
+                          {t.role === "admin" ? "Admin" : "Profesor"}
+                        </span>
+                      </div>
                       <p className="text-xs text-gray-400">{t.email || "Sin correo"}</p>
+                      {t.label && (
+                        <p className="text-xs text-gray-500 italic mt-0.5">{t.label}</p>
+                      )}
                       {ta.length === 0 ? (
                         <p className="text-xs text-gray-400 mt-1">Sin materias asignadas</p>
                       ) : (
@@ -400,6 +414,25 @@ export default function AdminProfesoresPage() {
                       {showPass ? "Ocultar" : "Ver"}
                     </button>
                   </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Perfil *</label>
+                  <select
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value as "teacher" | "admin")}
+                    className="input-field"
+                  >
+                    <option value="teacher">Profesor</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Etiqueta</label>
+                  <input
+                    type="text" value={newLabel} onChange={(e) => setNewLabel(e.target.value)}
+                    className="input-field" placeholder="Ej: Tecnologías - Sistemas IT"
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">Opcional. Descripción breve del área o función.</p>
                 </div>
               </div>
               {newError && <p className="text-xs text-red-600 mt-2">{newError}</p>}

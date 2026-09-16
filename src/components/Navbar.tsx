@@ -11,8 +11,9 @@ type Props = {
   userRole: string;
 };
 
-const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutos
-const WARNING_BEFORE = 2 * 60 * 1000; // Aviso 2 min antes
+const SESSION_DURATION = 10 * 60 * 1000; // 10 minutos
+const WARNING_AT = 9.5 * 60 * 1000; // Aviso a los 9:30
+const EXTENSION_TIME = 5 * 60 * 1000; // Extensión de 5 minutos
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
@@ -28,7 +29,8 @@ export default function Navbar({ userName, userRole }: Props) {
   const [currentTime, setCurrentTime] = useState("");
   const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
   const [showTimeout, setShowTimeout] = useState(false);
-  const lastActivity = useRef(Date.now());
+  const [countdown, setCountdown] = useState(30);
+  const sessionExpiry = useRef(Date.now() + SESSION_DURATION);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Marca de agua SVG generada dinámicamente
@@ -78,30 +80,27 @@ export default function Navbar({ userName, userRole }: Props) {
     );
   }, []);
 
-  // Timeout por inactividad
+  // Temporizador absoluto de sesión
   useEffect(() => {
-    function resetActivity() {
-      lastActivity.current = Date.now();
-      setShowTimeout(false);
-    }
-
-    const events = ["mousedown", "keydown", "touchstart", "scroll"];
-    events.forEach((e) => window.addEventListener(e, resetActivity));
-
     const checker = setInterval(() => {
-      const elapsed = Date.now() - lastActivity.current;
-      if (elapsed >= INACTIVITY_LIMIT) {
-        supabase.auth.signOut().then(() => router.push("/login"));
-      } else if (elapsed >= INACTIVITY_LIMIT - WARNING_BEFORE) {
+      const remaining = sessionExpiry.current - Date.now();
+      if (remaining <= 0) {
+        clearInterval(checker);
+        supabase.auth.signOut().then(() => router.replace("/login"));
+      } else if (remaining <= (SESSION_DURATION - WARNING_AT)) {
         setShowTimeout(true);
+        setCountdown(Math.ceil(remaining / 1000));
       }
-    }, 30000);
+    }, 1000);
 
-    return () => {
-      events.forEach((e) => window.removeEventListener(e, resetActivity));
-      clearInterval(checker);
-    };
+    return () => clearInterval(checker);
   }, [router, supabase.auth]);
+
+  const handleExtendSession = useCallback(() => {
+    sessionExpiry.current = Date.now() + EXTENSION_TIME;
+    setShowTimeout(false);
+    setCountdown(30);
+  }, []);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -116,7 +115,7 @@ export default function Navbar({ userName, userRole }: Props) {
 
   const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.replace("/login");
   }, [router, supabase.auth]);
 
   function weatherInfo(code: number): { desc: string; icon: string } {
@@ -326,13 +325,34 @@ export default function Navbar({ userName, userRole }: Props) {
         </div>
       </nav>
 
-      {/* Warning de inactividad */}
+      {/* Modal de sesión por expirar */}
       {showTimeout && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-yellow-50 border border-yellow-300 rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 max-w-sm">
-          <span className="text-yellow-600 text-lg">⚠️</span>
-          <div>
-            <p className="text-sm font-medium text-yellow-800">Sesión por expirar</p>
-            <p className="text-xs text-yellow-600">Mueve el mouse o presiona una tecla para mantener tu sesión activa.</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 text-center">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-yellow-100 flex items-center justify-center">
+              <svg className="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Sesión por expirar</h3>
+            <p className="text-sm text-gray-500 mb-1">
+              Tu sesión se cerrará en <span className="font-bold text-yellow-600 tabular-nums">{countdown}s</span>
+            </p>
+            <p className="text-xs text-gray-400 mb-5">¿Deseas continuar trabajando?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleLogout}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              >
+                Cerrar sesión
+              </button>
+              <button
+                onClick={handleExtendSession}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-colors"
+              >
+                +5 minutos
+              </button>
+            </div>
           </div>
         </div>
       )}

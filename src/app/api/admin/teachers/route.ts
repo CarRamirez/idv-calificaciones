@@ -21,10 +21,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { email, password, full_name } = await req.json();
+  const { email, password, full_name, role, label } = await req.json();
   if (!email || !password || !full_name) {
     return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
   }
+
+  // Validate role
+  const validRoles = ["admin", "teacher"];
+  const finalRole = validRoles.includes(role) ? role : "teacher";
 
   const admin = createAdminClient();
 
@@ -46,7 +50,8 @@ export async function POST(req: NextRequest) {
       id: authData.user.id,
       full_name: full_name.toUpperCase(),
       email: email.toLowerCase(),
-      role: "teacher",
+      role: finalRole,
+      ...(label ? { label: label.trim() } : {}),
     });
 
   if (profileError) {
