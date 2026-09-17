@@ -539,7 +539,7 @@ export default async function DashboardPage() {
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
                 Concentrado por grupo
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {groups.map((g: any) => {
                   const count = groupStudentCounts[g.id] || 0;
                   const colors = GRADE_COLORS[g.grade as number] || GRADE_COLORS[1];
@@ -553,20 +553,20 @@ export default async function DashboardPage() {
                           {g.grade}° {g.letter}
                         </p>
                       </div>
-                      <div className="p-2 text-center">
+                      <div className="p-3 text-center">
                         <p className="text-xs text-gray-500 mb-2">
                           {count} alumno{count !== 1 ? "s" : ""}
                         </p>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1.5">
                           <Link
                             href={`/concentrado/${g.id}`}
-                            className={`flex-1 text-[10px] font-medium px-1.5 py-1 rounded ${colors.badge} hover:opacity-80 transition-opacity`}
+                            className={`flex-1 text-xs font-medium px-2 py-1.5 rounded-md text-center ${colors.badge} hover:opacity-80 transition-opacity`}
                           >
                             Concentrado
                           </Link>
                           <Link
                             href={`/boleta/${g.id}`}
-                            className="flex-1 text-[10px] font-medium px-1.5 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                            className="flex-1 text-xs font-medium px-2 py-1.5 rounded-md text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                           >
                             Boleta
                           </Link>
