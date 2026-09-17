@@ -87,6 +87,18 @@ export default async function CalificacionesPage() {
       color: "indigo",
       roles: ["admin"],
     },
+    {
+      title: "Tareas",
+      description: "Envía notificaciones de tareas del día a los padres de familia por correo electrónico.",
+      href: "/tareas",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+        </svg>
+      ),
+      color: "rose",
+      roles: ["admin"],
+    },
   ];
 
   const visibleOptions = options.filter((opt) => opt.roles.includes(profile.role));
@@ -119,6 +131,13 @@ export default async function CalificacionesPage() {
       iconText: "text-yellow-600",
       border: "border-yellow-100",
       hover: "hover:border-yellow-300 hover:shadow-md",
+    },
+    rose: {
+      bg: "bg-white",
+      iconBg: "bg-rose-100",
+      iconText: "text-rose-600",
+      border: "border-rose-100",
+      hover: "hover:border-rose-300 hover:shadow-md",
     },
     indigo: {
       bg: "bg-white",
