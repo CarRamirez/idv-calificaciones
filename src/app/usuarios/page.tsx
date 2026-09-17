@@ -50,6 +50,17 @@ export default async function UsuariosPage() {
       ),
       color: "emerald",
     },
+    {
+      title: "Roles y Permisos",
+      description: "Define roles personalizados y asigna permisos por m\u00f3dulo a cada usuario.",
+      href: "/admin/roles",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+        </svg>
+      ),
+      color: "violet",
+    },
   ];
 
   const colorMap: Record<string, { bg: string; iconBg: string; iconText: string; border: string; hover: string }> = {
@@ -74,6 +85,13 @@ export default async function UsuariosPage() {
       border: "border-emerald-100",
       hover: "hover:border-emerald-300 hover:shadow-md",
     },
+    violet: {
+      bg: "bg-white",
+      iconBg: "bg-violet-100",
+      iconText: "text-violet-600",
+      border: "border-violet-100",
+      hover: "hover:border-violet-300 hover:shadow-md",
+    },
   };
 
   return (
@@ -85,7 +103,7 @@ export default async function UsuariosPage() {
           <p className="text-sm text-gray-500 mt-1">Administra los usuarios del sistema</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {options.map((opt) => {
             const c = colorMap[opt.color];
             return (
