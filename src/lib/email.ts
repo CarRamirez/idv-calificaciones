@@ -78,6 +78,7 @@ Secundaria | Ciclo 2026-2027`;
   await transporter.sendMail({
     from: `"Prefectura IDV" <${process.env.SMTP_USER}>`,
     to,
+    cc: ["sistemas@institutodonvasco.edu.mx", "alumnossecundaria@institutodonvasco.edu.mx"],
     subject: `Tarea del día ${date} — ${groupLabel} | Instituto Don Vasco`,
     text,
     html,

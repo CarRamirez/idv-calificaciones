@@ -204,9 +204,15 @@ export default function TareasPage() {
                 </p>
               )}
               {groupObj && groupObj.parent_email && (
-                <p className="text-xs text-gray-400 mt-2">
-                  Destinatario: <span className="font-mono">{groupObj.parent_email}</span>
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-gray-400">
+                    Destinatario: <span className="font-mono">{groupObj.parent_email}</span>
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    CC: <span className="font-mono">sistemas@institutodonvasco.edu.mx</span>,{" "}
+                    <span className="font-mono">alumnossecundaria@institutodonvasco.edu.mx</span>
+                  </p>
+                </div>
               )}
             </div>
 

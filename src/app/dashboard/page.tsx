@@ -44,6 +44,13 @@ function IconBook({ className = "w-6 h-6" }: { className?: string }) {
     </svg>
   );
 }
+function IconMail({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+    </svg>
+  );
+}
 
 function IconSubjects({ className = "w-6 h-6" }: { className?: string }) {
   return (
@@ -417,7 +424,7 @@ export default async function DashboardPage() {
           <div className="space-y-6">
             {/* ── Stat Cards ── */}
             {profile.role === "admin" && (
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <Link
                   href="/admin/alumnos"
                   className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
@@ -500,6 +507,21 @@ export default async function DashboardPage() {
                     Captura
                   </p>
                   <p className="text-xs text-gray-400">ir a calificar</p>
+                </Link>
+                <Link
+                  href="/tareas"
+                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
+                      <IconMail className="w-5 h-5 text-violet-600" />
+                    </div>
+                    <span className="text-lg font-bold text-violet-600">→</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                    Tareas
+                  </p>
+                  <p className="text-xs text-gray-400">notificar padres</p>
                 </Link>
               </div>
             )}
