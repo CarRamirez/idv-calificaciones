@@ -53,6 +53,12 @@ Atentamente,
 Prefectura — Instituto Don Vasco
 Secundaria | Ciclo 2026-2027`;
 
+  const customMessageHtml = customMessage
+    ? `<div style="background:#fef9e7;border-left:4px solid #d4a017;padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0;">
+      <p style="color:#7a6c0a;font-size:14px;margin:0;"><strong>Nota:</strong> ${customMessage}</p>
+    </div>`
+    : "";
+
   const html = `
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
   <div style="background:#1e3a5f;border-radius:10px 10px 0 0;padding:20px 24px;text-align:center;">
@@ -68,9 +74,7 @@ Secundaria | Ciclo 2026-2027`;
     <ul style="list-style:none;padding:0;margin:16px 0;">
       ${subjectLinesHtml}
     </ul>
-    \${customMessage ? \`<div style="background:#fef9e7;border-left:4px solid #d4a017;padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0;">
-      <p style="color:#7a6c0a;font-size:14px;margin:0;"><strong>Nota:</strong> \${customMessage}</p>
-    </div>\` : ""}
+    ${customMessageHtml}
     <p style="color:#333;font-size:15px;">
       Agradecemos su apoyo para que cumpla con sus actividades escolares.
     </p>
