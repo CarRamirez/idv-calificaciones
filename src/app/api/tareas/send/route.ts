@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { group_id, subjects } = await req.json();
+  const { group_id, subjects, recipients, cc_emails } = await req.json();
 
   // subjects: [{ subject_id, subject_name, comment? }]
   if (!group_id || !subjects || subjects.length === 0) {
@@ -57,8 +57,48 @@ export async function POST(req: NextRequest) {
   });
 
   try {
+    // Build recipient list from selected checkboxes
+    const toAddresses: string[] = [];
+    const ccAddresses: string[] = [];
+
+    if (recipients && Array.isArray(recipients)) {
+      for (const r of recipients) {
+        if (r === "padres" && group.parent_email) {
+          toAddresses.push(group.parent_email);
+        } else if (r === "sistemas") {
+          ccAddresses.push("sistemas@institutodonvasco.edu.mx");
+        } else if (r === "alumnos") {
+          ccAddresses.push("alumnossecundaria@institutodonvasco.edu.mx");
+        }
+      }
+    } else {
+      // Fallback: send to parent email only
+      if (group.parent_email) toAddresses.push(group.parent_email);
+    }
+
+    // Add custom emails
+    if (cc_emails && Array.isArray(cc_emails)) {
+      for (const email of cc_emails) {
+        const trimmed = email.trim();
+        if (trimmed && trimmed.includes("@")) {
+          ccAddresses.push(trimmed);
+        }
+      }
+    }
+
+    if (toAddresses.length === 0 && ccAddresses.length === 0) {
+      return NextResponse.json(
+        { error: "Selecciona al menos un destinatario" },
+        { status: 400 }
+      );
+    }
+
+    // If no "to" but has CC, move first CC to "to"
+    const finalTo = toAddresses.length > 0 ? toAddresses : [ccAddresses.shift()!];
+
     await sendHomeworkEmail({
-      to: group.parent_email,
+      to: finalTo,
+      cc: ccAddresses.length > 0 ? ccAddresses : undefined,
       groupLabel,
       subjects: subjects.map((s: any) => ({
         name: s.subject_name,
@@ -68,16 +108,17 @@ export async function POST(req: NextRequest) {
     });
 
     // Log the notification
+    const allRecipients = [...finalTo, ...ccAddresses].join(", ");
     await supabaseAdmin.from("homework_notifications").insert({
       group_id: group.id,
       sent_by: admin.id,
       subjects: subjects,
-      recipient_email: group.parent_email,
+      recipient_email: allRecipients,
     });
 
     return NextResponse.json({
       ok: true,
-      message: `Correo enviado a ${group.parent_email} para ${groupLabel}`,
+      message: `Correo enviado a ${allRecipients} para ${groupLabel}`,
     });
   } catch (err: any) {
     console.error("Error enviando correo:", err);

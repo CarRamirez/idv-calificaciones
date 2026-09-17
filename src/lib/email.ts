@@ -12,11 +12,13 @@ const transporter = nodemailer.createTransport({
 
 export async function sendHomeworkEmail({
   to,
+  cc,
   groupLabel,
   subjects,
   date,
 }: {
-  to: string;
+  to: string | string[];
+  cc?: string[];
   groupLabel: string;
   subjects: { name: string; comment?: string }[];
   date: string;

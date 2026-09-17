@@ -30,6 +30,12 @@ export default function TareasPage() {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [history, setHistory] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recipients, setRecipients] = useState<Record<string, boolean>>({
+    padres: true,
+    sistemas: true,
+    alumnos: true,
+  });
+  const [customEmails, setCustomEmails] = useState("");
 
   useEffect(() => {
     async function init() {
@@ -96,11 +102,30 @@ export default function TareasPage() {
     setSending(true);
     setResult(null);
 
+    const activeRecipients = Object.entries(recipients)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+    const extraEmails = customEmails
+      .split(",")
+      .map((e) => e.trim())
+      .filter((e) => e.includes("@"));
+
+    if (activeRecipients.length === 0 && extraEmails.length === 0) {
+      setResult({ ok: false, message: "Selecciona al menos un destinatario" });
+      setSending(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/tareas/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ group_id: selectedGroup, subjects: subjectsList }),
+        body: JSON.stringify({
+          group_id: selectedGroup,
+          subjects: subjectsList,
+          recipients: activeRecipients,
+          cc_emails: extraEmails,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -121,6 +146,8 @@ export default function TareasPage() {
   };
 
   const selectedCount = Object.keys(selected).length;
+  const recipientCount = Object.values(recipients).filter(Boolean).length
+    + (customEmails.split(",").filter((e) => e.trim().includes("@")).length);
 
   function timeAgo(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -204,23 +231,71 @@ export default function TareasPage() {
                 </p>
               )}
               {groupObj && groupObj.parent_email && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-xs text-gray-400">
-                    Destinatario: <span className="font-mono">{groupObj.parent_email}</span>
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    CC: <span className="font-mono">sistemas@institutodonvasco.edu.mx</span>,{" "}
-                    <span className="font-mono">alumnossecundaria@institutodonvasco.edu.mx</span>
-                  </p>
-                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Email del grupo: <span className="font-mono">{groupObj.parent_email}</span>
+                </p>
               )}
             </div>
+
+            {/* Destinatarios */}
+            {selectedGroup && groupObj?.parent_email && (
+              <div className="card p-4">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  2. Selecciona los destinatarios
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { key: "padres", label: "Padres de familia", desc: groupObj.parent_email },
+                    { key: "sistemas", label: "Sistemas", desc: "sistemas@institutodonvasco.edu.mx" },
+                    { key: "alumnos", label: "Alumnos Secundaria", desc: "alumnossecundaria@institutodonvasco.edu.mx" },
+                  ].map((r) => (
+                    <div
+                      key={r.key}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
+                        recipients[r.key]
+                          ? "border-primary-300 bg-primary-50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                      onClick={() =>
+                        setRecipients((prev) => ({ ...prev, [r.key]: !prev[r.key] }))
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={recipients[r.key] || false}
+                        onChange={() =>
+                          setRecipients((prev) => ({ ...prev, [r.key]: !prev[r.key] }))
+                        }
+                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-gray-800">{r.label}</span>
+                        <p className="text-xs text-gray-400 font-mono truncate">{r.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Campo para correos adicionales */}
+                <div className="mt-3">
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Correos adicionales (separados por coma)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ej. director@institutodonvasco.edu.mx, otro@correo.com"
+                    value={customEmails}
+                    onChange={(e) => setCustomEmails(e.target.value)}
+                    className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Materias */}
             {selectedGroup && filteredSubjects.length > 0 && (
               <div className="card p-4">
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  2. Selecciona las materias con tarea
+                  3. Selecciona las materias con tarea
                 </label>
                 <div className="space-y-2">
                   {filteredSubjects.map((s) => {
