@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { group_id, subjects, recipients, cc_emails } = await req.json();
+  const { group_id, subjects, recipients, cc_emails, custom_message } = await req.json();
 
   // subjects: [{ subject_id, subject_name, comment? }]
   if (!group_id || !subjects || subjects.length === 0) {
@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
         comment: s.comment || undefined,
       })),
       date: today,
+      customMessage: custom_message || undefined,
     });
 
     // Log the notification
