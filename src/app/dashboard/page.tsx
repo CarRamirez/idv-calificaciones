@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
@@ -110,8 +111,9 @@ export default async function DashboardPage() {
   } else if (profile.role === "viewer") {
     dashboardView = "admin"; // viewers see the admin/overview dashboard
   } else {
-    // Custom role — fetch permissions from roles table
-    const { data: roleData } = await supabase
+    // Custom role — fetch permissions from roles table (use admin client to bypass RLS)
+    const adminDb = createAdminClient();
+    const { data: roleData } = await adminDb
       .from("roles")
       .select("permissions")
       .eq("name", profile.role)

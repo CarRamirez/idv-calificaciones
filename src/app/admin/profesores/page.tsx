@@ -70,12 +70,9 @@ export default function AdminProfesoresPage() {
       if (!prof) { router.push("/dashboard"); return; }
       // Check if user has admin_profesores permission (admin always has access)
       if (prof.role !== "admin") {
-        const { data: roleData } = await supabase
-          .from("roles")
-          .select("permissions")
-          .eq("name", prof.role)
-          .single();
-        if (!roleData || !roleData.permissions?.includes("admin_profesores")) {
+        const res = await fetch("/api/auth/permissions");
+        const { permissions } = await res.json();
+        if (!permissions?.includes("admin_profesores")) {
           router.push("/dashboard"); return;
         }
       }

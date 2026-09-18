@@ -42,27 +42,17 @@ export default function Navbar({ userName, userRole }: Props) {
     return `url("data:image/svg+xml,${svg}")`;
   }, [userName, userRole]);
 
-  // Permisos según rol
+  // Permisos según rol (via API to bypass RLS)
   useEffect(() => {
-    const BUILTIN_PERMS: Record<string, string[]> = {
-      admin: ["dashboard", "calificaciones", "captura", "boleta", "periodos", "usuarios", "tareas", "concentrado", "admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles"],
-      teacher: ["dashboard", "calificaciones", "captura", "boleta"],
-      viewer: ["dashboard", "concentrado"],
-    };
-
-    if (BUILTIN_PERMS[userRole]) {
-      setPermissions(BUILTIN_PERMS[userRole]);
-    } else {
-      supabase
-        .from("roles")
-        .select("permissions")
-        .eq("name", userRole)
-        .single()
-        .then(({ data }) => {
-          setPermissions(data?.permissions || []);
-        });
-    }
-  }, [userRole, supabase]);
+    fetch("/api/auth/permissions")
+      .then((res) => res.json())
+      .then((data) => {
+        setPermissions(data.permissions || []);
+      })
+      .catch(() => {
+        setPermissions([]);
+      });
+  }, [userRole]);
 
   // Reloj en tiempo real
   useEffect(() => {
