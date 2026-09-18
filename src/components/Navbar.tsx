@@ -26,6 +26,7 @@ export default function Navbar({ userName, userRole }: Props) {
   const supabase = createClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [permissions, setPermissions] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState("");
   const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
   const [showTimeout, setShowTimeout] = useState(false);
@@ -40,6 +41,28 @@ export default function Navbar({ userName, userRole }: Props) {
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' transform='rotate(-25 200 100)' font-family='system-ui,sans-serif' font-size='14' font-weight='500' fill='%23000' fill-opacity='0.04' letter-spacing='1'>${encoded}</text></svg>`;
     return `url("data:image/svg+xml,${svg}")`;
   }, [userName, userRole]);
+
+  // Permisos según rol
+  useEffect(() => {
+    const BUILTIN_PERMS: Record<string, string[]> = {
+      admin: ["dashboard", "calificaciones", "captura", "boleta", "periodos", "usuarios", "tareas", "concentrado", "admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles"],
+      teacher: ["dashboard", "calificaciones", "captura", "boleta"],
+      viewer: ["dashboard", "concentrado"],
+    };
+
+    if (BUILTIN_PERMS[userRole]) {
+      setPermissions(BUILTIN_PERMS[userRole]);
+    } else {
+      supabase
+        .from("roles")
+        .select("permissions")
+        .eq("name", userRole)
+        .single()
+        .then(({ data }) => {
+          setPermissions(data?.permissions || []);
+        });
+    }
+  }, [userRole, supabase]);
 
   // Reloj en tiempo real
   useEffect(() => {
@@ -130,6 +153,9 @@ export default function Navbar({ userName, userRole }: Props) {
     return { desc: "Tormenta", icon: "⛈️" };
   }
 
+  const can = useCallback((perm: string) => permissions.includes(perm), [permissions]);
+  const canAny = useCallback((...perms: string[]) => perms.some(p => permissions.includes(p)), [permissions]);
+
   const firstName = userName.split(" ")[0];
 
   return (
@@ -180,7 +206,7 @@ export default function Navbar({ userName, userRole }: Props) {
               >
                 Inicio
               </Link>
-              {userRole === "admin" && (
+              {canAny("calificaciones", "captura") && (
                 <Link
                   href="/calificaciones"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -188,7 +214,7 @@ export default function Navbar({ userName, userRole }: Props) {
                   Calificaciones
                 </Link>
               )}
-              {userRole === "admin" && (
+              {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
                 <Link
                   href="/usuarios"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -196,7 +222,7 @@ export default function Navbar({ userName, userRole }: Props) {
                   Usuarios
                 </Link>
               )}
-              {userRole === "admin" && (
+              {can("periodos") && (
                 <Link
                   href="/periodos"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -204,7 +230,7 @@ export default function Navbar({ userName, userRole }: Props) {
                   Periodos
                 </Link>
               )}
-              {(userRole === "admin" || userRole === "teacher") && (
+              {can("boleta") && (
                 <Link
                   href="/boleta"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -212,15 +238,15 @@ export default function Navbar({ userName, userRole }: Props) {
                   Boleta
                 </Link>
               )}
-              {userRole === "teacher" && (
+              {can("tareas") && (
                 <Link
-                  href="/calificaciones"
+                  href="/tareas"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
                 >
-                  Calificaciones
+                  Tareas
                 </Link>
               )}
-              {userRole === "viewer" && (
+              {can("concentrado") && (
                 <Link
                   href="/dashboard"
                   className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -284,32 +310,32 @@ export default function Navbar({ userName, userRole }: Props) {
               <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                 Inicio
               </Link>
-              {userRole === "admin" && (
+              {canAny("calificaciones", "captura") && (
                 <Link href="/calificaciones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Calificaciones
                 </Link>
               )}
-              {userRole === "admin" && (
+              {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
                 <Link href="/usuarios" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Usuarios
                 </Link>
               )}
-              {userRole === "admin" && (
+              {can("periodos") && (
                 <Link href="/periodos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Periodos
                 </Link>
               )}
-              {(userRole === "admin" || userRole === "teacher") && (
+              {can("boleta") && (
                 <Link href="/boleta" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Boleta
                 </Link>
               )}
-              {userRole === "teacher" && (
-                <Link href="/calificaciones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Calificaciones
+              {can("tareas") && (
+                <Link href="/tareas" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  Tareas
                 </Link>
               )}
-              {userRole === "viewer" && (
+              {can("concentrado") && (
                 <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Concentrado
                 </Link>

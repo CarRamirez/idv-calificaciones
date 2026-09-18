@@ -100,12 +100,36 @@ export default async function DashboardPage() {
 
   if (!profile) redirect("/login");
 
+  // ──── Determine dashboard view based on permissions ────
+  let dashboardView: "teacher" | "admin" | "none" = "none";
+
+  if (profile.role === "admin") {
+    dashboardView = "admin";
+  } else if (profile.role === "teacher") {
+    dashboardView = "teacher";
+  } else if (profile.role === "viewer") {
+    dashboardView = "admin"; // viewers see the admin/overview dashboard
+  } else {
+    // Custom role — fetch permissions from roles table
+    const { data: roleData } = await supabase
+      .from("roles")
+      .select("permissions")
+      .eq("name", profile.role)
+      .single();
+    const perms: string[] = roleData?.permissions || [];
+    if (perms.some(p => p.startsWith("admin_") || p === "periodos" || p === "dashboard")) {
+      dashboardView = "admin";
+    } else if (perms.includes("captura") || perms.includes("calificaciones")) {
+      dashboardView = "teacher";
+    }
+  }
+
   // ──── TEACHER DATA ────
   let teacherAssignments: any[] = [];
   let teacherGroupIds: string[] = [];
   const teacherStudentCounts: Record<string, number> = {};
 
-  if (profile.role === "teacher") {
+  if (dashboardView === "teacher") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("id, subjects ( id, name, short_name ), groups ( id, grade, letter )")
@@ -151,7 +175,7 @@ export default async function DashboardPage() {
   let captureProgress = { entered: 0, total: 0 };
   let recentActivity: { teacher: string; group: string; subject: string; count: number; updated_at: string }[] = [];
 
-  if (profile.role === "admin" || profile.role === "viewer") {
+  if (dashboardView === "admin") {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter, school_years ( name )")
@@ -308,7 +332,7 @@ export default async function DashboardPage() {
         <div>
 
         {/* ════════════ TEACHER DASHBOARD ════════════ */}
-        {profile.role === "teacher" && (
+        {dashboardView === "teacher" && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="card p-4">
@@ -420,10 +444,10 @@ export default async function DashboardPage() {
         )}
 
         {/* ════════════ ADMIN / VIEWER DASHBOARD ════════════ */}
-        {(profile.role === "admin" || profile.role === "viewer") && (
+        {dashboardView === "admin" && (
           <div className="space-y-6">
             {/* ── Stat Cards ── */}
-            {profile.role === "admin" && (
+            {(profile.role === "admin" || (dashboardView === "admin" && profile.role !== "viewer")) && (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <Link
                   href="/admin/alumnos"
