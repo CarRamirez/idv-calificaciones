@@ -64,6 +64,16 @@ export default function AdminRolesPage() {
   // Delete
   const [deletingRole, setDeletingRole] = useState<string | null>(null);
 
+  // Edit user modal
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editLabel, setEditLabel] = useState("");
+  const [editPass, setEditPass] = useState("");
+  const [editShowPass, setEditShowPass] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
   const loadProfile = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
@@ -183,6 +193,49 @@ export default function AdminRolesPage() {
     setSaving(false);
   }
 
+  function openEditUser(u: User) {
+    setEditUser(u);
+    setEditName(u.full_name);
+    setEditEmail(u.email);
+    setEditLabel(u.label || "");
+    setEditPass("");
+    setEditShowPass(false);
+    setEditError("");
+  }
+
+  async function handleEditUser() {
+    if (!editUser || !editName.trim()) {
+      setEditError("El nombre es obligatorio"); return;
+    }
+    setEditSaving(true); setEditError("");
+
+    const body: Record<string, any> = {
+      id: editUser.id,
+      full_name: editName.trim(),
+      email: editEmail.trim() || undefined,
+      label: editLabel.trim(),
+    };
+    if (editPass.trim()) {
+      if (editPass.length < 6) {
+        setEditError("La contraseña debe tener al menos 6 caracteres");
+        setEditSaving(false); return;
+      }
+      body.password = editPass;
+    }
+
+    const res = await fetch("/api/admin/teachers", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) { setEditError(data.error || "Error al guardar"); setEditSaving(false); return; }
+
+    setEditSaving(false);
+    setEditUser(null);
+    loadUsers();
+  }
+
   const isBuiltIn = (name: string) => ["admin", "teacher", "viewer"].includes(name);
 
   if (loading) {
@@ -272,7 +325,7 @@ export default function AdminRolesPage() {
                       onClick={() => openEditRole(r)}
                       className="px-2 py-1 text-xs text-primary-600 hover:bg-primary-50 rounded"
                     >
-                      Editar permisos
+                      Editar
                     </button>
                     {!isBuiltIn(r.name) && (
                       <>
@@ -338,6 +391,12 @@ export default function AdminRolesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => openEditUser(u)}
+                          className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                        >
+                          Editar
+                        </button>
                         <button
                           onClick={() => openAssignUser(u)}
                           className="px-2 py-1 text-xs text-primary-600 hover:bg-primary-50 rounded"
@@ -463,6 +522,71 @@ export default function AdminRolesPage() {
               </button>
               <button onClick={handleSaveRole} disabled={saving} className="btn-primary text-sm">
                 {saving ? "Guardando..." : editingRole ? "Actualizar" : "Crear rol"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* ═══ EDIT USER MODAL ═══ */}
+      {editUser && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Editar usuario</h2>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nombre completo *</label>
+                  <input
+                    type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electrónico</label>
+                  <input
+                    type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Etiqueta</label>
+                  <input
+                    type="text" value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Ej: Tecnologías - Sistemas IT"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nueva contraseña</label>
+                  <div className="relative">
+                    <input
+                      type={editShowPass ? "text" : "password"} value={editPass}
+                      onChange={(e) => setEditPass(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 pr-16"
+                      placeholder="Dejar vacío para no cambiar"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditShowPass(!editShowPass)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                    >
+                      {editShowPass ? "Ocultar" : "Ver"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1">Mínimo 6 caracteres. Solo se actualiza si escribes una nueva.</p>
+                </div>
+              </div>
+              {editError && <p className="text-xs text-red-600 mt-2">{editError}</p>}
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
+              <button onClick={() => setEditUser(null)} className="btn-secondary text-sm" disabled={editSaving}>
+                Cancelar
+              </button>
+              <button onClick={handleEditUser} disabled={editSaving} className="btn-primary text-sm">
+                {editSaving ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
           </div>
