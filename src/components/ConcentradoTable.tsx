@@ -16,7 +16,7 @@ const PERIODS = [
 const TRIMESTERS = [
   { id: 1, name: "1er Trimestre", periods: [1, 2] },
   { id: 2, name: "2do Trimestre", periods: [3, 4] },
-  { id: 3, name: "3er Trimestre", periods: [5, 6, 7] },
+  { id: 3, name: "3er Trimestre", periods: [5, 6, 7, 8] },
 ];
 
 type Subject = { id: string; name: string; short_name: string; counts_for_avg: boolean };

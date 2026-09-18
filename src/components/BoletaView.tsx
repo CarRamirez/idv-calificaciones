@@ -23,7 +23,7 @@ type Props = {
 const TRIMESTERS = [
   { id: 1, name: "1er Trimestre", shortName: "1er Trim.", periods: [1, 2] },
   { id: 2, name: "2do Trimestre", shortName: "2do Trim.", periods: [3, 4] },
-  { id: 3, name: "3er Trimestre", shortName: "3er Trim.", periods: [5, 6, 7] },
+  { id: 3, name: "3er Trimestre", shortName: "3er Trim.", periods: [5, 6, 7, 8] },
 ];
 
 const PERIOD_NAMES: Record<number, string> = {
@@ -31,10 +31,10 @@ const PERIOD_NAMES: Record<number, string> = {
   2: "Oct",
   3: "Nov-Dic",
   4: "Ene-Feb",
-  5: "Mar-Abr",
-  6: "Mayo",
-  7: "Junio",
-  8: "Julio",
+  5: "Marzo",
+  6: "Abril",
+  7: "Mayo",
+  8: "Junio",
 };
 
 function semaforoClass(score: number | null): string {

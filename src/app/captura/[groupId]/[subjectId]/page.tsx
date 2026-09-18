@@ -48,9 +48,10 @@ const TRIMESTERS = [
     name: "3er Trimestre",
     short: "3T",
     periods: [
-      { id: 5, name: "Mar - Abr", short: "MAR-ABR" },
-      { id: 6, name: "Mayo", short: "MAYO" },
-      { id: 7, name: "Junio", short: "JUNIO" },
+      { id: 5, name: "Marzo", short: "MARZO" },
+      { id: 6, name: "Abril", short: "ABRIL" },
+      { id: 7, name: "Mayo", short: "MAYO" },
+      { id: 8, name: "Junio", short: "JUNIO" },
     ],
   },
 ];
