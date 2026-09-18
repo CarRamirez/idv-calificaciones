@@ -7,7 +7,7 @@ const PERIODS = [
   { id: 2, short: "OCT" },
   { id: 3, short: "NOV-DIC" },
   { id: 4, short: "ENE-FEB" },
-  { id: 5, short: "MAR-ABR" },
+  { id: 5, short: "MARZO" },
   { id: 6, short: "MAYO" },
   { id: 7, short: "JUNIO" },
   { id: 8, short: "JULIO" },
@@ -175,7 +175,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                       return (
                         <React.Fragment key={s.id}>
                           <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(curricular)}`}>
-                            {curricular !== null ? curricular.toFixed(1) : "—"}
+                            {curricular !== null ? Math.round(curricular).toString() : "—"}
                           </td>
                           <td className="text-center text-xs tabular-nums text-gray-500">
                             {totalAbs || "—"}
@@ -184,7 +184,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                       );
                     })}
                     <td className={`text-center text-xs font-bold tabular-nums border-l border-gray-200 ${semaforoClass(genAvg)}`}>
-                      {genAvg !== null ? genAvg.toFixed(1) : "—"}
+                      {genAvg !== null ? Math.round(genAvg).toString() : "—"}
                     </td>
                   </tr>
                 );
@@ -263,7 +263,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                             return (
                               <React.Fragment key={p}>
                                 <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)}`}>
-                                  {score !== null ? score.toFixed(1) : "—"}
+                                  {score !== null ? Math.round(score).toString() : "—"}
                                 </td>
                                 <td className="text-center text-xs tabular-nums text-gray-400">
                                   {abs || "—"}
@@ -272,7 +272,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                             );
                           })}
                           <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${semaforoClass(trimAvg)}`}>
-                            {trimAvg !== null ? trimAvg.toFixed(1) : "—"}
+                            {trimAvg !== null ? Math.round(trimAvg).toString() : "—"}
                           </td>
                           <td className="text-center text-xs tabular-nums text-gray-500 font-medium">
                             {trimAbs || "—"}
@@ -281,7 +281,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
                       );
                     })}
                     <td className={`text-center text-xs font-bold tabular-nums border-l border-gray-200 ${semaforoClass(trimGenAvg)}`}>
-                      {trimGenAvg !== null ? trimGenAvg.toFixed(1) : "—"}
+                      {trimGenAvg !== null ? Math.round(trimGenAvg).toString() : "—"}
                     </td>
                   </tr>
                 );

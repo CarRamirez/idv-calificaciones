@@ -23,7 +23,7 @@ export async function GET() {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("subjects")
-    .select("id, name, short_name, grade, counts_for_avg, sort_order, created_at")
+    .select("id, name, short_name, grade, counts_for_avg, sort_order, campo_formativo, input_type, created_at")
     .order("grade")
     .order("sort_order");
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { name, short_name, grade, counts_for_avg, sort_order } = await req.json();
+  const { name, short_name, grade, counts_for_avg, sort_order, campo_formativo, input_type } = await req.json();
 
   if (!name?.trim() || !short_name?.trim() || !grade) {
     return NextResponse.json({ error: "Nombre, abreviatura y grado son obligatorios" }, { status: 400 });
@@ -56,6 +56,8 @@ export async function POST(req: NextRequest) {
       grade: Number(grade),
       counts_for_avg: counts_for_avg !== false,
       sort_order: Number(sort_order) || 0,
+      campo_formativo: campo_formativo?.trim() || null,
+      input_type: input_type || 'score',
     })
     .select()
     .single();
@@ -70,7 +72,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { id, name, short_name, grade, counts_for_avg, sort_order } = await req.json();
+  const { id, name, short_name, grade, counts_for_avg, sort_order, campo_formativo, input_type } = await req.json();
   if (!id) return NextResponse.json({ error: "Falta ID" }, { status: 400 });
 
   const updates: Record<string, unknown> = {};
@@ -79,6 +81,8 @@ export async function PUT(req: NextRequest) {
   if (grade !== undefined) updates.grade = Number(grade);
   if (counts_for_avg !== undefined) updates.counts_for_avg = counts_for_avg;
   if (sort_order !== undefined) updates.sort_order = Number(sort_order);
+  if (campo_formativo !== undefined) updates.campo_formativo = campo_formativo?.trim() || null;
+  if (input_type !== undefined) updates.input_type = input_type;
 
   const admin = createAdminClient();
   const { data, error } = await admin

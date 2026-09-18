@@ -82,7 +82,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
   }
 
   function getTotalAbsences(subjectId: string): number {
-    return [1, 2, 3, 4, 5, 6, 7].reduce(
+    return [1, 2, 3, 4, 5, 6, 7, 8].reduce(
       (sum, p) => sum + getAbsences(subjectId, p),
       0
     );
@@ -97,7 +97,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
   }
 
   function fmt(n: number | null): string {
-    return n !== null ? n.toFixed(1) : "—";
+    return n !== null ? Math.round(n).toString() : "—";
   }
 
   const generalAvg = getGeneralAvg();

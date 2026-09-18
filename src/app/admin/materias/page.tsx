@@ -13,6 +13,8 @@ type Subject = {
   grade: number;
   counts_for_avg: boolean;
   sort_order: number;
+  campo_formativo: string | null;
+  input_type: string;
   created_at: string;
 };
 
@@ -40,6 +42,8 @@ export default function AdminMateriasPage() {
   const [formGrade, setFormGrade] = useState(1);
   const [formCounts, setFormCounts] = useState(true);
   const [formOrder, setFormOrder] = useState(0);
+  const [formCampo, setFormCampo] = useState("");
+  const [formInputType, setFormInputType] = useState("score");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -79,6 +83,8 @@ export default function AdminMateriasPage() {
     setFormGrade(1);
     setFormCounts(true);
     setFormOrder(0);
+    setFormCampo("");
+    setFormInputType("score");
     setError("");
     setShowModal(true);
   }
@@ -90,6 +96,8 @@ export default function AdminMateriasPage() {
     setFormGrade(s.grade);
     setFormCounts(s.counts_for_avg);
     setFormOrder(s.sort_order);
+    setFormCampo(s.campo_formativo || "");
+    setFormInputType(s.input_type || "score");
     setError("");
     setShowModal(true);
   }
@@ -109,6 +117,8 @@ export default function AdminMateriasPage() {
       grade: formGrade,
       counts_for_avg: formCounts,
       sort_order: formOrder,
+      campo_formativo: formCampo.trim() || null,
+      input_type: formInputType,
     };
 
     const res = await fetch("/api/admin/subjects", {
@@ -228,6 +238,8 @@ export default function AdminMateriasPage() {
                         <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orden</th>
                         <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
                         <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Abreviatura</th>
+                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Campo Formativo</th>
+                        <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipo</th>
                         <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Curricular</th>
                         <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                       </tr>
@@ -239,6 +251,20 @@ export default function AdminMateriasPage() {
                           <td className="px-4 py-2.5 font-medium text-gray-900">{s.name}</td>
                           <td className="px-4 py-2.5">
                             <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{s.short_name}</span>
+                          </td>
+                          <td className="px-4 py-2.5 text-xs text-gray-600">
+                            {s.campo_formativo || <span className="text-gray-300 italic">—</span>}
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
+                            <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                              s.input_type === 'counter' ? 'bg-cyan-50 text-cyan-700' :
+                              s.input_type === 'counter_max' ? 'bg-orange-50 text-orange-700' :
+                              'bg-gray-50 text-gray-600'
+                            }`}>
+                              {s.input_type === 'counter' ? 'Contador' :
+                               s.input_type === 'counter_max' ? 'Contador (max 10)' :
+                               'Calificación'}
+                            </span>
                           </td>
                           <td className="px-4 py-2.5 text-center">
                             {s.counts_for_avg ? (
@@ -354,6 +380,34 @@ export default function AdminMateriasPage() {
                     <option value={3}>3er Grado</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Campo Formativo</label>
+                <select
+                  value={formCampo}
+                  onChange={(e) => setFormCampo(e.target.value)}
+                  className="input-field"
+                >
+                  <option value="">Sin campo (no curricular)</option>
+                  <option value="Lenguajes">Lenguajes</option>
+                  <option value="Saberes y Pensamiento Científico">Saberes y Pensamiento Científico</option>
+                  <option value="Ética, Naturaleza y Sociedades">Ética, Naturaleza y Sociedades</option>
+                  <option value="De lo Humano y lo Comunitario">De lo Humano y lo Comunitario</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de dato</label>
+                <select
+                  value={formInputType}
+                  onChange={(e) => setFormInputType(e.target.value)}
+                  className="input-field"
+                >
+                  <option value="score">Calificación (5-10 entero)</option>
+                  <option value="counter">Contador (tareas/inasistencias)</option>
+                  <option value="counter_max">Contador máx. 10 (incidencias)</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

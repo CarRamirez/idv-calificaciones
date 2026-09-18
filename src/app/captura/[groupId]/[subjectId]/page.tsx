@@ -275,15 +275,29 @@ export default function CapturaPage({ params }: Props) {
   }
 
   function handleScoreChange(studentId: string, period: number, value: string) {
-    const num = value === "" ? null : parseFloat(value);
-    if (num !== null && isNaN(num)) return;
-    setGrades((prev) => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        [period]: { ...prev[studentId][period], score: num },
-      },
-    }));
+    const inputType = subject?.input_type || 'score';
+    if (inputType === 'counter' || inputType === 'counter_max') {
+      const num = value === "" ? 0 : parseInt(value);
+      if (isNaN(num) || num < 0) return;
+      if (inputType === 'counter_max' && num > 10) return;
+      setGrades((prev) => ({
+        ...prev,
+        [studentId]: {
+          ...prev[studentId],
+          [period]: { ...prev[studentId][period], score: num },
+        },
+      }));
+    } else {
+      const num = value === "" ? null : parseInt(value);
+      if (num !== null && isNaN(num)) return;
+      setGrades((prev) => ({
+        ...prev,
+        [studentId]: {
+          ...prev[studentId],
+          [period]: { ...prev[studentId][period], score: num },
+        },
+      }));
+    }
   }
 
   function handleAbsencesChange(studentId: string, period: number, value: string) {
@@ -301,11 +315,16 @@ export default function CapturaPage({ params }: Props) {
   function handleBlur(studentId: string, period: number) {
     const data = grades[studentId]?.[period];
     if (!data) return;
+    const inputType = subject?.input_type || 'score';
     let score = data.score;
-    if (score !== null) {
+    if (inputType === 'counter' || inputType === 'counter_max') {
+      if (score === null) score = 0;
+      score = Math.max(0, Math.round(score));
+      if (inputType === 'counter_max') score = Math.min(10, score);
+    } else if (score !== null) {
+      score = Math.round(score);
       if (score < 5) score = 5;
       if (score > 10) score = 10;
-      score = Math.round(score * 10) / 10;
     }
     if (score !== data.score) {
       setGrades((prev) => ({
@@ -320,6 +339,19 @@ export default function CapturaPage({ params }: Props) {
   }
 
   function getTrimesterAvg(studentId: string, trimesterId: number): string {
+    const inputType = subject?.input_type || 'score';
+    if (inputType === 'counter' || inputType === 'counter_max') {
+      // For counters, show the sum instead of average
+      const trimester = TRIMESTERS.find((t) => t.id === trimesterId);
+      if (!trimester) return "—";
+      const data = grades[studentId];
+      if (!data) return "—";
+      const scores = trimester.periods
+        .map((p) => data[p.id]?.score)
+        .filter((s): s is number => s !== null);
+      if (scores.length === 0) return "—";
+      return scores.reduce((a, b) => a + b, 0).toString();
+    }
     const trimester = TRIMESTERS.find((t) => t.id === trimesterId);
     if (!trimester) return "—";
     const data = grades[studentId];
@@ -328,7 +360,8 @@ export default function CapturaPage({ params }: Props) {
       .map((p) => data[p.id]?.score)
       .filter((s): s is number => s !== null);
     if (scores.length === 0) return "—";
-    return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    return Math.round(avg).toString();
   }
 
   function getPromedioFinal(studentId: string): string {
@@ -339,7 +372,8 @@ export default function CapturaPage({ params }: Props) {
       })
       .filter((a): a is number => a !== null);
     if (trimAvgs.length === 0) return "—";
-    return (trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length).toFixed(1);
+    const avg = trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length;
+    return Math.round(avg).toString();
   }
 
   function getTrimesterAbsences(studentId: string, trimesterId: number): number {
@@ -597,7 +631,9 @@ export default function CapturaPage({ params }: Props) {
                       {p.short}
                     </th>
                   ))}
-                  <th rowSpan={2} className="w-16 text-center border-l" style={{ borderColor: 'rgba(29,78,158,0.12)', background: 'rgba(29,78,158,0.06)' }}>PROM.</th>
+                  <th rowSpan={2} className="w-16 text-center border-l" style={{ borderColor: 'rgba(29,78,158,0.12)', background: 'rgba(29,78,158,0.06)' }}>
+                    {subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? 'TOTAL' : 'PROM.'}
+                  </th>
                   <th rowSpan={2} className="w-14 text-center !rounded-tr-2xl" style={{ background: 'rgba(29,78,158,0.06)' }}>IA</th>
                 </tr>
                 <tr>
@@ -628,10 +664,13 @@ export default function CapturaPage({ params }: Props) {
                         const locked = isPeriodLocked(p.id);
                         return (
                           <React.Fragment key={p.id}>
-                            <td className={`text-center border-l ${getSemaforoClass(data?.score ?? null)}`} style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
+                            <td className={`text-center border-l ${(subject?.input_type === 'counter' || subject?.input_type === 'counter_max') ? '' : getSemaforoClass(data?.score ?? null)}`} style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
                               <input
-                                type="number" min="5" max="10" step="0.1"
-                                value={data?.score ?? ""}
+                                type="number"
+                                min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
+                                max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
+                                step="1"
+                                value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
                                 onChange={(e) => handleScoreChange(student.id, p.id, e.target.value)}
                                 onBlur={() => handleBlur(student.id, p.id)}
                                 disabled={locked}
@@ -703,10 +742,13 @@ export default function CapturaPage({ params }: Props) {
                     <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
                       <td className="text-center text-gray-400 tabular-nums text-xs font-medium">{student.list_num}</td>
                       <td className="font-medium text-gray-800 text-xs">{student.full_name}</td>
-                      <td className={`text-center ${getSemaforoClass(data?.score ?? null)}`}>
+                      <td className={`text-center ${(subject?.input_type === 'counter' || subject?.input_type === 'counter_max') ? '' : getSemaforoClass(data?.score ?? null)}`}>
                         <input
-                          type="number" min="5" max="10" step="0.1"
-                          value={data?.score ?? ""}
+                          type="number"
+                          min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
+                          max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
+                          step="1"
+                          value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
                           onChange={(e) => handleScoreChange(student.id, JULIO_FINAL.id, e.target.value)}
                           onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
                           disabled={locked}
