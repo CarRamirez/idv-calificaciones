@@ -364,18 +364,30 @@ export default function CapturaPage({ params }: Props) {
     return "";
   }
 
-  /* --- Stats rápidos --- */
-  function getQuickStats() {
-    let filled = 0;
-    let total = 0;
+  /* --- Stats rápidos por periodo --- */
+  function getPerPeriodStats() {
     const periodIds = getCurrentPeriodIds();
-    students.forEach((s) => {
-      periodIds.forEach((pid) => {
-        total++;
+    const trim = activeTab >= 1 && activeTab <= 3
+      ? TRIMESTERS.find((t) => t.id === activeTab)
+      : null;
+    return periodIds.map((pid) => {
+      let filled = 0;
+      const total = students.length;
+      students.forEach((s) => {
         if (grades[s.id]?.[pid]?.score !== null) filled++;
       });
+      const pLabel = trim
+        ? trim.periods.find((p) => p.id === pid)?.short || `P${pid}`
+        : pid === 9 ? "JULIO" : `P${pid}`;
+      return { pid, label: pLabel, filled, total, pct: total ? Math.round((filled / total) * 100) : 0 };
     });
-    return { filled, total, pct: total ? Math.round((filled / total) * 100) : 0 };
+  }
+
+  function getQuickStats() {
+    const perPeriod = getPerPeriodStats();
+    const filled = perPeriod.reduce((a, p) => a + p.filled, 0);
+    const total = perPeriod.reduce((a, p) => a + p.total, 0);
+    return { filled, total, pct: total ? Math.round((filled / total) * 100) : 0, perPeriod };
   }
 
   if (loading) {
@@ -524,25 +536,27 @@ export default function CapturaPage({ params }: Props) {
 
         {/* Quick Stats */}
         {stats && activeTab !== 0 && (
-          <div className="flex items-center gap-4 mb-4">
-            <div className="glass-subtle rounded-xl px-4 py-2.5 flex items-center gap-3">
-              <div className="relative w-9 h-9">
-                <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15" fill="none" stroke={stats.pct === 100 ? "#16a34a" : "#1d4e9e"} strokeWidth="3"
-                    strokeDasharray={`${stats.pct * 0.942} 100`} strokeLinecap="round" />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
-                  {stats.pct}%
-                </span>
+          <div className="flex items-center gap-4 mb-4 flex-wrap">
+            {stats.perPeriod.map((pp) => (
+              <div key={pp.pid} className="glass-subtle rounded-xl px-4 py-2.5 flex items-center gap-3">
+                <div className="relative w-9 h-9">
+                  <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="15" fill="none" stroke={pp.pct === 100 ? "#16a34a" : "#1d4e9e"} strokeWidth="3"
+                      strokeDasharray={`${pp.pct * 0.942} 100`} strokeLinecap="round" />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
+                    {pp.pct}%
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{pp.label}</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {pp.filled} / {pp.total}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500">Progreso</p>
-                <p className="text-sm font-semibold text-gray-800">
-                  {stats.filled} / {stats.total}
-                </p>
-              </div>
-            </div>
+            ))}
 
             {liveMissing.count > 0 ? (
               <div className="glass-subtle rounded-xl px-4 py-2.5 flex items-center gap-2 !border-amber-200/60 !bg-amber-50/40">
