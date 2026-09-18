@@ -37,6 +37,7 @@ export default function TareasPage() {
   });
   const [customEmails, setCustomEmails] = useState("");
   const [customMessage, setCustomMessage] = useState("");
+  const [deletingNotif, setDeletingNotif] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -172,6 +173,23 @@ export default function TareasPage() {
   }
 
   if (!profile) return null;
+
+  async function handleDeleteNotif(id: string) {
+    try {
+      const res = await fetch("/api/tareas/send", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        setHistory((prev) => prev.filter((n) => n.id !== id));
+        setDeletingNotif(null);
+      }
+    } catch (err) {
+      console.error("Error eliminando notificación:", err);
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -422,7 +440,35 @@ export default function TareasPage() {
                         <span className="text-xs font-medium text-gray-700">
                           {n.groups ? `${n.groups.grade}°${n.groups.letter}` : "—"}
                         </span>
-                        <span className="text-[10px] text-gray-400">{timeAgo(n.sent_at)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-gray-400">{timeAgo(n.sent_at)}</span>
+                          {deletingNotif === n.id ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleDeleteNotif(n.id)}
+                                className="text-[10px] text-red-600 hover:text-red-800 font-medium"
+                              >
+                                Eliminar
+                              </button>
+                              <button
+                                onClick={() => setDeletingNotif(null)}
+                                className="text-[10px] text-gray-400 hover:text-gray-600"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeletingNotif(n.id)}
+                              className="text-gray-300 hover:text-red-500 transition-colors"
+                              title="Eliminar"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {(n.subjects as any[]).map((s: any, i: number) => (

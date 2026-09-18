@@ -151,3 +151,29 @@ export async function GET() {
 
   return NextResponse.json({ notifications: data || [] });
 }
+
+
+// DELETE: Eliminar notificación del historial
+export async function DELETE(req: NextRequest) {
+  const admin = await verifyAdmin();
+  if (!admin) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const { id } = await req.json();
+  if (!id) {
+    return NextResponse.json({ error: "Falta ID" }, { status: 400 });
+  }
+
+  const supabaseAdmin = createAdminClient();
+  const { error } = await supabaseAdmin
+    .from("homework_notifications")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
