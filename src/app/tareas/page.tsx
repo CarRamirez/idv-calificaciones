@@ -32,8 +32,6 @@ export default function TareasPage() {
   const [loading, setLoading] = useState(true);
   const [recipients, setRecipients] = useState<Record<string, boolean>>({
     padres: true,
-    sistemas: true,
-    alumnos: true,
   });
   const [customEmails, setCustomEmails] = useState("");
   const [customMessage, setCustomMessage] = useState("");
@@ -268,8 +266,6 @@ export default function TareasPage() {
                 <div className="space-y-2">
                   {[
                     { key: "padres", label: "Padres de familia", desc: groupObj.parent_email },
-                    { key: "sistemas", label: "Sistemas", desc: "sistemas@institutodonvasco.edu.mx" },
-                    { key: "alumnos", label: "Alumnos Secundaria", desc: "alumnossecundaria@institutodonvasco.edu.mx" },
                   ].map((r) => (
                     <div
                       key={r.key}

@@ -65,10 +65,6 @@ export async function POST(req: NextRequest) {
       for (const r of recipients) {
         if (r === "padres" && group.parent_email) {
           toAddresses.push(group.parent_email);
-        } else if (r === "sistemas") {
-          ccAddresses.push("sistemas@institutodonvasco.edu.mx");
-        } else if (r === "alumnos") {
-          ccAddresses.push("alumnossecundaria@institutodonvasco.edu.mx");
         }
       }
     } else {
