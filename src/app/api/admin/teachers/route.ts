@@ -79,6 +79,59 @@ export async function POST(req: NextRequest) {
 }
 
 // DELETE: Remove teacher account
+
+// PUT: Update teacher profile
+export async function PUT(req: NextRequest) {
+  const caller = await verifyTeacherAdmin();
+  if (!caller) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const { id, full_name, email, role, label, password } = await req.json();
+  if (!id) return NextResponse.json({ error: "Falta ID" }, { status: 400 });
+
+  const admin = createAdminClient();
+
+  // Build profile update
+  const updates: Record<string, any> = {};
+  if (full_name !== undefined) updates.full_name = full_name.trim().toUpperCase();
+  if (email !== undefined) updates.email = email.trim().toLowerCase();
+  if (label !== undefined) updates.label = label.trim() || null;
+  if (role !== undefined) {
+    // Non-admin callers cannot assign admin role
+    if (!caller.isAdmin && role === "admin") {
+      updates.role = "teacher";
+    } else {
+      updates.role = role;
+    }
+  }
+
+  if (Object.keys(updates).length > 0) {
+    const { error: profileError } = await admin
+      .from("profiles")
+      .update(updates)
+      .eq("id", id);
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 400 });
+    }
+  }
+
+  // Update auth email if changed
+  if (email) {
+    await admin.auth.admin.updateUserById(id, { email: email.trim().toLowerCase() });
+  }
+
+  // Reset password if provided
+  if (password && password.length >= 6) {
+    const { error: passError } = await admin.auth.admin.updateUserById(id, { password });
+    if (passError) {
+      return NextResponse.json({ error: passError.message }, { status: 400 });
+    }
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(req: NextRequest) {
   if (!(await verifyTeacherAdmin())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });

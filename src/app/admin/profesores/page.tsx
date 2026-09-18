@@ -50,6 +50,17 @@ export default function AdminProfesoresPage() {
   // Delete confirmation
   const [deleteTeacher, setDeleteTeacher] = useState<Teacher | null>(null);
 
+  // Edit modal
+  const [editTeacher, setEditTeacher] = useState<Teacher | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editRole, setEditRole] = useState("");
+  const [editLabel, setEditLabel] = useState("");
+  const [editPass, setEditPass] = useState("");
+  const [editShowPass, setEditShowPass] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -217,6 +228,53 @@ export default function AdminProfesoresPage() {
     loadAssignments();
   }
 
+  // Open edit modal
+  function openEditTeacher(t: Teacher) {
+    setEditTeacher(t);
+    setEditName(t.full_name);
+    setEditEmail(t.email || "");
+    setEditRole(t.role || "teacher");
+    setEditLabel(t.label || "");
+    setEditPass("");
+    setEditShowPass(false);
+    setEditError("");
+  }
+
+  // Save edit
+  async function handleEditSave() {
+    if (!editTeacher || !editName.trim()) {
+      setEditError("El nombre es obligatorio"); return;
+    }
+    setEditSaving(true); setEditError("");
+
+    const body: Record<string, any> = {
+      id: editTeacher.id,
+      full_name: editName.trim(),
+      email: editEmail.trim() || undefined,
+      role: editRole,
+      label: editLabel.trim(),
+    };
+    if (editPass.trim()) {
+      if (editPass.length < 6) {
+        setEditError("La contraseña debe tener al menos 6 caracteres");
+        setEditSaving(false); return;
+      }
+      body.password = editPass;
+    }
+
+    const res = await fetch("/api/admin/teachers", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) { setEditError(data.error || "Error al guardar"); setEditSaving(false); return; }
+
+    setEditSaving(false);
+    setEditTeacher(null);
+    loadTeachers();
+  }
+
   // Add assignment
   async function handleAddAssignment() {
     if (!assignTeacher || !assignGroup || !assignSubject) return;
@@ -367,6 +425,12 @@ export default function AdminProfesoresPage() {
                       )}
                     </div>
                     <div className="flex gap-2 shrink-0 ml-4">
+                      <button
+                        onClick={() => openEditTeacher(t)}
+                        className="text-xs text-gray-600 hover:text-gray-800"
+                      >
+                        Editar
+                      </button>
                       <button
                         onClick={() => {
                           setAssignTeacher(t);
@@ -543,6 +607,77 @@ export default function AdminProfesoresPage() {
                     {bulkUploading ? "Creando cuentas..." : `Crear ${csvPreview.length} profesor${csvPreview.length !== 1 ? "es" : ""}`}
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* Edit teacher modal */}
+        {editTeacher && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
+              <h2 className="text-base font-bold text-gray-900 mb-4">Editar profesor</h2>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nombre completo *</label>
+                  <input
+                    type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
+                    className="input-field" autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electrónico</label>
+                  <input
+                    type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Rol</label>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="teacher">Profesor</option>
+                    {profile?.role === "admin" && (
+                      <option value="admin">Administrador</option>
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Etiqueta</label>
+                  <input
+                    type="text" value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
+                    className="input-field" placeholder="Ej: Tecnologías - Sistemas IT"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nueva contraseña</label>
+                  <div className="relative">
+                    <input
+                      type={editShowPass ? "text" : "password"} value={editPass}
+                      onChange={(e) => setEditPass(e.target.value)}
+                      className="input-field pr-10" placeholder="Dejar vacío para no cambiar"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditShowPass(!editShowPass)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                    >
+                      {editShowPass ? "Ocultar" : "Ver"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1">Mínimo 6 caracteres. Solo se actualiza si escribes una nueva.</p>
+                </div>
+              </div>
+              {editError && <p className="text-xs text-red-600 mt-2">{editError}</p>}
+              <div className="flex justify-end gap-2 mt-5">
+                <button onClick={() => setEditTeacher(null)} className="btn-secondary text-sm" disabled={editSaving}>Cancelar</button>
+                <button onClick={handleEditSave} className="btn-primary text-sm" disabled={editSaving}>
+                  {editSaving ? "Guardando..." : "Guardar cambios"}
+                </button>
               </div>
             </div>
           </div>
