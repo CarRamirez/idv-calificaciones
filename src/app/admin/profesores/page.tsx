@@ -29,7 +29,7 @@ export default function AdminProfesoresPage() {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPass, setNewPass] = useState("");
-  const [newRole, setNewRole] = useState<"teacher" | "admin">("teacher");
+  const [newRole, setNewRole] = useState<string>("teacher");
   const [newLabel, setNewLabel] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [newError, setNewError] = useState("");
@@ -56,7 +56,18 @@ export default function AdminProfesoresPage() {
       if (!user) { router.push("/login"); return; }
       const { data: prof } = await supabase
         .from("profiles").select("full_name, role").eq("id", user.id).single();
-      if (!prof || prof.role !== "admin") { router.push("/dashboard"); return; }
+      if (!prof) { router.push("/dashboard"); return; }
+      // Check if user has admin_profesores permission (admin always has access)
+      if (prof.role !== "admin") {
+        const { data: roleData } = await supabase
+          .from("roles")
+          .select("permissions")
+          .eq("name", prof.role)
+          .single();
+        if (!roleData || !roleData.permissions?.includes("admin_profesores")) {
+          router.push("/dashboard"); return;
+        }
+      }
       setProfile(prof);
 
       const [grps, subs] = await Promise.all([
@@ -74,7 +85,6 @@ export default function AdminProfesoresPage() {
     const { data } = await supabase
       .from("profiles")
       .select("id, full_name, email, role, label")
-      .in("role", ["teacher", "admin"])
       .order("full_name");
     setTeachers(data || []);
   }, []);
@@ -323,9 +333,11 @@ export default function AdminProfesoresPage() {
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                           t.role === "admin"
                             ? "bg-purple-100 text-purple-700"
-                            : "bg-blue-100 text-blue-700"
+                            : t.role === "teacher"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-amber-100 text-amber-700"
                         }`}>
-                          {t.role === "admin" ? "Admin" : "Profesor"}
+                          {t.role === "admin" ? "Admin" : t.role === "teacher" ? "Profesor" : t.role}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400">{t.email || "Sin correo"}</p>
@@ -419,11 +431,13 @@ export default function AdminProfesoresPage() {
                   <label className="text-xs font-medium text-gray-700 mb-1 block">Perfil *</label>
                   <select
                     value={newRole}
-                    onChange={(e) => setNewRole(e.target.value as "teacher" | "admin")}
+                    onChange={(e) => setNewRole(e.target.value)}
                     className="input-field"
                   >
                     <option value="teacher">Profesor</option>
-                    <option value="admin">Administrador</option>
+                    {profile?.role === "admin" && (
+                      <option value="admin">Administrador</option>
+                    )}
                   </select>
                 </div>
                 <div>

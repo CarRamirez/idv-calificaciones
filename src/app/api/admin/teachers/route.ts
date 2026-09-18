@@ -2,22 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-// Verify caller is admin
-async function verifyAdmin() {
+// Verify caller has admin_profesores permission
+async function verifyTeacherAdmin() {
   const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
+  if (!user) return null;
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
-  return profile?.role === "admin";
+  if (!profile) return null;
+  if (profile.role === "admin") return { role: "admin", isAdmin: true };
+  // Check if custom role has admin_profesores permission
+  const { data: roleData } = await supabase
+    .from("roles")
+    .select("permissions")
+    .eq("name", profile.role)
+    .single();
+  if (roleData?.permissions?.includes("admin_profesores")) {
+    return { role: profile.role, isAdmin: false };
+  }
+  return null;
 }
 
 // POST: Create teacher account
 export async function POST(req: NextRequest) {
-  if (!(await verifyAdmin())) {
+  const caller = await verifyTeacherAdmin();
+  if (!caller) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
@@ -26,9 +38,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
   }
 
-  // Validate role
+  // Validate role — non-admin callers can only create teachers
   const validRoles = ["admin", "teacher"];
-  const finalRole = validRoles.includes(role) ? role : "teacher";
+  let finalRole = validRoles.includes(role) ? role : "teacher";
+  if (!caller.isAdmin && finalRole === "admin") {
+    finalRole = "teacher";
+  }
 
   const admin = createAdminClient();
 
@@ -65,7 +80,7 @@ export async function POST(req: NextRequest) {
 
 // DELETE: Remove teacher account
 export async function DELETE(req: NextRequest) {
-  if (!(await verifyAdmin())) {
+  if (!(await verifyTeacherAdmin())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 

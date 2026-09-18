@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-async function verifyAdmin() {
+async function verifyTeacherAdmin() {
   const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
@@ -11,14 +11,21 @@ async function verifyAdmin() {
     .select("role")
     .eq("id", user.id)
     .single();
-  return profile?.role === "admin";
+  if (!profile) return false;
+  if (profile.role === "admin") return true;
+  const { data: roleData } = await supabase
+    .from("roles")
+    .select("permissions")
+    .eq("name", profile.role)
+    .single();
+  return roleData?.permissions?.includes("admin_profesores") || false;
 }
 
 type TeacherRow = { full_name: string; email: string; password: string };
 type ResultRow = { email: string; ok: boolean; error?: string };
 
 export async function POST(req: NextRequest) {
-  if (!(await verifyAdmin())) {
+  if (!(await verifyTeacherAdmin())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
