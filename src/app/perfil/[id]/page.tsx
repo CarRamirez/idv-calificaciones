@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import ProfileContactInfo from "@/components/ProfileContactInfo";
 
 export default async function PerfilPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();
@@ -38,6 +39,27 @@ export default async function PerfilPage({ params }: { params: { id: string } })
     profile.role === "teacher" ? "Profesor" :
     profile.role === "viewer" ? "Consulta" : profile.role
   );
+
+  // Determine permissions
+  const isStudent = false; // Profiles are never students in this system
+  // Can edit: admin, own profile, or has admin_profesores
+  let canEditContact = false;
+  if (myProfile.role === "admin" || user.id === params.id) {
+    canEditContact = true;
+  } else {
+    const { data: callerRole } = await admin
+      .from("roles")
+      .select("permissions")
+      .eq("name", myProfile.role)
+      .single();
+    if (callerRole?.permissions?.includes("admin_profesores")) {
+      canEditContact = true;
+    }
+  }
+  // Don't allow non-admins to edit admin contact
+  if (canEditContact && myProfile.role !== "admin" && profile.role === "admin") {
+    canEditContact = false;
+  }
 
   // Fetch teacher assignments
   const { data: assignments } = await admin
@@ -126,6 +148,13 @@ export default async function PerfilPage({ params }: { params: { id: string } })
             </div>
           </div>
         </div>
+
+        {/* Contact info */}
+        <ProfileContactInfo
+          profileId={profile.id}
+          isStudent={isStudent}
+          canEdit={canEditContact}
+        />
 
         {/* Assignments */}
         {Object.keys(byGroup).length > 0 ? (
