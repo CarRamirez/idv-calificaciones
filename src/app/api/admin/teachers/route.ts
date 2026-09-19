@@ -92,6 +92,21 @@ export async function PUT(req: NextRequest) {
 
   const admin = createAdminClient();
 
+  // Non-admin callers cannot edit admin profiles
+  if (!caller.isAdmin) {
+    const { data: targetProfile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", id)
+      .single();
+    if (targetProfile?.role === "admin") {
+      return NextResponse.json(
+        { error: "No tienes permiso para editar administradores" },
+        { status: 403 }
+      );
+    }
+  }
+
   // Build profile update
   const updates: Record<string, any> = {};
   if (full_name !== undefined) updates.full_name = full_name.trim().toUpperCase();

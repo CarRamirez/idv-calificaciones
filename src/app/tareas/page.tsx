@@ -43,7 +43,14 @@ export default function TareasPage() {
       if (!user) { router.push("/login"); return; }
       const { data: prof } = await supabase
         .from("profiles").select("full_name, role").eq("id", user.id).single();
-      if (!prof || prof.role !== "admin") { router.push("/dashboard"); return; }
+      if (!prof) { router.push("/dashboard"); return; }
+      if (prof.role !== "admin") {
+        const res = await fetch("/api/auth/permissions");
+        const { permissions } = await res.json();
+        if (!permissions?.includes("tareas")) {
+          router.push("/dashboard"); return;
+        }
+      }
       setProfile(prof);
 
       // Load groups

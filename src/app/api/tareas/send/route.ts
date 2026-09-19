@@ -12,8 +12,17 @@ async function verifyAdmin() {
     .select("id, role, full_name")
     .eq("id", user.id)
     .single();
-  if (profile?.role !== "admin") return null;
-  return profile;
+  if (!profile) return null;
+  if (profile.role === "admin") return profile;
+  // Check custom role permissions
+  const admin = createAdminClient();
+  const { data: roleData } = await admin
+    .from("roles")
+    .select("permissions")
+    .eq("name", profile.role)
+    .single();
+  if (roleData?.permissions?.includes("tareas")) return profile;
+  return null;
 }
 
 export async function POST(req: NextRequest) {

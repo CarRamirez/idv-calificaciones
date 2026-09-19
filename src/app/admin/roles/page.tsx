@@ -391,18 +391,22 @@ export default function AdminRolesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => openEditUser(u)}
-                          className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => openAssignUser(u)}
-                          className="px-2 py-1 text-xs text-primary-600 hover:bg-primary-50 rounded"
-                        >
-                          Cambiar rol
-                        </button>
+                        {(profile?.role === "admin" || u.role !== "admin") && (
+                          <button
+                            onClick={() => openEditUser(u)}
+                            className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                          >
+                            Editar
+                          </button>
+                        )}
+                        {(profile?.role === "admin" || u.role !== "admin") && (
+                          <button
+                            onClick={() => openAssignUser(u)}
+                            className="px-2 py-1 text-xs text-primary-600 hover:bg-primary-50 rounded"
+                          >
+                            Cambiar rol
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

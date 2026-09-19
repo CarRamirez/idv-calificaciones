@@ -27,6 +27,12 @@ export default function Navbar({ userName, userRole }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; type: string; detail: string; href: string }>>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState("");
   const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
   const [showTimeout, setShowTimeout] = useState(false);
@@ -143,6 +149,47 @@ export default function Navbar({ userName, userRole }: Props) {
     return { desc: "Tormenta", icon: "⛈️" };
   }
 
+  // Search debounce
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        const data = await res.json();
+        setSearchResults(data.results || []);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
+  }, [searchQuery]);
+
+  // Close search on click outside
+  useEffect(() => {
+    function handleClickOutsideSearch(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutsideSearch);
+    return () => document.removeEventListener("mousedown", handleClickOutsideSearch);
+  }, []);
+
+  function handleSearchSelect(href: string) {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    router.push(href);
+  }
+
   const can = useCallback((perm: string) => permissions.includes(perm), [permissions]);
   const canAny = useCallback((...perms: string[]) => perms.some(p => permissions.includes(p)), [permissions]);
 
@@ -190,6 +237,55 @@ export default function Navbar({ userName, userRole }: Props) {
 
             {/* Desktop: nav + usuario */}
             <div className="hidden sm:flex items-center gap-4">
+              {/* Search bar */}
+              <div className="relative" ref={searchRef}>
+                <div className="flex items-center bg-gray-100 rounded-lg px-2.5 py-1.5 focus-within:ring-2 focus-within:ring-primary-300 focus-within:bg-white transition-all">
+                  <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Buscar alumno o profesor..."
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
+                    onFocus={() => setSearchOpen(true)}
+                    className="bg-transparent border-none outline-none text-xs text-gray-700 placeholder-gray-400 ml-1.5 w-40 lg:w-52"
+                  />
+                  {searchLoading && (
+                    <div className="w-3 h-3 border-2 border-primary-300 border-t-transparent rounded-full animate-spin ml-1" />
+                  )}
+                </div>
+                {searchOpen && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 mt-1 w-80 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50 max-h-80 overflow-y-auto">
+                    {searchResults.map((r) => (
+                      <button
+                        key={`${r.type}-${r.id}`}
+                        onClick={() => handleSearchSelect(r.href)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                      >
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                          r.type === "student"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-emerald-100 text-emerald-700"
+                        }`}>
+                          {r.name.charAt(0)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">{r.name}</p>
+                          <p className="text-[10px] text-gray-400">
+                            {r.type === "student" ? "Alumno" : "Profesor"} · {r.detail}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {searchOpen && searchQuery.trim().length >= 2 && !searchLoading && searchResults.length === 0 && (
+                  <div className="absolute top-full left-0 mt-1 w-80 bg-white rounded-xl shadow-xl border border-gray-200 py-3 z-50 text-center text-xs text-gray-400">
+                    Sin resultados
+                  </div>
+                )}
+              </div>
               <Link
                 href="/dashboard"
                 className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
@@ -228,14 +324,7 @@ export default function Navbar({ userName, userRole }: Props) {
                   Boleta
                 </Link>
               )}
-              {can("tareas") && (
-                <Link
-                  href="/tareas"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Tareas
-                </Link>
-              )}
+
               {can("concentrado") && (
                 <Link
                   href="/dashboard"
@@ -297,6 +386,43 @@ export default function Navbar({ userName, userRole }: Props) {
           {/* Menú móvil */}
           {menuOpen && (
             <div className="sm:hidden pb-3 space-y-1">
+              {/* Mobile search */}
+              <div className="px-3 py-2 relative">
+                <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2">
+                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Buscar alumno o profesor..."
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
+                    onFocus={() => setSearchOpen(true)}
+                    className="bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400 ml-2 w-full"
+                  />
+                </div>
+                {searchOpen && searchResults.length > 0 && (
+                  <div className="mt-1 bg-white rounded-lg border border-gray-200 py-1 max-h-60 overflow-y-auto">
+                    {searchResults.map((r) => (
+                      <button
+                        key={`m-${r.type}-${r.id}`}
+                        onClick={() => { handleSearchSelect(r.href); setMenuOpen(false); }}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                          r.type === "student" ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"
+                        }`}>
+                          {r.name.charAt(0)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm text-gray-700 truncate">{r.name}</p>
+                          <p className="text-[10px] text-gray-400">{r.type === "student" ? "Alumno" : "Profesor"} · {r.detail}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                 Inicio
               </Link>
@@ -320,11 +446,7 @@ export default function Navbar({ userName, userRole }: Props) {
                   Boleta
                 </Link>
               )}
-              {can("tareas") && (
-                <Link href="/tareas" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Tareas
-                </Link>
-              )}
+
               {can("concentrado") && (
                 <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Concentrado
