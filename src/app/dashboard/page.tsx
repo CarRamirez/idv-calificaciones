@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import AnnouncementWall from "@/components/AnnouncementWall";
@@ -101,14 +102,32 @@ export default async function DashboardPage() {
 
   if (!profile) redirect("/login");
 
+  // ──── Check for impersonation ────
+  let effectiveProfile = profile;
+  const cookieStore = cookies();
+  const impersonateAs = cookieStore.get("impersonate_as")?.value;
+  const impersonateAdminId = cookieStore.get("impersonate_admin_id")?.value;
+
+  if (impersonateAs && impersonateAdminId === user.id && profile.role === "admin") {
+    const adminDb = createAdminClient();
+    const { data: targetProfile } = await adminDb
+      .from("profiles")
+      .select("full_name, role")
+      .eq("id", impersonateAs)
+      .single();
+    if (targetProfile) {
+      effectiveProfile = targetProfile;
+    }
+  }
+
   // ──── Determine dashboard view based on permissions ────
   let dashboardView: "teacher" | "admin" | "none" = "none";
 
-  if (profile.role === "admin") {
+  if (effectiveProfile.role === "admin") {
     dashboardView = "admin";
-  } else if (profile.role === "teacher") {
+  } else if (effectiveProfile.role === "teacher") {
     dashboardView = "teacher";
-  } else if (profile.role === "viewer") {
+  } else if (effectiveProfile.role === "viewer") {
     dashboardView = "admin"; // viewers see the admin/overview dashboard
   } else {
     // Custom role — fetch permissions from roles table (use admin client to bypass RLS)
@@ -116,7 +135,7 @@ export default async function DashboardPage() {
     const { data: roleData } = await adminDb
       .from("roles")
       .select("permissions")
-      .eq("name", profile.role)
+      .eq("name", effectiveProfile.role)
       .single();
     const perms: string[] = roleData?.permissions || [];
     if (perms.some(p => p.startsWith("admin_") || p === "periodos" || p === "dashboard")) {
@@ -135,7 +154,7 @@ export default async function DashboardPage() {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("id, subjects ( id, name, short_name ), groups ( id, grade, letter )")
-      .eq("teacher_id", user.id);
+      .eq("teacher_id", impersonateAs || user.id);
     teacherAssignments = data || [];
 
     teacherGroupIds = Array.from(
@@ -315,7 +334,7 @@ export default async function DashboardPage() {
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div>
             <h1 className="text-lg font-bold text-gray-900">
-              Bienvenido, {profile.full_name.split(" ")[0]}
+              Bienvenido, {effectiveProfile.full_name.split(" ")[0]}
             </h1>
             <p className="text-sm text-gray-500">
               Mnemósine — Ciclo escolar 2026-2027
@@ -327,6 +346,24 @@ export default async function DashboardPage() {
               {activePeriod.name}
             </span>
           )}
+        </div>
+
+        {/* Quick access — visible to all roles */}
+        <div className="mb-6">
+          <Link
+            href="/horario"
+            className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-white/60 border border-gray-200 hover:bg-white hover:border-primary-300 hover:shadow-md transition-all group"
+          >
+            <div className="w-9 h-9 rounded-lg bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+              <IconCalendar className="w-5 h-5 text-primary-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">
+                Horario Escolar
+              </p>
+              <p className="text-[11px] text-gray-400">Ver horario semanal de clases</p>
+            </div>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
@@ -449,7 +486,7 @@ export default async function DashboardPage() {
         {dashboardView === "admin" && (
           <div className="space-y-6">
             {/* ── Stat Cards ── */}
-            {(profile.role === "admin" || (dashboardView === "admin" && profile.role !== "viewer")) && (
+            {(effectiveProfile.role === "admin" || (dashboardView === "admin" && effectiveProfile.role !== "viewer")) && (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <Link
                   href="/admin/alumnos"

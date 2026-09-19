@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -20,18 +21,52 @@ export async function GET() {
     return NextResponse.json({ permissions: [] }, { status: 401 });
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  // Check for impersonation
+  const cookieStore = cookies();
+  const impersonateAs = cookieStore.get("impersonate_as")?.value;
+  const impersonateAdminId = cookieStore.get("impersonate_admin_id")?.value;
 
-  if (!profile) {
-    return NextResponse.json({ permissions: [] });
+  let effectiveRole: string = "";
+
+  if (impersonateAs && impersonateAdminId === user.id) {
+    // Admin is impersonating — verify admin is still admin
+    const admin = createAdminClient();
+    const { data: callerProfile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (callerProfile?.role === "admin") {
+      // Get the target user's role
+      const { data: targetProfile } = await admin
+        .from("profiles")
+        .select("role")
+        .eq("id", impersonateAs)
+        .single();
+
+      if (targetProfile) {
+        effectiveRole = targetProfile.role;
+      }
+    }
   }
 
-  if (BUILTIN_PERMS[profile.role]) {
-    return NextResponse.json({ permissions: BUILTIN_PERMS[profile.role] });
+  if (effectiveRole === "") {
+    // Normal flow — get own role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile) {
+      return NextResponse.json({ permissions: [] });
+    }
+    effectiveRole = profile.role;
+  }
+
+  if (BUILTIN_PERMS[effectiveRole]) {
+    return NextResponse.json({ permissions: BUILTIN_PERMS[effectiveRole] });
   }
 
   // Custom role — use admin client to bypass RLS
@@ -39,7 +74,7 @@ export async function GET() {
   const { data: roleData } = await admin
     .from("roles")
     .select("permissions")
-    .eq("name", profile.role)
+    .eq("name", effectiveRole)
     .single();
 
   return NextResponse.json({ permissions: roleData?.permissions || [] });

@@ -34,10 +34,8 @@ const SCHEDULE: Record<string, CellData[][]> = {
     [{ subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "INGLES" }],
     [{ subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "INGLES" }],
     [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "GEO" }, { subject: "FCE" }, { subject: "MATE" }],
-    // After first break
     [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "FCE" }, { subject: "MATE" }],
     [{ subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "TECNO" }, { subject: "INGLES" }, { subject: "ARTES" }],
-    // After second break
     [{ subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "INGLES" }, { subject: "ARTES" }, { subject: "TECNO" }],
     [{ subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
     [{ subject: "ORTO" }, { subject: "SALUD" }, { subject: "VIDA" }, { subject: "VALORES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "FCE" }],
@@ -105,7 +103,19 @@ const SUBJECT_COLORS: Record<string, { bg: string; text: string }> = {
 
 const DEFAULT_COLOR = { bg: "bg-gray-100", text: "text-gray-700" };
 
+/* ──────────────────── DAY COLORS (for week view) ──────────────────── */
+
+const DAY_COLORS: Record<string, { header: string; bg: string }> = {
+  Lunes:     { header: "bg-blue-600",    bg: "bg-blue-50" },
+  Martes:    { header: "bg-emerald-600", bg: "bg-emerald-50" },
+  Miércoles: { header: "bg-purple-600",  bg: "bg-purple-50" },
+  Jueves:    { header: "bg-orange-600",  bg: "bg-orange-50" },
+  Viernes:   { header: "bg-rose-600",    bg: "bg-rose-50" },
+};
+
 /* ──────────────────── COMPONENT ──────────────────── */
+
+type ViewMode = "day" | "week";
 
 export default function HorarioPage() {
   const router = useRouter();
@@ -113,12 +123,13 @@ export default function HorarioPage() {
   const [userName, setUserName] = useState("");
   const [userRole, setUserRole] = useState("");
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>("day");
   const [selectedDay, setSelectedDay] = useState<string>(() => {
     const today = new Date().getDay();
-    // 0=Sun, 1=Mon, ... 5=Fri, 6=Sat
     if (today >= 1 && today <= 5) return DAYS[today - 1];
     return "Lunes";
   });
+  const [selectedGroup, setSelectedGroup] = useState<string>("all");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -154,6 +165,9 @@ export default function HorarioPage() {
 
   const dayData = SCHEDULE[selectedDay] || [];
 
+  // Filtered groups for the week view
+  const filteredGroups = selectedGroup === "all" ? [...GROUPS] : [selectedGroup];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -168,109 +182,285 @@ export default function HorarioPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="p-2 rounded-lg hover:bg-white/80 text-gray-500 hover:text-primary-600 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Horario Escolar</h1>
-            <p className="text-sm text-gray-500">Ciclo escolar 2025-2026 — Instituto Don Vasco</p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="p-2 rounded-lg hover:bg-white/80 text-gray-500 hover:text-primary-600 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Horario Escolar</h1>
+              <p className="text-sm text-gray-500">Ciclo escolar 2025-2026 — Instituto Don Vasco</p>
+            </div>
+          </div>
+
+          {/* View toggle */}
+          <div className="flex items-center bg-white/60 border border-gray-200 rounded-xl p-1">
+            <button
+              onClick={() => setViewMode("day")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                viewMode === "day"
+                  ? "bg-primary-600 text-white shadow-sm"
+                  : "text-gray-500 hover:text-primary-600"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="hidden sm:inline">Día</span>
+            </button>
+            <button
+              onClick={() => setViewMode("week")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                viewMode === "week"
+                  ? "bg-primary-600 text-white shadow-sm"
+                  : "text-gray-500 hover:text-primary-600"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              <span className="hidden sm:inline">Semana</span>
+            </button>
           </div>
         </div>
 
-        {/* Day Tabs */}
-        <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1">
-          {DAYS.map((day) => {
-            const isSelected = selectedDay === day;
-            return (
+        {/* ──────────── DAY VIEW ──────────── */}
+        {viewMode === "day" && (
+          <>
+            {/* Day Tabs */}
+            <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1">
+              {DAYS.map((day) => {
+                const isSelected = selectedDay === day;
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDay(day)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                      isSelected
+                        ? "bg-primary-600 text-white shadow-md"
+                        : "bg-white/60 text-gray-600 hover:bg-white hover:text-primary-600 border border-gray-200"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Schedule Grid — single day */}
+            <div className="card overflow-hidden p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse min-w-[700px]">
+                  <thead>
+                    <tr className="bg-primary-600 text-white">
+                      <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide w-20">
+                        Horario
+                      </th>
+                      {GROUPS.map((g) => (
+                        <th key={g} className="px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wide">
+                          {g}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {classSlots.map((slot, idx) => {
+                      if (slot.isBreak) {
+                        return (
+                          <tr key={`break-${idx}`} className="bg-amber-50">
+                            <td
+                              colSpan={GROUPS.length + 1}
+                              className="px-3 py-1.5 text-center text-xs font-bold text-amber-700 uppercase tracking-widest"
+                            >
+                              {slot.label} ({slot.start} - {slot.end})
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      const rowData = slot.dataIndex !== undefined ? dayData[slot.dataIndex] : [];
+
+                      return (
+                        <tr
+                          key={idx}
+                          className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                        >
+                          <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
+                            {slot.start} - {slot.end}
+                          </td>
+                          {GROUPS.map((_, gi) => {
+                            const cell = rowData?.[gi];
+                            if (!cell || !cell.subject) {
+                              return (
+                                <td key={gi} className="px-1 py-1.5 text-center">
+                                  <span className="text-gray-300">—</span>
+                                </td>
+                              );
+                            }
+                            const colors = SUBJECT_COLORS[cell.subject] || DEFAULT_COLOR;
+                            return (
+                              <td key={gi} className="px-1 py-1.5 text-center">
+                                <span
+                                  className={`inline-block px-2 py-1 rounded-lg text-[11px] font-semibold ${colors.bg} ${colors.text} min-w-[60px]`}
+                                >
+                                  {cell.subject}
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ──────────── WEEK VIEW ──────────── */}
+        {viewMode === "week" && (
+          <>
+            {/* Group filter */}
+            <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Grupo:</span>
               <button
-                key={day}
-                onClick={() => setSelectedDay(day)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                  isSelected
-                    ? "bg-primary-600 text-white shadow-md"
+                onClick={() => setSelectedGroup("all")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                  selectedGroup === "all"
+                    ? "bg-primary-600 text-white shadow-sm"
                     : "bg-white/60 text-gray-600 hover:bg-white hover:text-primary-600 border border-gray-200"
                 }`}
               >
-                {day}
+                Todos
               </button>
-            );
-          })}
-        </div>
+              {GROUPS.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setSelectedGroup(g)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                    selectedGroup === g
+                      ? "bg-primary-600 text-white shadow-sm"
+                      : "bg-white/60 text-gray-600 hover:bg-white hover:text-primary-600 border border-gray-200"
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
 
-        {/* Schedule Grid */}
-        <div className="card overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse min-w-[700px]">
-              <thead>
-                <tr className="bg-primary-600 text-white">
-                  <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide w-20">
-                    Horario
-                  </th>
-                  {GROUPS.map((g) => (
-                    <th key={g} className="px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wide">
-                      {g}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {classSlots.map((slot, idx) => {
-                  if (slot.isBreak) {
-                    return (
-                      <tr key={`break-${idx}`} className="bg-amber-50">
-                        <td
-                          colSpan={GROUPS.length + 1}
-                          className="px-3 py-1.5 text-center text-xs font-bold text-amber-700 uppercase tracking-widest"
-                        >
-                          {slot.label} ({slot.start} - {slot.end})
-                        </td>
-                      </tr>
-                    );
-                  }
-
-                  const rowData = slot.dataIndex !== undefined ? dayData[slot.dataIndex] : [];
-
-                  return (
-                    <tr
-                      key={idx}
-                      className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
-                    >
-                      <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
-                        {slot.start} - {slot.end}
-                      </td>
-                      {GROUPS.map((_, gi) => {
-                        const cell = rowData?.[gi];
-                        if (!cell || !cell.subject) {
+            {/* Full week grid */}
+            <div className="card overflow-hidden p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse" style={{ minWidth: selectedGroup === "all" ? "1200px" : "600px" }}>
+                  <thead>
+                    <tr className="bg-gray-800 text-white">
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold uppercase tracking-wide w-20 sticky left-0 bg-gray-800 z-10">
+                        Horario
+                      </th>
+                      {DAYS.map((day) => {
+                        const dayColor = DAY_COLORS[day];
+                        if (selectedGroup !== "all") {
                           return (
-                            <td key={gi} className="px-1 py-1.5 text-center">
-                              <span className="text-gray-300">—</span>
-                            </td>
+                            <th key={day} className={`px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wide ${dayColor.header} text-white`}>
+                              {day}
+                            </th>
                           );
                         }
-                        const colors = SUBJECT_COLORS[cell.subject] || DEFAULT_COLOR;
                         return (
-                          <td key={gi} className="px-1 py-1.5 text-center">
-                            <span
-                              className={`inline-block px-2 py-1 rounded-lg text-[11px] font-semibold ${colors.bg} ${colors.text} min-w-[60px]`}
-                            >
-                              {cell.subject}
-                            </span>
-                          </td>
+                          <th
+                            key={day}
+                            colSpan={filteredGroups.length}
+                            className={`px-2 py-2.5 text-center text-xs font-semibold uppercase tracking-wide ${dayColor.header} text-white`}
+                          >
+                            {day}
+                          </th>
                         );
                       })}
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    {/* Group sub-headers when showing all groups */}
+                    {selectedGroup === "all" && (
+                      <tr className="bg-gray-100">
+                        <th className="sticky left-0 bg-gray-100 z-10" />
+                        {DAYS.map((day) =>
+                          filteredGroups.map((g) => (
+                            <th key={`${day}-${g}`} className="px-1 py-1.5 text-center text-[10px] font-semibold text-gray-600 uppercase">
+                              {g}
+                            </th>
+                          ))
+                        )}
+                      </tr>
+                    )}
+                  </thead>
+                  <tbody>
+                    {classSlots.map((slot, idx) => {
+                      if (slot.isBreak) {
+                        const totalCols = selectedGroup === "all"
+                          ? 1 + DAYS.length * filteredGroups.length
+                          : 1 + DAYS.length;
+                        return (
+                          <tr key={`break-${idx}`} className="bg-amber-50">
+                            <td
+                              colSpan={totalCols}
+                              className="px-3 py-1 text-center text-[10px] font-bold text-amber-700 uppercase tracking-widest"
+                            >
+                              {slot.label} ({slot.start} - {slot.end})
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return (
+                        <tr
+                          key={idx}
+                          className="border-b border-gray-100 hover:bg-gray-50/30 transition-colors"
+                        >
+                          <td className="px-2 py-1.5 text-[10px] font-medium text-gray-500 whitespace-nowrap sticky left-0 bg-white z-10">
+                            {slot.start}
+                            <br />
+                            <span className="text-gray-400">{slot.end}</span>
+                          </td>
+                          {DAYS.map((day) => {
+                            const daySchedule = SCHEDULE[day] || [];
+                            const rowData = slot.dataIndex !== undefined ? daySchedule[slot.dataIndex] : [];
+                            const dayBg = DAY_COLORS[day]?.bg || "";
+
+                            return filteredGroups.map((g) => {
+                              const gi = GROUPS.indexOf(g as typeof GROUPS[number]);
+                              const cell = rowData?.[gi];
+                              if (!cell || !cell.subject) {
+                                return (
+                                  <td key={`${day}-${g}`} className={`px-0.5 py-1 text-center ${dayBg}`}>
+                                    <span className="text-gray-300 text-[10px]">—</span>
+                                  </td>
+                                );
+                              }
+                              const colors = SUBJECT_COLORS[cell.subject] || DEFAULT_COLOR;
+                              return (
+                                <td key={`${day}-${g}`} className={`px-0.5 py-1 text-center ${dayBg}`}>
+                                  <span
+                                    className={`inline-block px-1 py-0.5 rounded text-[9px] font-bold ${colors.bg} ${colors.text} leading-tight`}
+                                  >
+                                    {cell.subject}
+                                  </span>
+                                </td>
+                              );
+                            });
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Legend */}
         <div className="mt-5 card p-4">

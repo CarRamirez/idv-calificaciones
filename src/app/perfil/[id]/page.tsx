@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ProfileContactInfo from "@/components/ProfileContactInfo";
+import ImpersonateButton from "@/components/ImpersonateButton";
 
 export default async function PerfilPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();
@@ -60,6 +61,9 @@ export default async function PerfilPage({ params }: { params: { id: string } })
   if (canEditContact && myProfile.role !== "admin" && profile.role === "admin") {
     canEditContact = false;
   }
+
+  // Admin can impersonate other users (not themselves)
+  const canImpersonate = myProfile.role === "admin" && user.id !== params.id;
 
   // Fetch teacher assignments
   const { data: assignments } = await admin
@@ -148,6 +152,17 @@ export default async function PerfilPage({ params }: { params: { id: string } })
             </div>
           </div>
         </div>
+
+        {/* Impersonate button — admin only */}
+        {canImpersonate && (
+          <div className="mb-4">
+            <ImpersonateButton
+              targetId={profile.id}
+              targetName={profile.full_name}
+              targetRole={roleLabel}
+            />
+          </div>
+        )}
 
         {/* Contact info */}
         <ProfileContactInfo

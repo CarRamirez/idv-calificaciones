@@ -334,16 +334,6 @@ export default function Navbar({ userName, userRole }: Props) {
                 </Link>
               )}
 
-              <Link
-                href="/horario"
-                className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                title="Horario Escolar"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                </svg>
-              </Link>
-
               {/* Dropdown de usuario */}
               <div className="relative ml-2 pl-4 border-l border-gray-200" ref={dropdownRef}>
                 <button
@@ -462,9 +452,6 @@ export default function Navbar({ userName, userRole }: Props) {
                   Concentrado
                 </Link>
               )}
-              <Link href="/horario" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg" onClick={() => setMenuOpen(false)}>
-                Horario Escolar
-              </Link>
               <div className="px-3 py-2 flex items-center justify-between border-t border-gray-100 mt-1 pt-2">
                 <span className="text-xs text-gray-500">{userName}</span>
                 <button onClick={handleLogout} className="text-xs text-red-600">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ImpersonationBanner from "@/components/ImpersonationBanner";
 
 export const metadata: Metadata = {
   title: "IDV Calificaciones",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <ImpersonationBanner />
+        {children}
+      </body>
     </html>
   );
 }
