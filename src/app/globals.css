@@ -156,32 +156,106 @@
 
 /* Print styles for boleta */
 @media print {
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  @page {
+    size: landscape;
+    margin: 0.5cm;
   }
 
-  nav, .print\\:hidden {
+  html, body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 9px !important;
+  }
+
+  nav, .print\:hidden, footer {
     display: none !important;
   }
 
-  .print\\:block {
+  .print\:block {
     display: block !important;
-  }
-
-  .card {
-    border: 1px solid #e5e7eb;
-    box-shadow: none;
-    break-inside: avoid;
   }
 
   main {
     max-width: 100% !important;
-    padding: 0 !important;
+    padding: 0.2cm 0.3cm !important;
+    margin: 0 !important;
   }
 
-  @page {
-    size: landscape;
-    margin: 1cm;
+  .card {
+    border: 1px solid #ccc;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Boleta table compact */
+  table {
+    width: 100% !important;
+    font-size: 8px !important;
+    border-collapse: collapse !important;
+  }
+
+  table th,
+  table td {
+    padding: 1px 2px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+
+  table th {
+    font-size: 7px !important;
+  }
+
+  /* Subject name column */
+  table td:first-child {
+    white-space: normal !important;
+    max-width: 120px !important;
+    font-size: 7.5px !important;
+    word-break: break-word !important;
+  }
+
+  /* Print header compact */
+  .print\:block h1 {
+    font-size: 12px !important;
+    margin: 0 !important;
+  }
+
+  .print\:block p,
+  .print\:block span {
+    font-size: 9px !important;
+    margin: 0 !important;
+  }
+
+  .print\:block.mb-4 {
+    margin-bottom: 0.15cm !important;
+  }
+
+  /* Remove all extra spacing */
+  .mb-4, .mb-6, .mt-6, .py-6, .py-8 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Overflow */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  [class*="min-w-"] {
+    min-width: unset !important;
+  }
+
+  .min-h-screen {
+    min-height: auto !important;
+  }
+
+  .bg-gray-50 {
+    background-color: white !important;
   }
 }

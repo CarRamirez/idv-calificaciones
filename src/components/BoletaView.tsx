@@ -307,7 +307,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
         </div>
 
         {/* Julio (Final) */}
-        <div className="mt-6">
+        <div className="mt-6 print:hidden">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">
             Julio (Final) — Referencia
           </h3>

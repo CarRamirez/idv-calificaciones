@@ -134,7 +134,7 @@ export default async function BoletaDetailPage({ params }: Props) {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4 gap-4">
+        <div className="flex items-start justify-between mb-4 gap-4 print:hidden">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{student.full_name}</h1>
             <div className="flex items-center gap-2 mt-1">
@@ -157,7 +157,7 @@ export default async function BoletaDetailPage({ params }: Props) {
         </div>
 
         {/* ── Navegación entre alumnos y grupos ── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 print:hidden">
           {/* Anterior / Siguiente alumno */}
           <div className="flex items-center gap-2">
             {prevStudent ? (
