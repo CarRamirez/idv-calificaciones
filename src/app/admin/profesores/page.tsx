@@ -68,13 +68,11 @@ export default function AdminProfesoresPage() {
       const { data: prof } = await supabase
         .from("profiles").select("full_name, role").eq("id", user.id).single();
       if (!prof) { router.push("/dashboard"); return; }
-      // Check if user has admin_profesores permission (admin always has access)
-      if (prof.role !== "admin") {
-        const res = await fetch("/api/auth/permissions");
-        const { permissions } = await res.json();
-        if (!permissions?.includes("admin_profesores")) {
-          router.push("/dashboard"); return;
-        }
+      // Always check via permissions API (respects impersonation)
+      const permRes = await fetch("/api/auth/permissions");
+      const { permissions } = await permRes.json();
+      if (!permissions?.includes("admin_profesores")) {
+        router.push("/dashboard"); return;
       }
       setProfile(prof);
 

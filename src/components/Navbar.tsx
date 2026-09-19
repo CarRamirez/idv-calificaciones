@@ -25,6 +25,7 @@ export default function Navbar({ userName, userRole }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [userDropdown, setUserDropdown] = useState(false);
   const [calDropdown, setCalDropdown] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
@@ -60,6 +61,10 @@ export default function Navbar({ userName, userRole }: Props) {
       .catch(() => {
         setPermissions([]);
       });
+    // Get own user ID for profile link
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id);
+    });
   }, [userRole]);
 
   // Reloj en tiempo real
@@ -379,6 +384,15 @@ export default function Navbar({ userName, userRole }: Props) {
                       <p className="text-xs font-medium text-gray-900">{userName}</p>
                       <p className="text-[10px] text-gray-400 capitalize">{userRole}</p>
                     </div>
+                    {userId && (
+                      <Link
+                        href={`/perfil/${userId}`}
+                        onClick={() => setUserDropdown(false)}
+                        className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        Mi perfil
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -481,11 +495,22 @@ export default function Navbar({ userName, userRole }: Props) {
                   Periodos
                 </Link>
               )}
-              <div className="px-3 py-2 flex items-center justify-between border-t border-gray-100 mt-1 pt-2">
-                <span className="text-xs text-gray-500">{userName}</span>
-                <button onClick={handleLogout} className="text-xs text-red-600">
-                  Cerrar sesión
-                </button>
+              <div className="border-t border-gray-100 mt-1 pt-2">
+                {userId && (
+                  <Link
+                    href={`/perfil/${userId}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
+                  >
+                    Mi perfil
+                  </Link>
+                )}
+                <div className="px-3 py-2 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">{userName}</span>
+                  <button onClick={handleLogout} className="text-xs text-red-600">
+                    Cerrar sesión
+                  </button>
+                </div>
               </div>
             </div>
           )}

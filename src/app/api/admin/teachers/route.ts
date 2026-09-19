@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-// Verify caller has admin_profesores permission
+// Verify caller has admin_profesores permission (respects impersonation)
 async function verifyTeacherAdmin() {
   const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -13,15 +14,37 @@ async function verifyTeacherAdmin() {
     .eq("id", user.id)
     .single();
   if (!profile) return null;
-  if (profile.role === "admin") return { role: "admin", isAdmin: true };
-  // Check if custom role has admin_profesores permission
-  const { data: roleData } = await supabase
+
+  // Check impersonation — if admin is impersonating, use the target's role
+  const cookieStore = cookies();
+  const impersonateAs = cookieStore.get("impersonate_as")?.value;
+  const impersonateAdminId = cookieStore.get("impersonate_admin_id")?.value;
+
+  let effectiveRole = profile.role;
+
+  if (impersonateAs && impersonateAdminId === user.id && profile.role === "admin") {
+    // Admin is impersonating someone — use target user's role
+    const admin = createAdminClient();
+    const { data: targetProfile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", impersonateAs)
+      .single();
+    if (targetProfile) {
+      effectiveRole = targetProfile.role;
+    }
+  }
+
+  if (effectiveRole === "admin") return { role: "admin", isAdmin: true };
+  // Check if effective role has admin_profesores permission
+  const adminClient = createAdminClient();
+  const { data: roleData } = await adminClient
     .from("roles")
     .select("permissions")
-    .eq("name", profile.role)
+    .eq("name", effectiveRole)
     .single();
   if (roleData?.permissions?.includes("admin_profesores")) {
-    return { role: profile.role, isAdmin: false };
+    return { role: effectiveRole, isAdmin: false };
   }
   return null;
 }

@@ -157,7 +157,7 @@
 /* Print styles for boleta */
 @media print {
   @page {
-    size: landscape;
+    size: letter portrait;
     margin: 0.5cm;
   }
 
@@ -195,7 +195,7 @@
   /* Boleta table compact */
   table {
     width: 100% !important;
-    font-size: 8px !important;
+    font-size: 6.5px !important;
     border-collapse: collapse !important;
   }
 
@@ -210,17 +210,25 @@
     font-size: 7px !important;
   }
 
-  /* Subject name column */
-  table td:first-child {
+  /* Subject name column — compact for portrait */
+  table td:first-child,
+  table th:first-child {
     white-space: normal !important;
-    max-width: 120px !important;
-    font-size: 7.5px !important;
+    max-width: 100px !important;
+    width: auto !important;
+    font-size: 7px !important;
     word-break: break-word !important;
+    padding-right: 4px !important;
+  }
+
+  /* Remove fixed widths on grade columns */
+  table th, table td {
+    width: auto !important;
   }
 
   /* Print header compact */
   .print\:block h1 {
-    font-size: 12px !important;
+    font-size: 11px !important;
     margin: 0 !important;
   }
 

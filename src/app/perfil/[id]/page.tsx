@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ProfileContactInfo from "@/components/ProfileContactInfo";
 import ImpersonateButton from "@/components/ImpersonateButton";
+import ProfileSelfEdit from "@/components/ProfileSelfEdit";
 
 export default async function PerfilPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();
@@ -63,6 +64,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
   }
 
   // Admin can impersonate other users (not themselves)
+  const isOwnProfile = user.id === params.id;
   const canImpersonate = myProfile.role === "admin" && user.id !== params.id;
 
   // Fetch teacher assignments
@@ -152,6 +154,15 @@ export default async function PerfilPage({ params }: { params: { id: string } })
             </div>
           </div>
         </div>
+
+        {/* Self-edit section — own profile */}
+        <ProfileSelfEdit
+          profileId={profile.id}
+          initialName={profile.full_name}
+          initialEmail={profile.email}
+          initialLabel={profile.label || ""}
+          isOwnProfile={isOwnProfile}
+        />
 
         {/* Impersonate button — admin only */}
         {canImpersonate && (
