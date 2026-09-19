@@ -26,6 +26,7 @@ export default function Navbar({ userName, userRole }: Props) {
   const supabase = createClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [calDropdown, setCalDropdown] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; type: string; detail: string; href: string }>>([]);
@@ -39,6 +40,7 @@ export default function Navbar({ userName, userRole }: Props) {
   const [countdown, setCountdown] = useState(30);
   const sessionExpiry = useRef(Date.now() + SESSION_DURATION);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const calDropdownRef = useRef<HTMLDivElement>(null);
 
   // Marca de agua SVG generada dinámicamente
   const watermarkBg = useMemo(() => {
@@ -121,11 +123,14 @@ export default function Navbar({ userName, userRole }: Props) {
     setCountdown(30);
   }, []);
 
-  // Cerrar dropdown al hacer click fuera
+  // Cerrar dropdowns al hacer click fuera
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setUserDropdown(false);
+      }
+      if (calDropdownRef.current && !calDropdownRef.current.contains(e.target as Node)) {
+        setCalDropdown(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -292,13 +297,49 @@ export default function Navbar({ userName, userRole }: Props) {
               >
                 Inicio
               </Link>
-              {canAny("calificaciones", "captura") && (
-                <Link
-                  href="/calificaciones"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Calificaciones
-                </Link>
+              {canAny("calificaciones", "captura", "boleta", "concentrado") && (
+                <div className="relative" ref={calDropdownRef}>
+                  <button
+                    onClick={() => setCalDropdown(!calDropdown)}
+                    className="flex items-center gap-1 text-sm text-gray-600 hover:text-primary-600 transition-colors"
+                  >
+                    Calificaciones
+                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {calDropdown && (
+                    <div className="absolute left-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                      {canAny("calificaciones", "captura") && (
+                        <Link
+                          href="/calificaciones"
+                          onClick={() => setCalDropdown(false)}
+                          className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition-colors"
+                        >
+                          Calificaciones
+                        </Link>
+                      )}
+                      {can("concentrado") && (
+                        <Link
+                          href="/concentrado"
+                          onClick={() => setCalDropdown(false)}
+                          className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition-colors"
+                        >
+                          Concentrado
+                        </Link>
+                      )}
+                      {can("boleta") && (
+                        <Link
+                          href="/boleta"
+                          onClick={() => setCalDropdown(false)}
+                          className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition-colors"
+                        >
+                          Boleta
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
               {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
                 <Link
@@ -316,23 +357,7 @@ export default function Navbar({ userName, userRole }: Props) {
                   Periodos
                 </Link>
               )}
-              {can("boleta") && (
-                <Link
-                  href="/boleta"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Boleta
-                </Link>
-              )}
 
-              {can("concentrado") && (
-                <Link
-                  href="/dashboard"
-                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
-                >
-                  Concentrado
-                </Link>
-              )}
 
               {/* Dropdown de usuario */}
               <div className="relative ml-2 pl-4 border-l border-gray-200" ref={dropdownRef}>
@@ -426,10 +451,25 @@ export default function Navbar({ userName, userRole }: Props) {
               <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                 Inicio
               </Link>
-              {canAny("calificaciones", "captura") && (
-                <Link href="/calificaciones" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Calificaciones
-                </Link>
+              {canAny("calificaciones", "captura", "boleta", "concentrado") && (
+                <>
+                  <p className="px-3 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Calificaciones</p>
+                  {canAny("calificaciones", "captura") && (
+                    <Link href="/calificaciones" onClick={() => setMenuOpen(false)} className="block px-5 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                      Calificaciones
+                    </Link>
+                  )}
+                  {can("concentrado") && (
+                    <Link href="/concentrado" onClick={() => setMenuOpen(false)} className="block px-5 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                      Concentrado
+                    </Link>
+                  )}
+                  {can("boleta") && (
+                    <Link href="/boleta" onClick={() => setMenuOpen(false)} className="block px-5 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                      Boleta
+                    </Link>
+                  )}
+                </>
               )}
               {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
                 <Link href="/usuarios" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
@@ -439,17 +479,6 @@ export default function Navbar({ userName, userRole }: Props) {
               {can("periodos") && (
                 <Link href="/periodos" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   Periodos
-                </Link>
-              )}
-              {can("boleta") && (
-                <Link href="/boleta" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Boleta
-                </Link>
-              )}
-
-              {can("concentrado") && (
-                <Link href="/dashboard" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  Concentrado
                 </Link>
               )}
               <div className="px-3 py-2 flex items-center justify-between border-t border-gray-100 mt-1 pt-2">
