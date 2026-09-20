@@ -17,12 +17,14 @@ const EXTENSION_TIME = 5 * 60 * 1000;
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
+  direccion_secundaria: "Dirección",
   teacher: "Profesor",
   viewer: "Consulta",
 };
 
 const ROLE_COLORS: Record<string, string> = {
   admin: "bg-violet-100 text-violet-700",
+  direccion_secundaria: "bg-emerald-100 text-emerald-700",
   teacher: "bg-primary-100 text-primary-700",
   viewer: "bg-sky-100 text-sky-700",
 };

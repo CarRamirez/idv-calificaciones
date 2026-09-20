@@ -36,7 +36,9 @@ async function verifyTeacherAdmin() {
   }
 
   if (effectiveRole === "admin") return { role: "admin", isAdmin: true };
-  // Check if effective role has admin_profesores permission
+  // Builtin roles with admin_profesores permission
+  if (effectiveRole === "direccion_secundaria") return { role: effectiveRole, isAdmin: false };
+  // Check if custom role has admin_profesores permission
   const adminClient = createAdminClient();
   const { data: roleData } = await adminClient
     .from("roles")
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate role — non-admin callers can only create teachers
-  const validRoles = ["admin", "teacher"];
+  const validRoles = ["admin", "teacher", "direccion_secundaria", "viewer"];
   let finalRole = validRoles.includes(role) ? role : "teacher";
   if (!caller.isAdmin && finalRole === "admin") {
     finalRole = "teacher";
@@ -171,7 +173,8 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!(await verifyTeacherAdmin())) {
+  const caller = await verifyTeacherAdmin();
+  if (!caller) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
@@ -179,6 +182,21 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: "Falta ID" }, { status: 400 });
 
   const admin = createAdminClient();
+
+  // Non-admin callers cannot delete admin profiles
+  if (!caller.isAdmin) {
+    const { data: targetProfile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", id)
+      .single();
+    if (targetProfile?.role === "admin") {
+      return NextResponse.json(
+        { error: "No tienes permiso para eliminar administradores" },
+        { status: 403 }
+      );
+    }
+  }
 
   // Delete profile (cascades assignments)
   await admin.from("profiles").delete().eq("id", id);

@@ -59,7 +59,13 @@ export default function AdminAlumnosPage() {
         .eq("id", user.id)
         .single();
 
-      if (!prof || prof.role !== "admin") { router.push("/dashboard"); return; }
+      if (!prof) { router.push("/dashboard"); return; }
+      // Check via permissions API (respects impersonation)
+      const permRes = await fetch("/api/auth/permissions");
+      const { permissions } = await permRes.json();
+      if (!permissions?.includes("admin_alumnos")) {
+        router.push("/dashboard"); return;
+      }
       setProfile(prof);
 
       const { data: grps } = await supabase

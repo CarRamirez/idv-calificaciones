@@ -18,9 +18,11 @@ export default async function UsuariosPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role !== "admin") redirect("/dashboard");
+  const isAdmin = effectiveProfile.role === "admin";
+  const isDireccion = effectiveProfile.role === "direccion_secundaria";
+  if (!isAdmin && !isDireccion) redirect("/dashboard");
 
-  const options = [
+  const allOptions = [
     {
       title: "Alumnos",
       description: "Gestiona el registro de alumnos por grupo: alta, baja y edición de datos.",
@@ -53,6 +55,7 @@ export default async function UsuariosPage() {
         </svg>
       ),
       color: "emerald",
+      adminOnly: true,
     },
     {
       title: "Roles y Permisos",
@@ -64,8 +67,11 @@ export default async function UsuariosPage() {
         </svg>
       ),
       color: "violet",
+      adminOnly: true,
     },
   ];
+
+  const options = allOptions.filter(opt => !opt.adminOnly || isAdmin);
 
   const colorMap: Record<string, { bg: string; iconBg: string; iconText: string; border: string; hover: string }> = {
     primary: {

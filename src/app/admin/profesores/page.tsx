@@ -314,6 +314,14 @@ export default function AdminProfesoresPage() {
     return s ? s.short_name : "";
   }
 
+  // Whether the effective user is a full admin (not direccion_secundaria)
+  const isFullAdmin = (effectiveProfile || profile)?.role === "admin";
+
+  // Filter out admin users if the current effective role is not admin
+  const visibleTeachers = isFullAdmin
+    ? teachers
+    : teachers.filter((t) => t.role !== "admin");
+
   const selectedGroupObj = groups.find((g) => g.id === assignGroup);
   const filteredSubjects = selectedGroupObj
     ? subjects.filter((s) => s.grade === selectedGroupObj.grade)
@@ -383,7 +391,7 @@ export default function AdminProfesoresPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {teachers.map((t) => {
+            {visibleTeachers.map((t) => {
               const ta = getTeacherAssignments(t.id);
               return (
                 <div key={t.id} className="card">
@@ -394,11 +402,13 @@ export default function AdminProfesoresPage() {
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                           t.role === "admin"
                             ? "bg-purple-100 text-purple-700"
+                            : t.role === "direccion_secundaria"
+                            ? "bg-emerald-100 text-emerald-700"
                             : t.role === "teacher"
                             ? "bg-blue-100 text-blue-700"
                             : "bg-amber-100 text-amber-700"
                         }`}>
-                          {t.role === "admin" ? "Admin" : t.role === "teacher" ? "Profesor" : t.role}
+                          {t.role === "admin" ? "Admin" : t.role === "direccion_secundaria" ? "Dirección" : t.role === "teacher" ? "Profesor" : t.role}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400">{t.email || "Sin correo"}</p>
@@ -502,9 +512,10 @@ export default function AdminProfesoresPage() {
                     className="input-field"
                   >
                     <option value="teacher">Profesor</option>
-                    {profile?.role === "admin" && (
+                    {isFullAdmin && (
                       <option value="admin">Administrador</option>
                     )}
+                    <option value="direccion_secundaria">Dirección Secundaria</option>
                   </select>
                 </div>
                 <div>
@@ -644,9 +655,10 @@ export default function AdminProfesoresPage() {
                     className="input-field"
                   >
                     <option value="teacher">Profesor</option>
-                    {profile?.role === "admin" && (
+                    {isFullAdmin && (
                       <option value="admin">Administrador</option>
                     )}
+                    <option value="direccion_secundaria">Dirección Secundaria</option>
                   </select>
                 </div>
                 <div>
