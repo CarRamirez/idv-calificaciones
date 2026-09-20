@@ -37,7 +37,7 @@ async function verifyTeacherAdmin() {
 
   if (effectiveRole === "admin") return { role: "admin", isAdmin: true };
   // Builtin roles with admin_profesores permission
-  if (effectiveRole === "direccion_secundaria") return { role: effectiveRole, isAdmin: false };
+  if (effectiveRole === "directora_anita") return { role: effectiveRole, isAdmin: false };
   // Check if custom role has admin_profesores permission
   const adminClient = createAdminClient();
   const { data: roleData } = await adminClient
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate role — non-admin callers can only create teachers
-  const validRoles = ["admin", "teacher", "direccion_secundaria", "viewer"];
+  const validRoles = ["admin", "teacher", "directora_anita", "viewer"];
   let finalRole = validRoles.includes(role) ? role : "teacher";
   if (!caller.isAdmin && finalRole === "admin") {
     finalRole = "teacher";

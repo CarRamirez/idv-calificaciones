@@ -314,7 +314,7 @@ export default function AdminProfesoresPage() {
     return s ? s.short_name : "";
   }
 
-  // Whether the effective user is a full admin (not direccion_secundaria)
+  // Whether the effective user is a full admin (not directora_anita)
   const isFullAdmin = (effectiveProfile || profile)?.role === "admin";
 
   // Filter out admin users if the current effective role is not admin
@@ -402,13 +402,13 @@ export default function AdminProfesoresPage() {
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                           t.role === "admin"
                             ? "bg-purple-100 text-purple-700"
-                            : t.role === "direccion_secundaria"
+                            : t.role === "directora_anita"
                             ? "bg-emerald-100 text-emerald-700"
                             : t.role === "teacher"
                             ? "bg-blue-100 text-blue-700"
                             : "bg-amber-100 text-amber-700"
                         }`}>
-                          {t.role === "admin" ? "Admin" : t.role === "direccion_secundaria" ? "Dirección" : t.role === "teacher" ? "Profesor" : t.role}
+                          {t.role === "admin" ? "Admin" : t.role === "directora_anita" ? "Dirección" : t.role === "teacher" ? "Profesor" : t.role}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400">{t.email || "Sin correo"}</p>
@@ -515,7 +515,7 @@ export default function AdminProfesoresPage() {
                     {isFullAdmin && (
                       <option value="admin">Administrador</option>
                     )}
-                    <option value="direccion_secundaria">Dirección Secundaria</option>
+                    <option value="directora_anita">Directora</option>
                   </select>
                 </div>
                 <div>
@@ -658,7 +658,7 @@ export default function AdminProfesoresPage() {
                     {isFullAdmin && (
                       <option value="admin">Administrador</option>
                     )}
-                    <option value="direccion_secundaria">Dirección Secundaria</option>
+                    <option value="directora_anita">Directora</option>
                   </select>
                 </div>
                 <div>

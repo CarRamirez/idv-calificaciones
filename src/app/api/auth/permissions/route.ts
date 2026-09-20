@@ -11,7 +11,7 @@ const BUILTIN_PERMS: Record<string, string[]> = {
     "admin_materias", "admin_sesiones", "admin_roles",
   ],
   teacher: ["dashboard", "calificaciones", "captura", "boleta"],
-  direccion_secundaria: [
+  directora_anita: [
     "dashboard", "calificaciones", "captura", "boleta", "periodos",
     "usuarios", "tareas", "concentrado",
     "admin_profesores", "admin_alumnos",
