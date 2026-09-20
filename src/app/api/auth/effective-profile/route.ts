@@ -21,7 +21,7 @@ export async function GET() {
     return NextResponse.json({ error: "No profile" }, { status: 404 });
   }
 
-  const { effectiveProfile, isImpersonating } = await getEffectiveProfile(
+  const { effectiveProfile, isImpersonating, impersonatedUserId } = await getEffectiveProfile(
     user.id,
     profile
   );
@@ -30,5 +30,6 @@ export async function GET() {
     full_name: effectiveProfile.full_name,
     role: effectiveProfile.role,
     isImpersonating,
+    effectiveUserId: impersonatedUserId || user.id,
   });
 }

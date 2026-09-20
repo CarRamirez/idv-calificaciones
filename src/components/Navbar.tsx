@@ -66,6 +66,13 @@ export default function Navbar({ userName, userRole }: Props) {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id);
     });
+    // If impersonating, override userId with the effective user's ID
+    fetch("/api/auth/effective-profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.effectiveUserId) setUserId(data.effectiveUserId);
+      })
+      .catch(() => {});
   }, [userRole]);
 
   useEffect(() => {
