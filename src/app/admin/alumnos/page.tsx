@@ -188,12 +188,12 @@ export default function AdminAlumnosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-5xl animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-bold text-gray-900">Alumnos</h1>
+          <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Alumnos</h1>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
         </div>
 
@@ -349,7 +349,7 @@ export default function AdminAlumnosPage() {
               <div className="flex justify-end gap-2 mt-5">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="btn-secondary text-sm"
+                  className="btn-secondary"
                   disabled={saving}
                 >
                   Cancelar
@@ -375,7 +375,7 @@ export default function AdminAlumnosPage() {
                 Se eliminarán también sus calificaciones registradas. Esta acción no se puede deshacer.
               </p>
               <div className="flex justify-end gap-2">
-                <button onClick={() => setDeleteId(null)} className="btn-secondary text-sm">
+                <button onClick={() => setDeleteId(null)} className="btn-secondary">
                   Cancelar
                 </button>
                 <button

@@ -257,13 +257,13 @@ export default function AdminRolesPage() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">Roles y Permisos</h1>
+            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Roles y Permisos</h1>
             <p className="text-sm text-gray-500">Gestiona roles y asigna permisos por módulo</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
@@ -529,7 +529,7 @@ export default function AdminRolesPage() {
             </div>
 
             <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
-              <button onClick={() => setShowRoleModal(false)} className="btn-secondary text-sm" disabled={saving}>
+              <button onClick={() => setShowRoleModal(false)} className="btn-secondary" disabled={saving}>
                 Cancelar
               </button>
               <button onClick={handleSaveRole} disabled={saving} className="btn-primary text-sm">
@@ -594,7 +594,7 @@ export default function AdminRolesPage() {
               {editError && <p className="text-xs text-red-600 mt-2">{editError}</p>}
             </div>
             <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
-              <button onClick={() => setEditUser(null)} className="btn-secondary text-sm" disabled={editSaving}>
+              <button onClick={() => setEditUser(null)} className="btn-secondary" disabled={editSaving}>
                 Cancelar
               </button>
               <button onClick={handleEditUser} disabled={editSaving} className="btn-primary text-sm">
@@ -643,7 +643,7 @@ export default function AdminRolesPage() {
             </div>
 
             <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
-              <button onClick={() => setShowUserModal(false)} className="btn-secondary text-sm" disabled={saving}>
+              <button onClick={() => setShowUserModal(false)} className="btn-secondary" disabled={saving}>
                 Cancelar
               </button>
               <button onClick={handleAssignRole} disabled={saving} className="btn-primary text-sm">

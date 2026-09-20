@@ -174,13 +174,13 @@ export default function AdminMateriasPage() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">Materias</h1>
+            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Materias</h1>
             <p className="text-sm text-gray-500">
               {subjects.length} materia{subjects.length !== 1 ? "s" : ""} registrada{subjects.length !== 1 ? "s" : ""}
             </p>
@@ -233,7 +233,7 @@ export default function AdminMateriasPage() {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([grade, subs]) => (
               <div key={grade} className="mb-6">
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <span className={`inline-flex px-2 py-0.5 rounded-md text-xs border ${GRADE_COLORS[Number(grade)]}`}>
                     {GRADE_LABELS[Number(grade)]}
                   </span>
@@ -340,7 +340,7 @@ export default function AdminMateriasPage() {
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="card p-8 text-center text-gray-500 text-sm">
+          <div className="empty-state">
             {filterGrade ? `No hay materias en ${GRADE_LABELS[filterGrade]}` : "No hay materias registradas"}
           </div>
         )}

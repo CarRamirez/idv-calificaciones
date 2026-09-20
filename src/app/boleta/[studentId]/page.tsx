@@ -132,10 +132,10 @@ export default async function BoletaDetailPage({ params }: Props) {
   }));
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content animate-fade-in">
         {/* Header */}
         <div className="flex items-start justify-between mb-4 gap-4 print:hidden">
           <div>

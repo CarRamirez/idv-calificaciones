@@ -130,13 +130,13 @@ export default async function SesionesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-6xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
               Registro de Sesiones
             </h1>
             <p className="text-sm text-gray-500">
@@ -149,7 +149,7 @@ export default async function SesionesPage() {
         </div>
 
         {/* Resumen por usuario */}
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
           Resumen por usuario
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
@@ -207,7 +207,7 @@ export default async function SesionesPage() {
         </div>
 
         {/* Tabla detallada de logs */}
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
           Últimos 100 inicios de sesión
         </h2>
         <div className="card overflow-x-auto">

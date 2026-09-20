@@ -311,22 +311,22 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content animate-fade-in">
         {/* Header con periodo activo */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">
+            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
               Bienvenido, {effectiveProfile.full_name.split(" ")[0]}
             </h1>
-            <p className="text-sm text-gray-500">
-              Mnemósine — Ciclo escolar 2026-2027
+            <p className="text-sm text-gray-400">
+              Ciclo escolar 2026-2027
             </p>
           </div>
           {activePeriod && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+            <span className="badge badge-mint">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               {activePeriod.name}
             </span>
@@ -337,13 +337,13 @@ export default async function DashboardPage() {
         <div className="mb-6">
           <Link
             href="/horario"
-            className="inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-white/60 border border-gray-200 hover:bg-white hover:border-primary-300 hover:shadow-md transition-all group"
+            className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
           >
-            <div className="w-9 h-9 rounded-lg bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
               <IconCalendar className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">
+              <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-600 transition-colors duration-200">
                 Horario Escolar
               </p>
               <p className="text-[11px] text-gray-400">Ver horario semanal de clases</p>
@@ -358,50 +358,50 @@ export default async function DashboardPage() {
         {/* ════════════ TEACHER DASHBOARD ════════════ */}
         {dashboardView === "teacher" && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="card p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                    <IconBook className="w-5 h-5 text-indigo-600" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="stat-card stat-card-blue p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center">
+                    <IconBook className="w-5 h-5 text-primary-600" />
                   </div>
-                  <span className="text-2xl font-bold text-primary-600">
+                  <span className="text-3xl font-extrabold text-primary-600" style={{ fontFamily: "var(--font-display)" }}>
                     {teacherAssignments.length}
                   </span>
                 </div>
-                <p className="text-sm font-medium text-gray-700">Asignaturas</p>
+                <p className="text-sm font-semibold text-gray-700">Asignaturas</p>
                 <p className="text-xs text-gray-400">asignadas</p>
               </div>
-              <div className="card p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <IconGroups className="w-5 h-5 text-blue-600" />
+              <div className="stat-card stat-card-violet p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
+                    <IconGroups className="w-5 h-5 text-violet-600" />
                   </div>
-                  <span className="text-2xl font-bold text-primary-600">
+                  <span className="text-3xl font-extrabold text-violet-600" style={{ fontFamily: "var(--font-display)" }}>
                     {teacherGroupIds.length}
                   </span>
                 </div>
-                <p className="text-sm font-medium text-gray-700">Grupos</p>
+                <p className="text-sm font-semibold text-gray-700">Grupos</p>
                 <p className="text-xs text-gray-400">a mi cargo</p>
               </div>
-              <div className="card p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                    <IconUsers className="w-5 h-5 text-amber-600" />
+              <div className="stat-card stat-card-accent p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center">
+                    <IconUsers className="w-5 h-5 text-accent-600" />
                   </div>
-                  <span className="text-2xl font-bold text-accent-600">
+                  <span className="text-3xl font-extrabold text-accent-600" style={{ fontFamily: "var(--font-display)" }}>
                     {Object.values(teacherStudentCounts).reduce((a, b) => a + b, 0)}
                   </span>
                 </div>
-                <p className="text-sm font-medium text-gray-700">Alumnos</p>
+                <p className="text-sm font-semibold text-gray-700">Alumnos</p>
                 <p className="text-xs text-gray-400">en mis grupos</p>
               </div>
             </div>
 
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
               Mis grupos
             </h2>
             {Object.keys(teacherByGroup).length === 0 ? (
-              <div className="card p-8 text-center text-gray-500 text-sm">
+              <div className="empty-state">
                 No tienes asignaturas asignadas. Contacta al administrador.
               </div>
             ) : (
@@ -475,98 +475,98 @@ export default async function DashboardPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <Link
                   href="/admin/alumnos"
-                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                  className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                      <IconUsers className="w-5 h-5 text-blue-600" />
+                    <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                      <IconUsers className="w-5 h-5 text-primary-600" />
                     </div>
-                    <span className="text-2xl font-bold text-primary-600">
+                    <span className="text-2xl font-extrabold text-primary-600" style={{ fontFamily: "var(--font-display)" }}>
                       {totalStudents}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
                     Alumnos
                   </p>
                   <p className="text-xs text-gray-400">activos</p>
                 </Link>
                 <Link
                   href="/admin/profesores"
-                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                  className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                      <IconTeacher className="w-5 h-5 text-emerald-600" />
+                    <div className="w-11 h-11 rounded-xl bg-mint-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                      <IconTeacher className="w-5 h-5 text-mint-600" />
                     </div>
-                    <span className="text-2xl font-bold text-primary-600">
+                    <span className="text-2xl font-extrabold text-primary-600" style={{ fontFamily: "var(--font-display)" }}>
                       {totalTeachers}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
                     Profesores
                   </p>
                   <p className="text-xs text-gray-400">registrados</p>
                 </Link>
                 <Link
                   href="/admin/ciclo"
-                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                  className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
-                      <IconGroups className="w-5 h-5 text-amber-600" />
+                    <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                      <IconGroups className="w-5 h-5 text-accent-600" />
                     </div>
-                    <span className="text-2xl font-bold text-accent-600">
+                    <span className="text-2xl font-extrabold text-accent-600" style={{ fontFamily: "var(--font-display)" }}>
                       {groups.length}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
                     Grupos
                   </p>
                   <p className="text-xs text-gray-400">ciclo actual</p>
                 </Link>
                 <Link
                   href="/admin/materias"
-                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                  className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-                      <IconSubjects className="w-5 h-5 text-indigo-600" />
+                    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                      <IconSubjects className="w-5 h-5 text-violet-600" />
                     </div>
-                    <span className="text-2xl font-bold text-indigo-600">
+                    <span className="text-2xl font-extrabold text-violet-600" style={{ fontFamily: "var(--font-display)" }}>
                       {totalSubjects}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
                     Materias
                   </p>
                   <p className="text-xs text-gray-400">registradas</p>
                 </Link>
                 <Link
                   href="/captura"
-                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                  className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
-                      <IconPencil className="w-5 h-5 text-rose-600" />
+                    <div className="w-11 h-11 rounded-xl bg-coral-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
+                      <IconPencil className="w-5 h-5 text-coral-600" />
                     </div>
-                    <span className="text-lg font-bold text-rose-600">→</span>
+                    <span className="text-lg font-bold text-coral-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
                     Captura
                   </p>
                   <p className="text-xs text-gray-400">ir a calificar</p>
                 </Link>
                 <Link
                   href="/tareas"
-                  className="card p-4 hover:border-primary-300 hover:shadow-md transition-all group"
+                  className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
+                    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
                       <IconMail className="w-5 h-5 text-violet-600" />
                     </div>
                     <span className="text-lg font-bold text-violet-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
                     Tareas
                   </p>
                   <p className="text-xs text-gray-400">notificar padres</p>
@@ -606,7 +606,7 @@ export default async function DashboardPage() {
 
             {/* ── Group cards ── */}
             <div>
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
                 Concentrado por grupo
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

@@ -3,8 +3,8 @@ import "./globals.css";
 import ImpersonationBanner from "@/components/ImpersonationBanner";
 
 export const metadata: Metadata = {
-  title: "IDV Calificaciones",
-  description: "Sistema de registro de calificaciones - Instituto Don Vasco",
+  title: "Mnemósine — IDV",
+  description: "Sistema de registro de calificaciones — Instituto Don Vasco",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="font-sans">
+      <body className="font-sans antialiased">
         <ImpersonationBanner />
         {children}
       </body>

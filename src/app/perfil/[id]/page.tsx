@@ -113,10 +113,10 @@ export default async function PerfilPage({ params }: { params: { id: string } })
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={myEffective.full_name} userRole={myEffective.role} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-4xl animate-fade-in">
         {/* Back */}
         <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-600 mb-4">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +132,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
               {profile.full_name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-gray-900">{profile.full_name}</h1>
+              <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>{profile.full_name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                   profile.role === "admin" ? "bg-purple-100 text-purple-700" :
@@ -188,7 +188,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
         {/* Assignments */}
         {Object.keys(byGroup).length > 0 ? (
           <div>
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
               Asignaturas asignadas
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -457,7 +457,7 @@ export default function CapturaPage({ params }: Props) {
     <div className="bg-mesh">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content animate-fade-in">
         {/* Banner de periodo cerrado */}
         {profile?.role === "teacher" && openPeriods.size > 0 && (() => {
           const ct = TRIMESTERS.find((t) => t.id === activeTab);
@@ -942,7 +942,7 @@ export default function CapturaPage({ params }: Props) {
             <div className="px-5 py-4 border-t flex gap-3 justify-end" style={{ borderColor: 'rgba(0,0,0,0.04)', background: 'rgba(0,0,0,0.01)' }}>
               <button
                 onClick={() => setShowMissingModal(false)}
-                className="btn-secondary text-sm"
+                className="btn-secondary"
               >
                 Revisar registro
               </button>

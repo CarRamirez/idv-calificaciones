@@ -207,10 +207,10 @@ export default function TareasPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-4xl animate-fade-in">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

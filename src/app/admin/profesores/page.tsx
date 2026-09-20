@@ -328,12 +328,12 @@ export default function AdminProfesoresPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-5xl animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-          <h1 className="text-lg font-bold text-gray-900">Profesores</h1>
+          <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Profesores</h1>
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowNew(true)} className="btn-primary text-sm">
               + Nuevo profesor
@@ -518,7 +518,7 @@ export default function AdminProfesoresPage() {
               </div>
               {newError && <p className="text-xs text-red-600 mt-2">{newError}</p>}
               <div className="flex justify-end gap-2 mt-5">
-                <button onClick={() => setShowNew(false)} className="btn-secondary text-sm" disabled={saving}>Cancelar</button>
+                <button onClick={() => setShowNew(false)} className="btn-secondary" disabled={saving}>Cancelar</button>
                 <button onClick={handleCreate} className="btn-primary text-sm" disabled={saving}>
                   {saving ? "Creando..." : "Crear profesor"}
                 </button>
@@ -597,7 +597,7 @@ export default function AdminProfesoresPage() {
                     setBulkResults(null);
                     setCsvError("");
                   }}
-                  className="btn-secondary text-sm"
+                  className="btn-secondary"
                 >
                   {bulkResults ? "Cerrar" : "Cancelar"}
                 </button>
@@ -677,7 +677,7 @@ export default function AdminProfesoresPage() {
               </div>
               {editError && <p className="text-xs text-red-600 mt-2">{editError}</p>}
               <div className="flex justify-end gap-2 mt-5">
-                <button onClick={() => setEditTeacher(null)} className="btn-secondary text-sm" disabled={editSaving}>Cancelar</button>
+                <button onClick={() => setEditTeacher(null)} className="btn-secondary" disabled={editSaving}>Cancelar</button>
                 <button onClick={handleEditSave} className="btn-primary text-sm" disabled={editSaving}>
                   {editSaving ? "Guardando..." : "Guardar cambios"}
                 </button>
@@ -722,7 +722,7 @@ export default function AdminProfesoresPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-5">
-                <button onClick={() => setAssignTeacher(null)} className="btn-secondary text-sm">Cerrar</button>
+                <button onClick={() => setAssignTeacher(null)} className="btn-secondary">Cerrar</button>
                 <button
                   onClick={handleAddAssignment}
                   className="btn-primary text-sm"
@@ -745,7 +745,7 @@ export default function AdminProfesoresPage() {
                 Se eliminara su cuenta, perfil y todas sus asignaciones.
               </p>
               <div className="flex justify-end gap-2">
-                <button onClick={() => setDeleteTeacher(null)} className="btn-secondary text-sm">Cancelar</button>
+                <button onClick={() => setDeleteTeacher(null)} className="btn-secondary">Cancelar</button>
                 <button
                   onClick={handleDelete}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"

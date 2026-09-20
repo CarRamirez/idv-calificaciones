@@ -109,19 +109,19 @@ export default function PeriodosPage() {
   const openCount = periods.filter((p) => p.is_open).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+      <main className="page-content max-w-4xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-lg font-bold text-gray-900">Periodos de Evaluación</h1>
+            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Periodos de Evaluación</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               {openCount === 0
                 ? "Todos los periodos están cerrados"
                 : `${openCount} periodo${openCount > 1 ? "s" : ""} abierto${openCount > 1 ? "s" : ""} para captura`}
             </p>
           </div>
-          <Link href="/dashboard" className="btn-secondary text-sm">← Inicio</Link>
+          <Link href="/dashboard" className="btn-secondary">← Inicio</Link>
         </div>
 
         <div className="space-y-6">

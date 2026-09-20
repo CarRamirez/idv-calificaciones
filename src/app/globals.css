@@ -2,165 +2,212 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Google Fonts (Inter + outfit) via CDN ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap');
+
 @layer base {
   :root {
-    --glass-bg: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-shadow: 0 8px 32px rgba(12, 34, 71, 0.08);
-    --gradient-start: #eef3fb;
-    --gradient-mid: #e8eef8;
-    --gradient-end: #f0ece4;
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --page-bg: #f8f9fc;
+    --card-bg: #ffffff;
+    --card-border: rgba(0, 0, 0, 0.06);
+    --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+    --nav-bg: rgba(255, 255, 255, 0.85);
+    --nav-border: rgba(0, 0, 0, 0.06);
+  }
+
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--page-bg);
+    color: #1a1a2e;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
   }
 }
 
 @layer components {
-  /* ---- Glass base ---- */
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-  }
-
-  .glass-subtle {
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-  }
-
-  .bg-mesh {
-    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
-    min-height: 100vh;
-    position: relative;
-  }
-
-  .bg-mesh::before {
-    content: '';
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba(29, 78, 158, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba(201, 149, 33, 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 80%, rgba(29, 78, 158, 0.04) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .bg-mesh > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ---- Buttons ---- */
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-primary-600 text-white px-4 py-2 rounded-xl font-medium
-           hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-           transition-all disabled:opacity-50 disabled:cursor-not-allowed
-           shadow-sm hover:shadow-md active:scale-[0.98];
+    @apply px-5 py-2.5 rounded-2xl font-semibold text-sm text-white
+           transition-all duration-200 ease-out
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed
+           active:scale-[0.97];
+    background: linear-gradient(135deg, #5c7cfa 0%, #7c3aed 100%);
+    box-shadow: 0 4px 14px rgba(92, 124, 250, 0.35);
+  }
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(92, 124, 250, 0.45);
+    transform: translateY(-1px);
+  }
+  .btn-primary:focus {
+    --tw-ring-color: rgba(92, 124, 250, 0.5);
   }
 
   .btn-secondary {
-    @apply text-gray-700 px-4 py-2 rounded-xl font-medium border
-           hover:bg-white/80 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-           transition-all shadow-sm;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(8px);
-    border-color: rgba(255,255,255,0.4);
+    @apply px-5 py-2.5 rounded-2xl font-semibold text-sm
+           text-gray-700 bg-white border border-gray-200
+           hover:border-primary-300 hover:text-primary-700
+           hover:shadow-soft
+           transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2
+           active:scale-[0.97];
   }
 
   .btn-accent {
-    @apply bg-accent-500 text-white px-4 py-2 rounded-xl font-medium
-           hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2
-           transition-all shadow-sm hover:shadow-md active:scale-[0.98];
+    @apply px-5 py-2.5 rounded-2xl font-semibold text-sm text-white
+           transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           active:scale-[0.97];
+    background: linear-gradient(135deg, #ff9800 0%, #ff6b63 100%);
+    box-shadow: 0 4px 14px rgba(255, 152, 0, 0.3);
+  }
+  .btn-accent:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+    transform: translateY(-1px);
   }
 
-  /* ---- Inputs ---- */
+  /* ── Inputs ── */
   .input-field {
-    @apply block w-full rounded-xl border px-3 py-2 text-sm
-           shadow-sm placeholder:text-gray-400
-           focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500;
-    background: rgba(255,255,255,0.6);
-    border-color: rgba(255,255,255,0.3);
+    @apply block w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm
+           bg-white shadow-sm
+           placeholder:text-gray-400
+           focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100
+           transition-all duration-200;
   }
 
-  /* ---- Card (glass) ---- */
+  /* ── Cards ── */
   .card {
-    @apply rounded-2xl p-4;
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+    @apply rounded-2xl bg-white border border-gray-100 p-5;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   }
 
-  /* ---- Grade Table (glass variant) ---- */
+  .card-interactive {
+    @apply card cursor-pointer;
+  }
+  .card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── Grade table ── */
   .grade-table {
     @apply w-full text-sm border-collapse;
   }
-
   .grade-table th {
-    @apply px-2 py-2.5 text-left text-xs font-semibold uppercase tracking-wider
-           border-b sticky top-0;
-    background: rgba(29, 78, 158, 0.08);
-    color: #1d4e9e;
-    border-color: rgba(29, 78, 158, 0.12);
+    @apply px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider
+           border-b-2 sticky top-0 bg-gray-50;
+    color: #6b7280;
   }
-
   .grade-table td {
-    @apply px-2 py-2 border-b;
-    border-color: rgba(0, 0, 0, 0.04);
+    @apply px-3 py-2.5 border-b border-gray-100;
   }
-
   .grade-table tbody tr {
-    @apply transition-colors;
+    @apply transition-colors duration-150;
   }
-
   .grade-table tbody tr:hover {
-    background: rgba(29, 78, 158, 0.04);
+    @apply bg-primary-50/50;
   }
-
   .grade-cell {
-    @apply w-full text-center text-sm py-1.5 px-1 rounded-lg
-           focus:outline-none tabular-nums transition-all;
+    @apply w-full text-center text-sm py-2 px-1.5 rounded-xl
+           focus:outline-none tabular-nums transition-all duration-200;
     background: transparent;
-    border: 1.5px solid transparent;
+    border: 2px solid transparent;
   }
-
   .grade-cell:focus {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(29, 78, 158, 0.4);
-    box-shadow: 0 0 0 3px rgba(29, 78, 158, 0.1);
+    @apply bg-white border-primary-300;
+    box-shadow: 0 0 0 3px rgba(92, 124, 250, 0.15);
   }
 
-  /* ---- Semáforo (glass pills) ---- */
+  /* ── Status pills ── */
   .semaforo-rojo {
-    background: rgba(239, 68, 68, 0.12);
-    color: #b91c1c;
+    @apply bg-coral-50 text-coral-700 px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
-
   .semaforo-amarillo {
-    background: rgba(245, 158, 11, 0.12);
-    color: #92400e;
+    @apply bg-accent-50 text-accent-800 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .semaforo-verde {
+    @apply bg-mint-50 text-mint-700 px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 
-  .semaforo-verde {
-    background: rgba(34, 197, 94, 0.12);
-    color: #166534;
+  /* ── Stat card accent bars ── */
+  .stat-card {
+    @apply card relative overflow-hidden;
+  }
+  .stat-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-1 h-full rounded-l-2xl;
+  }
+  .stat-card-blue::before { background: linear-gradient(180deg, #5c7cfa, #22d3ee); }
+  .stat-card-violet::before { background: linear-gradient(180deg, #8b5cf6, #c4b5fd); }
+  .stat-card-mint::before { background: linear-gradient(180deg, #2ba672, #7dd8ad); }
+  .stat-card-coral::before { background: linear-gradient(180deg, #ff4c42, #ffa09b); }
+  .stat-card-accent::before { background: linear-gradient(180deg, #ff9800, #ffcc80); }
+
+  /* ── Badge / chip ── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge-primary { @apply bg-primary-100 text-primary-700; }
+  .badge-violet { @apply bg-violet-100 text-violet-700; }
+  .badge-mint { @apply bg-mint-100 text-mint-700; }
+  .badge-coral { @apply bg-coral-100 text-coral-700; }
+  .badge-accent { @apply bg-accent-100 text-accent-800; }
+  .badge-sky { @apply bg-sky-100 text-sky-700; }
+
+  /* ── Page container ── */
+  .page-container {
+    @apply min-h-screen;
+    background: var(--page-bg);
+  }
+  .page-content {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 py-6;
+  }
+
+  /* ── Animated gradient background for special pages ── */
+  .bg-gradient-animated {
+    background: linear-gradient(135deg, #4263eb 0%, #7c3aed 30%, #5c7cfa 60%, #22d3ee 100%);
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ── Decorative blobs ── */
+  .blob {
+    @apply absolute rounded-full opacity-20 blur-3xl pointer-events-none;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    @apply card p-10 text-center;
+  }
+  .empty-state p {
+    @apply text-gray-400 text-sm;
   }
 }
 
-/* Print styles for boleta */
+/* ══════════════ Print ══════════════ */
 @media print {
   @page {
     size: letter portrait;
     margin: 0.5cm;
   }
-
   html, body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -168,21 +215,17 @@
     padding: 0 !important;
     font-size: 9px !important;
   }
-
   nav, .print\:hidden, footer {
     display: none !important;
   }
-
   .print\:block {
     display: block !important;
   }
-
   main {
     max-width: 100% !important;
     padding: 0.2cm 0.3cm !important;
     margin: 0 !important;
   }
-
   .card {
     border: 1px solid #ccc;
     box-shadow: none !important;
@@ -191,28 +234,20 @@
     margin: 0 !important;
     overflow: visible !important;
   }
-
-  /* Boleta table compact */
   table {
     width: 100% !important;
     font-size: 6.5px !important;
     border-collapse: collapse !important;
   }
-
-  table th,
-  table td {
+  table th, table td {
     padding: 1px 2px !important;
     line-height: 1.15 !important;
     white-space: nowrap !important;
   }
-
   table th {
     font-size: 7px !important;
   }
-
-  /* Subject name column — compact for portrait */
-  table td:first-child,
-  table th:first-child {
+  table td:first-child, table th:first-child {
     white-space: normal !important;
     max-width: 100px !important;
     width: auto !important;
@@ -220,50 +255,20 @@
     word-break: break-word !important;
     padding-right: 4px !important;
   }
-
-  /* Remove fixed widths on grade columns */
   table th, table td {
     width: auto !important;
   }
-
-  /* Print header compact */
-  .print\:block h1 {
-    font-size: 11px !important;
-    margin: 0 !important;
-  }
-
-  .print\:block p,
-  .print\:block span {
-    font-size: 9px !important;
-    margin: 0 !important;
-  }
-
-  .print\:block.mb-4 {
-    margin-bottom: 0.15cm !important;
-  }
-
-  /* Remove all extra spacing */
+  .print\:block h1 { font-size: 11px !important; margin: 0 !important; }
+  .print\:block p, .print\:block span { font-size: 9px !important; margin: 0 !important; }
+  .print\:block.mb-4 { margin-bottom: 0.15cm !important; }
   .mb-4, .mb-6, .mt-6, .py-6, .py-8 {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
   }
-
-  /* Overflow */
-  .overflow-x-auto {
-    overflow: visible !important;
-  }
-
-  [class*="min-w-"] {
-    min-width: unset !important;
-  }
-
-  .min-h-screen {
-    min-height: auto !important;
-  }
-
-  .bg-gray-50 {
-    background-color: white !important;
-  }
+  .overflow-x-auto { overflow: visible !important; }
+  [class*="min-w-"] { min-width: unset !important; }
+  .min-h-screen { min-height: auto !important; }
+  .bg-gray-50 { background-color: white !important; }
 }
