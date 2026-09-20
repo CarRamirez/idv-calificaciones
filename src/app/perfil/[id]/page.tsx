@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ProfileContactInfo from "@/components/ProfileContactInfo";
@@ -19,6 +20,8 @@ export default async function PerfilPage({ params }: { params: { id: string } })
     .single();
   if (!myProfile) redirect("/login");
 
+  const { effectiveProfile: myEffective } = await getEffectiveProfile(user.id, myProfile);
+
   // Fetch target profile
   const admin = createAdminClient();
   const { data: profile } = await admin
@@ -33,7 +36,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
   const { data: roleInfo } = await admin
     .from("roles")
     .select("display_name")
-    .eq("name", profile.role)
+    .eq("name", profile.role)  // target profile role for display
     .single();
 
   const roleLabel = roleInfo?.display_name || (
@@ -111,7 +114,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={myProfile.full_name} userRole={myProfile.role} />
+      <Navbar userName={myEffective.full_name} userRole={myEffective.role} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         {/* Back */}

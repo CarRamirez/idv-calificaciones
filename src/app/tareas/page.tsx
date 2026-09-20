@@ -22,6 +22,16 @@ export default function TareasPage() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null);
+  const [effectiveProfile, setEffectiveProfile] = useState<{ full_name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/effective-profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.full_name) setEffectiveProfile(data);
+      })
+      .catch(() => {});
+  }, []);
   const [groups, setGroups] = useState<Group[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
@@ -198,7 +208,7 @@ export default function TareasPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         <div className="mb-6">

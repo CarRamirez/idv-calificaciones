@@ -69,6 +69,14 @@ export default function CapturaPage({ params }: Props) {
   const { groupId, subjectId } = params;
 
   const [profile, setProfile] = useState<any>(null);
+  const [effectiveProfile, setEffectiveProfile] = useState<{ full_name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/effective-profile")
+      .then((r) => r.json())
+      .then((data) => { if (data.full_name) setEffectiveProfile(data); })
+      .catch(() => {});
+  }, []);
   const [group, setGroup] = useState<any>(null);
   const [subject, setSubject] = useState<any>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -447,7 +455,7 @@ export default function CapturaPage({ params }: Props) {
 
   return (
     <div className="bg-mesh">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Banner de periodo cerrado */}

@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import BoletaSelector from "@/components/BoletaSelector";
 
@@ -18,19 +19,21 @@ export default async function BoletaIndexPage() {
     .single();
 
   if (!profile) redirect("/login");
-  if (profile.role === "viewer") redirect("/dashboard");
+
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  if (effectiveProfile.role === "viewer") redirect("/dashboard");
 
   // Para admin: todos los grupos. Para teacher: solo sus grupos asignados
   let groups: { id: string; grade: number; letter: string }[] = [];
 
-  if (profile.role === "admin") {
+  if (effectiveProfile.role === "admin") {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
       .order("grade")
       .order("letter");
     groups = data || [];
-  } else if (profile.role === "teacher") {
+  } else if (effectiveProfile.role === "teacher") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("groups ( id, grade, letter )")
@@ -48,7 +51,7 @@ export default async function BoletaIndexPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="text-center mb-8">

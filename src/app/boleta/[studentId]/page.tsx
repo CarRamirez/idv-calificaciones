@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import BoletaView from "@/components/BoletaView";
 import Link from "next/link";
@@ -23,7 +24,9 @@ export default async function BoletaDetailPage({ params }: Props) {
     .single();
 
   if (!profile) redirect("/login");
-  if (profile.role === "viewer") redirect("/dashboard");
+
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  if (effectiveProfile.role === "viewer") redirect("/dashboard");
 
   // Datos del alumno
   const { data: student } = await supabase
@@ -130,7 +133,7 @@ export default async function BoletaDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}

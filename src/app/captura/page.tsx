@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
@@ -40,17 +41,19 @@ export default async function CapturaIndexPage() {
     .single();
 
   if (!profile) redirect("/login");
-  if (profile.role === "viewer") redirect("/dashboard");
+
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  if (effectiveProfile.role === "viewer") redirect("/dashboard");
 
   let assignments: any[] = [];
 
-  if (profile.role === "teacher") {
+  if (effectiveProfile.role === "teacher") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("id, subjects ( id, name, short_name, sort_order, counts_for_avg ), groups ( id, grade, letter )")
       .eq("teacher_id", user.id);
     assignments = data || [];
-  } else if (profile.role === "admin") {
+  } else if (effectiveProfile.role === "admin") {
     const { data: groups } = await supabase
       .from("groups")
       .select("id, grade, letter")
@@ -96,7 +99,7 @@ export default async function CapturaIndexPage() {
 
   return (
     <div className="bg-mesh">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header con stats */}

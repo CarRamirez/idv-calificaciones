@@ -144,6 +144,17 @@ export default function HorarioPage() {
           setUserName(data.full_name);
           setUserRole(data.role);
           setLoading(false);
+
+          // Override with effective profile (handles impersonation)
+          fetch("/api/auth/effective-profile")
+            .then((r) => r.json())
+            .then((ep) => {
+              if (ep.full_name) {
+                setUserName(ep.full_name);
+                setUserRole(ep.role);
+              }
+            })
+            .catch(() => {});
         });
     });
   }, [router, supabase]);

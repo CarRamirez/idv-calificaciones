@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ConcentradoTable from "@/components/ConcentradoTable";
@@ -23,6 +24,8 @@ export default async function ConcentradoPage({ params }: Props) {
     .single();
 
   if (!profile) redirect("/login");
+
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
 
   const { data: group } = await supabase
     .from("groups")
@@ -81,7 +84,7 @@ export default async function ConcentradoPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
       <main className="max-w-full mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-4">

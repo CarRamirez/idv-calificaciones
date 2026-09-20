@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
@@ -14,11 +15,14 @@ export default async function CalificacionesPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "admin" && profile.role !== "teacher")) {
+  if (!profile) redirect("/login");
+
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  if (effectiveProfile.role !== "admin" && effectiveProfile.role !== "teacher") {
     redirect("/dashboard");
   }
 
-  const isTeacher = profile.role === "teacher";
+  const isTeacher = effectiveProfile.role === "teacher";
 
   const options = [
     {
@@ -101,7 +105,7 @@ export default async function CalificacionesPage() {
     },
   ];
 
-  const visibleOptions = options.filter((opt) => opt.roles.includes(profile.role));
+  const visibleOptions = options.filter((opt) => opt.roles.includes(effectiveProfile.role));
 
   const colorMap: Record<string, { bg: string; iconBg: string; iconText: string; border: string; hover: string }> = {
     primary: {
@@ -150,7 +154,7 @@ export default async function CalificacionesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Calificaciones</h1>

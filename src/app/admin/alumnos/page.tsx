@@ -21,6 +21,14 @@ export default function AdminAlumnosPage() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null);
+  const [effectiveProfile, setEffectiveProfile] = useState<{ full_name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/effective-profile")
+      .then((r) => r.json())
+      .then((data) => { if (data.full_name) setEffectiveProfile(data); })
+      .catch(() => {});
+  }, []);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [students, setStudents] = useState<Student[]>([]);
@@ -181,7 +189,7 @@ export default function AdminAlumnosPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">

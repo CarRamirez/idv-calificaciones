@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
@@ -39,7 +40,10 @@ export default async function SesionesPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") redirect("/dashboard");
+  if (!profile) redirect("/login");
+
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  if (effectiveProfile.role !== "admin") redirect("/dashboard");
 
   // Obtener los últimos 100 logs
   const { data: logs } = await supabase
@@ -127,7 +131,7 @@ export default async function SesionesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-6">

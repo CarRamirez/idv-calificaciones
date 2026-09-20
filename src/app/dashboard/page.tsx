@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import AnnouncementWall from "@/components/AnnouncementWall";
@@ -103,22 +103,7 @@ export default async function DashboardPage() {
   if (!profile) redirect("/login");
 
   // ──── Check for impersonation ────
-  let effectiveProfile = profile;
-  const cookieStore = cookies();
-  const impersonateAs = cookieStore.get("impersonate_as")?.value;
-  const impersonateAdminId = cookieStore.get("impersonate_admin_id")?.value;
-
-  if (impersonateAs && impersonateAdminId === user.id && profile.role === "admin") {
-    const adminDb = createAdminClient();
-    const { data: targetProfile } = await adminDb
-      .from("profiles")
-      .select("full_name, role")
-      .eq("id", impersonateAs)
-      .single();
-    if (targetProfile) {
-      effectiveProfile = targetProfile;
-    }
-  }
+  const { effectiveProfile, impersonatedUserId } = await getEffectiveProfile(user.id, profile);
 
   // ──── Determine dashboard view based on permissions ────
   let dashboardView: "teacher" | "admin" | "none" = "none";
@@ -154,7 +139,7 @@ export default async function DashboardPage() {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("id, subjects ( id, name, short_name ), groups ( id, grade, letter )")
-      .eq("teacher_id", impersonateAs || user.id);
+      .eq("teacher_id", impersonatedUserId || user.id);
     teacherAssignments = data || [];
 
     teacherGroupIds = Array.from(
@@ -327,7 +312,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header con periodo activo */}
