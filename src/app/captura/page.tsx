@@ -53,7 +53,7 @@ export default async function CapturaIndexPage() {
       .select("id, subjects ( id, name, short_name, sort_order, counts_for_avg ), groups ( id, grade, letter )")
       .eq("teacher_id", user.id);
     assignments = data || [];
-  } else if (effectiveProfile.role === "admin") {
+  } else if (effectiveProfile.role === "admin" || effectiveProfile.role === "directora_anita") {
     const { data: groups } = await supabase
       .from("groups")
       .select("id, grade, letter")

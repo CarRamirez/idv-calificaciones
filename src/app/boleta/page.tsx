@@ -26,7 +26,7 @@ export default async function BoletaIndexPage() {
   // Para admin: todos los grupos. Para teacher: solo sus grupos asignados
   let groups: { id: string; grade: number; letter: string }[] = [];
 
-  if (effectiveProfile.role === "admin") {
+  if (effectiveProfile.role === "admin" || effectiveProfile.role === "directora_anita") {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
