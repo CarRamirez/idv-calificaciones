@@ -48,6 +48,7 @@ export default function Navbar({ userName, userRole }: Props) {
   const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
   const [showTimeout, setShowTimeout] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
   const [countdown, setCountdown] = useState(30);
   const sessionExpiry = useRef(Date.now() + SESSION_DURATION);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -76,6 +77,21 @@ export default function Navbar({ userName, userRole }: Props) {
       })
       .catch(() => {});
   }, [userRole]);
+
+  // Presence: heartbeat + online count polling
+  useEffect(() => {
+    const sendHeartbeat = () => fetch("/api/presence", { method: "POST" }).catch(() => {});
+    const fetchOnline = () =>
+      fetch("/api/presence")
+        .then((r) => r.json())
+        .then((d) => setOnlineCount(d.count || 0))
+        .catch(() => {});
+    sendHeartbeat();
+    fetchOnline();
+    const hbInterval = setInterval(sendHeartbeat, 60_000);
+    const countInterval = setInterval(fetchOnline, 60_000);
+    return () => { clearInterval(hbInterval); clearInterval(countInterval); };
+  }, []);
 
   useEffect(() => {
     function updateTime() {
@@ -219,6 +235,18 @@ export default function Navbar({ userName, userRole }: Props) {
                   </span>
                 </>
               )}
+              {onlineCount > 0 && (
+                <>
+                  <span className="w-px h-3 bg-gray-200" />
+                  <span className="flex items-center gap-1 text-xs text-gray-500" title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea`}>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                    </span>
+                    <span className="font-medium">{onlineCount}</span>
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Desktop nav + user */}
@@ -339,6 +367,15 @@ export default function Navbar({ userName, userRole }: Props) {
             <div className="sm:hidden flex items-center gap-2">
               <span className="text-xs text-gray-500 tabular-nums font-medium">{currentTime}</span>
               {weather && <span className="text-xs">{weather.icon} {weather.temp}°</span>}
+              {onlineCount > 0 && (
+                <span className="flex items-center gap-1 text-xs text-gray-500">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                  </span>
+                  <span className="font-medium">{onlineCount}</span>
+                </span>
+              )}
               <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {menuOpen
