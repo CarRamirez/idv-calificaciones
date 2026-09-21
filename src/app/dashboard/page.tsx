@@ -334,7 +334,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Quick access — visible to all roles */}
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap gap-3">
           <Link
             href="/horario"
             className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
@@ -347,6 +347,20 @@ export default async function DashboardPage() {
                 Horario Escolar
               </p>
               <p className="text-[11px] text-gray-400">Ver horario semanal de clases</p>
+            </div>
+          </Link>
+          <Link
+            href="/directorio"
+            className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+              <IconUsers className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 group-hover:text-orange-600 transition-colors duration-200">
+                Directorio
+              </p>
+              <p className="text-[11px] text-gray-400">Contactos del personal</p>
             </div>
           </Link>
         </div>
