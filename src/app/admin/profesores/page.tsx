@@ -45,7 +45,7 @@ export default function AdminProfesoresPage() {
 
   // CSV bulk upload
   const [showBulk, setShowBulk] = useState(false);
-  const [csvPreview, setCsvPreview] = useState<{ full_name: string; email: string; password: string }[]>([]);
+  const [csvPreview, setCsvPreview] = useState<{ full_name: string; email: string; password: string; role: string; label: string }[]>([]);
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkResults, setBulkResults] = useState<BulkResult[] | null>(null);
   const [csvError, setCsvError] = useState("");
@@ -134,8 +134,8 @@ export default function AdminProfesoresPage() {
 
   // Download CSV template
   function downloadTemplate() {
-    const header = "nombre,correo,contrasena";
-    const example = "JUAN PEREZ LOPEZ,juan.perez@ejemplo.com,Pass1234";
+    const header = "nombre,correo,contrasena,perfil,etiqueta";
+    const example = "JUAN PEREZ LOPEZ,juan.perez@ejemplo.com,Pass1234,profesor,Tecnologías - Sistemas IT";
     const blob = new Blob([header + "\n" + example + "\n"], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -168,18 +168,29 @@ export default function AdminProfesoresPage() {
       const nameIdx = header.findIndex((h) => h === "nombre" || h === "full_name" || h === "name");
       const emailIdx = header.findIndex((h) => h === "correo" || h === "email" || h === "mail");
       const passIdx = header.findIndex((h) => h === "contrasena" || h === "password" || h === "pass" || h === "contraseña");
+      const roleIdx = header.findIndex((h) => h === "perfil" || h === "rol" || h === "role" || h === "profile");
+      const labelIdx = header.findIndex((h) => h === "etiqueta" || h === "label" || h === "tag");
 
       if (nameIdx === -1 || emailIdx === -1 || passIdx === -1) {
-        setCsvError("El CSV debe tener columnas: nombre, correo, contrasena (o equivalentes en ingles)");
+        setCsvError("El CSV debe tener al menos las columnas: nombre, correo, contrasena");
         return;
       }
 
+      const ROLE_MAP: Record<string, string> = {
+        profesor: "teacher", teacher: "teacher", maestro: "teacher",
+        admin: "admin", administrador: "admin",
+        directora: "directora_anita", "directora_anita": "directora_anita", direccion: "directora_anita",
+        viewer: "viewer", observador: "viewer",
+      };
       const rows = lines.slice(1).map((line) => {
         const cols = line.split(sep).map((c) => c.trim().replace(/^"|"$/g, ""));
+        const rawRole = roleIdx !== -1 ? (cols[roleIdx] || "").toLowerCase() : "";
         return {
           full_name: cols[nameIdx] || "",
           email: cols[emailIdx] || "",
           password: cols[passIdx] || "",
+          role: ROLE_MAP[rawRole] || "teacher",
+          label: labelIdx !== -1 ? (cols[labelIdx] || "") : "",
         };
       }).filter((r) => r.full_name || r.email);
 
@@ -387,7 +398,7 @@ export default function AdminProfesoresPage() {
         {teachers.length === 0 ? (
           <div className="card p-8 text-center text-gray-400 text-sm">
             <p>No hay profesores registrados.</p>
-            <p className="mt-2">Usa el boton <strong>+ Nuevo profesor</strong> o carga un archivo CSV con columnas: <code className="bg-gray-100 px-1 rounded">nombre, correo, contrasena</code></p>
+            <p className="mt-2">Usa el boton <strong>+ Nuevo profesor</strong> o carga un archivo CSV con columnas: <code className="bg-gray-100 px-1 rounded">nombre, correo, contrasena, perfil, etiqueta</code></p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -556,6 +567,8 @@ export default function AdminProfesoresPage() {
                       <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Nombre</th>
                       <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Correo</th>
                       <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Contrasena</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Perfil</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Etiqueta</th>
                       {bulkResults && (
                         <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Estado</th>
                       )}
@@ -570,6 +583,11 @@ export default function AdminProfesoresPage() {
                           <td className="px-3 py-2 text-gray-900">{row.full_name}</td>
                           <td className="px-3 py-2 text-gray-600">{row.email}</td>
                           <td className="px-3 py-2 text-gray-400">{"*".repeat(Math.min(row.password.length, 8))}</td>
+                          <td className="px-3 py-2 text-gray-600 text-xs">{(() => {
+                            const rl: Record<string, string> = { teacher: "Profesor", admin: "Admin", directora_anita: "Directora", viewer: "Observador" };
+                            return rl[row.role] || row.role;
+                          })()}</td>
+                          <td className="px-3 py-2 text-gray-500 text-xs">{row.label || <span className="text-gray-300">—</span>}</td>
                           {bulkResults && (
                             <td className="px-3 py-2 text-xs">
                               {result?.ok ? (

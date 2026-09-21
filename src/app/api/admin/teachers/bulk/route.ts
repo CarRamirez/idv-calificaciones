@@ -21,7 +21,7 @@ async function verifyTeacherAdmin() {
   return roleData?.permissions?.includes("admin_profesores") || false;
 }
 
-type TeacherRow = { full_name: string; email: string; password: string };
+type TeacherRow = { full_name: string; email: string; password: string; role?: string; label?: string };
 type ResultRow = { email: string; ok: boolean; error?: string };
 
 export async function POST(req: NextRequest) {
@@ -46,6 +46,11 @@ export async function POST(req: NextRequest) {
     const email = (t.email || "").trim().toLowerCase();
     const full_name = (t.full_name || "").trim().toUpperCase();
     const password = (t.password || "").trim();
+    const VALID_ROLES = ["teacher", "admin", "directora_anita", "viewer"];
+    const role = VALID_ROLES.includes((t.role || "").trim().toLowerCase())
+      ? (t.role || "").trim().toLowerCase()
+      : "teacher";
+    const label = (t.label || "").trim();
 
     if (!email || !full_name || !password) {
       results.push({ email: email || "(vacio)", ok: false, error: "Campos incompletos" });
@@ -68,12 +73,14 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
-    const { error: profileError } = await admin.from("profiles").insert({
+    const insertData: Record<string, string> = {
       id: authData.user.id,
       full_name,
       email,
-      role: "teacher",
-    });
+      role,
+    };
+    if (label) insertData.label = label;
+    const { error: profileError } = await admin.from("profiles").insert(insertData);
 
     if (profileError) {
       await admin.auth.admin.deleteUser(authData.user.id);
