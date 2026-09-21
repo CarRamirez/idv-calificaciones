@@ -104,8 +104,9 @@ export default function AdminProfesoresPage() {
   }, []);
 
   const loadAssignments = useCallback(async () => {
-    const { data } = await supabase.from("teacher_assignments").select("*");
-    setAssignments(data || []);
+    const res = await fetch("/api/admin/assignments");
+    const data = await res.json();
+    setAssignments(data.assignments || []);
   }, []);
 
   useEffect(() => { loadTeachers(); loadAssignments(); }, [loadTeachers, loadAssignments]);
@@ -297,17 +298,25 @@ export default function AdminProfesoresPage() {
     );
     if (exists) return;
 
-    await supabase.from("teacher_assignments").insert({
-      teacher_id: assignTeacher.id,
-      group_id: assignGroup,
-      subject_id: assignSubject,
+    await fetch("/api/admin/assignments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        teacher_id: assignTeacher.id,
+        group_id: assignGroup,
+        subject_id: assignSubject,
+      }),
     });
     loadAssignments();
   }
 
   // Remove assignment
   async function removeAssignment(id: string) {
-    await supabase.from("teacher_assignments").delete().eq("id", id);
+    await fetch("/api/admin/assignments", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
     loadAssignments();
   }
 
