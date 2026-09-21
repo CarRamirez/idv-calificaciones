@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   const admin = createAdminClient();
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, celular, telefono_emergencia, correo_personal")
+    .select("id, celular, telefono_emergencia, correo_personal, nombre_emergencia, relacion_emergencia")
     .eq("id", profileId)
     .single();
 
@@ -31,7 +31,7 @@ export async function PUT(req: Request) {
   if (!user) return NextResponse.json({ error: "No auth" }, { status: 401 });
 
   const body = await req.json();
-  const { id, celular, telefono_emergencia, correo_personal } = body;
+  const { id, celular, telefono_emergencia, correo_personal, nombre_emergencia, relacion_emergencia } = body;
 
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
@@ -82,6 +82,8 @@ export async function PUT(req: Request) {
       celular: celular || null,
       telefono_emergencia: telefono_emergencia || null,
       correo_personal: correo_personal || null,
+      nombre_emergencia: nombre_emergencia || null,
+      relacion_emergencia: relacion_emergencia || null,
     })
     .eq("id", id);
 

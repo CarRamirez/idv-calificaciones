@@ -19,7 +19,6 @@ export async function GET() {
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
 
-  // Only admin, directora_anita, and teacher can see the directory
   const ALLOWED_ROLES = ["admin", "directora_anita", "teacher", "viewer"];
   if (!ALLOWED_ROLES.includes(effectiveProfile.role)) {
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
@@ -28,7 +27,7 @@ export async function GET() {
   const admin = createAdminClient();
   const { data: users, error } = await admin
     .from("profiles")
-    .select("id, full_name, role, celular, correo_personal")
+    .select("id, full_name, role, celular, correo_personal, telefono_emergencia, nombre_emergencia, relacion_emergencia")
     .order("full_name");
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

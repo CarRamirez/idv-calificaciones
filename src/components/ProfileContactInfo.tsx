@@ -12,6 +12,8 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
   const [celular, setCelular] = useState("");
   const [telefonoEmergencia, setTelefonoEmergencia] = useState("");
   const [correoPersonal, setCorreoPersonal] = useState("");
+  const [nombreEmergencia, setNombreEmergencia] = useState("");
+  const [relacionEmergencia, setRelacionEmergencia] = useState("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -20,6 +22,8 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
   const [origCelular, setOrigCelular] = useState("");
   const [origTelefono, setOrigTelefono] = useState("");
   const [origCorreo, setOrigCorreo] = useState("");
+  const [origNombreEmergencia, setOrigNombreEmergencia] = useState("");
+  const [origRelacionEmergencia, setOrigRelacionEmergencia] = useState("");
 
   const fetchData = useCallback(async () => {
     try {
@@ -29,9 +33,13 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
         setCelular(data.profile.celular || "");
         setTelefonoEmergencia(data.profile.telefono_emergencia || "");
         setCorreoPersonal(data.profile.correo_personal || "");
+        setNombreEmergencia(data.profile.nombre_emergencia || "");
+        setRelacionEmergencia(data.profile.relacion_emergencia || "");
         setOrigCelular(data.profile.celular || "");
         setOrigTelefono(data.profile.telefono_emergencia || "");
         setOrigCorreo(data.profile.correo_personal || "");
+        setOrigNombreEmergencia(data.profile.nombre_emergencia || "");
+        setOrigRelacionEmergencia(data.profile.relacion_emergencia || "");
       }
     } catch {
       // Silent fail
@@ -58,12 +66,16 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
           celular,
           telefono_emergencia: telefonoEmergencia,
           correo_personal: correoPersonal,
+          nombre_emergencia: nombreEmergencia,
+          relacion_emergencia: relacionEmergencia,
         }),
       });
       if (res.ok) {
         setOrigCelular(celular);
         setOrigTelefono(telefonoEmergencia);
         setOrigCorreo(correoPersonal);
+        setOrigNombreEmergencia(nombreEmergencia);
+        setOrigRelacionEmergencia(relacionEmergencia);
         setEditing(false);
       }
     } catch {
@@ -77,6 +89,8 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
     setCelular(origCelular);
     setTelefonoEmergencia(origTelefono);
     setCorreoPersonal(origCorreo);
+    setNombreEmergencia(origNombreEmergencia);
+    setRelacionEmergencia(origRelacionEmergencia);
     setEditing(false);
   };
 
@@ -91,7 +105,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
     ? `https://wa.me/52${celular.replace(/\D/g, "")}`
     : null;
 
-  const hasSomeData = celular || telefonoEmergencia || correoPersonal;
+  const hasSomeData = celular || telefonoEmergencia || correoPersonal || nombreEmergencia;
 
   return (
     <div className="card p-5 mb-6">
@@ -138,6 +152,26 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
               value={correoPersonal}
               onChange={(e) => setCorreoPersonal(e.target.value)}
               placeholder="correo@ejemplo.com"
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Contacto de emergencia</label>
+            <input
+              type="text"
+              value={nombreEmergencia}
+              onChange={(e) => setNombreEmergencia(e.target.value)}
+              placeholder="Nombre completo"
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Relación</label>
+            <input
+              type="text"
+              value={relacionEmergencia}
+              onChange={(e) => setRelacionEmergencia(e.target.value)}
+              placeholder="Ej: Hermano, Esposa, Padre"
               className="input-field"
             />
           </div>
@@ -211,6 +245,23 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
               <div>
                 <p className="text-xs text-gray-400">Correo personal</p>
                 <p className="text-sm font-medium text-gray-800">{correoPersonal}</p>
+              </div>
+            </div>
+          )}
+
+          {nombreEmergencia && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Contacto de emergencia</p>
+                <p className="text-sm font-medium text-gray-800">{nombreEmergencia}</p>
+                {relacionEmergencia && (
+                  <p className="text-xs text-gray-400">{relacionEmergencia}</p>
+                )}
               </div>
             </div>
           )}
