@@ -28,6 +28,7 @@ type Props = {
   subjects: Subject[];
   students: Student[];
   gradeMap: GradeMap;
+  groupName?: string;
 };
 
 type ViewType = "general" | "t1" | "t2" | "t3";
@@ -43,7 +44,7 @@ function periodShort(id: number): string {
   return PERIODS.find((p) => p.id === id)?.short ?? "";
 }
 
-export default function ConcentradoTable({ subjects, students, gradeMap }: Props) {
+export default function ConcentradoTable({ subjects, students, gradeMap, groupName }: Props) {
   const [view, setView] = useState<ViewType>("general");
 
   const tabs: { key: ViewType; label: string }[] = [
@@ -125,6 +126,48 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
             {tab.label}
           </button>
         ))}
+      </div>
+
+      {/* Print button */}
+      <div className="flex justify-end mb-2 print:hidden">
+        <button
+          onClick={() => window.print()}
+          className="btn-primary text-sm flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          Imprimir Concentrado
+        </button>
+      </div>
+
+      {/* Print styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { size: landscape; margin: 6mm 4mm; }
+          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .card { box-shadow: none !important; border: 1px solid #d1d5db !important; }
+          .concentrado-print-header { display: flex !important; }
+          .concentrado-print-footer { display: block !important; }
+        }
+      `}} />
+
+      {/* Print header */}
+      <div className="hidden concentrado-print-header items-center justify-between mb-3 pb-2 border-b-2 border-indigo-600">
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-idv.png" alt="IDV" className="w-12 h-12 object-contain" />
+          <div>
+            <h1 className="text-sm font-bold text-gray-900">Instituto Don Vasco — Secundaria</h1>
+            <p className="text-[10px] text-gray-500">Concentrado de Calificaciones — Ciclo Escolar 2026-2027</p>
+          </div>
+        </div>
+        {groupName && (
+          <div className="text-right">
+            <p className="text-sm font-bold text-gray-900">{groupName}</p>
+            <p className="text-[10px] text-gray-500">{students.length} alumno{students.length !== 1 ? "s" : ""}</p>
+          </div>
+        )}
       </div>
 
       {/* Semáforo */}
@@ -289,6 +332,23 @@ export default function ConcentradoTable({ subjects, students, gradeMap }: Props
             </tbody>
           </table>
         )}
+      </div>
+
+      {/* Print footer — signature */}
+      <div className="hidden concentrado-print-footer mt-6 px-4">
+        <div className="flex justify-between items-end">
+          <div className="text-center">
+            <div className="w-48 border-t border-gray-400 pt-1">
+              <p className="text-[9px] font-semibold text-gray-700">Profesor(a)</p>
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="w-52 border-t border-gray-400 pt-1">
+              <p className="text-[9px] font-semibold text-gray-700">Lic. Ana Laura Zúñiga García</p>
+              <p className="text-[8px] text-gray-500">Directora de Secundaria</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

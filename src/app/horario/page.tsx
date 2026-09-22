@@ -131,6 +131,48 @@ export default function HorarioPage() {
   });
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
 
+  // Current time tracking for highlighting active class
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30_000); // update every 30s
+    return () => clearInterval(timer);
+  }, []);
+
+  // Get current time in Mexico City timezone
+  const mexicoTime = useMemo(() => {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Mexico_City",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      weekday: "long",
+    }).formatToParts(now);
+    const hour = parts.find((p) => p.type === "hour")?.value || "00";
+    const minute = parts.find((p) => p.type === "minute")?.value || "00";
+    const weekday = parts.find((p) => p.type === "weekday")?.value || "";
+    return { timeStr: `${hour}:${minute}`, weekday };
+  }, [now]);
+
+  // Map English weekday to Spanish
+  const WEEKDAY_MAP: Record<string, string> = {
+    Monday: "Lunes", Tuesday: "Martes", Wednesday: "Miércoles",
+    Thursday: "Jueves", Friday: "Viernes",
+  };
+  const todayName = WEEKDAY_MAP[mexicoTime.weekday] || "";
+
+  // Find active slot index (among classSlots, not just data slots)
+  const activeSlotIdx = useMemo(() => {
+    const [h, m] = mexicoTime.timeStr.split(":").map(Number);
+    const nowMins = h * 60 + m;
+    return classSlots.findIndex((slot) => {
+      if (slot.isBreak) return false;
+      const [sh, sm] = slot.start.split(":").map(Number);
+      const [eh, em] = slot.end.split(":").map(Number);
+      return nowMins >= sh * 60 + sm && nowMins < eh * 60 + em;
+    });
+  }, [mexicoTime.timeStr, classSlots]);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.replace("/login"); return; }
@@ -299,9 +341,20 @@ export default function HorarioPage() {
                       return (
                         <tr
                           key={idx}
-                          className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                          className={`border-b border-gray-100 transition-colors ${
+                            idx === activeSlotIdx && selectedDay === todayName
+                              ? "bg-indigo-50 ring-2 ring-inset ring-indigo-400"
+                              : "hover:bg-gray-50/50"
+                          }`}
                         >
-                          <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
+                          <td className={`px-3 py-2 text-xs font-medium whitespace-nowrap ${
+                            idx === activeSlotIdx && selectedDay === todayName
+                              ? "text-indigo-700 font-bold"
+                              : "text-gray-500"
+                          }`}>
+                            {idx === activeSlotIdx && selectedDay === todayName && (
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse mr-1 align-middle" />
+                            )}
                             {slot.start} - {slot.end}
                           </td>
                           {GROUPS.map((_, gi) => {
@@ -429,9 +482,20 @@ export default function HorarioPage() {
                       return (
                         <tr
                           key={idx}
-                          className="border-b border-gray-100 hover:bg-gray-50/30 transition-colors"
+                          className={`border-b border-gray-100 transition-colors ${
+                            idx === activeSlotIdx
+                              ? "bg-indigo-50/70 ring-1 ring-inset ring-indigo-300"
+                              : "hover:bg-gray-50/30"
+                          }`}
                         >
-                          <td className="px-2 py-1.5 text-[10px] font-medium text-gray-500 whitespace-nowrap sticky left-0 bg-white z-10">
+                          <td className={`px-2 py-1.5 text-[10px] font-medium whitespace-nowrap sticky left-0 z-10 ${
+                            idx === activeSlotIdx
+                              ? "bg-indigo-50 text-indigo-700 font-bold"
+                              : "bg-white text-gray-500"
+                          }`}>
+                            {idx === activeSlotIdx && (
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse mr-0.5 align-middle" />
+                            )}
                             {slot.start}
                             <br />
                             <span className="text-gray-400">{slot.end}</span>

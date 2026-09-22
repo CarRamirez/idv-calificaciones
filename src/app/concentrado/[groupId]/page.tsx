@@ -102,6 +102,7 @@ export default async function ConcentradoPage({ params }: Props) {
         </div>
 
         <ConcentradoTable
+          groupName={`${group.grade}° ${group.letter}`}
           subjects={safeSubjects}
           students={safeStudents}
           gradeMap={gradeMap}

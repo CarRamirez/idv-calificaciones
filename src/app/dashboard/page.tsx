@@ -641,7 +641,7 @@ export default async function DashboardPage() {
                         <p className="text-xs text-gray-500 mb-2">
                           {count} alumno{count !== 1 ? "s" : ""}
                         </p>
-                        <div className="flex gap-1.5">
+                        <div className="flex flex-col sm:flex-row gap-1.5">
                           <Link
                             href={`/concentrado/${g.id}`}
                             className={`flex-1 text-xs font-medium px-2 py-1.5 rounded-md text-center ${colors.badge} hover:opacity-80 transition-opacity`}
@@ -653,6 +653,12 @@ export default async function DashboardPage() {
                             className="flex-1 text-xs font-medium px-2 py-1.5 rounded-md text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                           >
                             Boleta
+                          </Link>
+                          <Link
+                            href={`/lista/${g.id}`}
+                            className="flex-1 text-xs font-medium px-2 py-1.5 rounded-md text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                          >
+                            Lista
                           </Link>
                         </div>
                       </div>
