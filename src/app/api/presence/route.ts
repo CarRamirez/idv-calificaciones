@@ -18,6 +18,7 @@ export async function POST() {
 }
 
 // GET: Count online users (active in last 3 minutes)
+// Admin roles also get the list of who is online
 export async function GET() {
   const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,6 +27,31 @@ export async function GET() {
   const admin = createAdminClient();
   const threshold = new Date(Date.now() - 3 * 60 * 1000).toISOString();
 
+  // Check if caller is admin
+  const { data: callerProfile } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const ADMIN_ROLES = ["admin", "directora_anita"];
+  const isAdmin = callerProfile && ADMIN_ROLES.includes(callerProfile.role);
+
+  if (isAdmin) {
+    // Return full list for admins
+    const { data: onlineUsers, error } = await admin
+      .from("profiles")
+      .select("id, full_name, role, last_active")
+      .gte("last_active", threshold)
+      .order("full_name");
+
+    return NextResponse.json({
+      count: error ? 0 : (onlineUsers?.length || 0),
+      users: error ? [] : (onlineUsers || []),
+    });
+  }
+
+  // Non-admin: just the count
   const { count, error } = await admin
     .from("profiles")
     .select("id", { count: "exact", head: true })

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Tutorial from "@/components/Tutorial";
+import { useTheme, SKIN_LABELS, SKIN_DOT, type ThemeMode, type ThemeColor } from "@/components/ThemeProvider";
 
 type Props = {
   userName: string;
@@ -15,6 +16,8 @@ type Props = {
 const SESSION_DURATION = 10 * 60 * 1000;
 const WARNING_AT = 9.5 * 60 * 1000;
 const EXTENSION_TIME = 5 * 60 * 1000;
+
+const ADMIN_ROLES = ["admin", "directora_anita"];
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
@@ -30,9 +33,24 @@ const ROLE_COLORS: Record<string, string> = {
   viewer: "bg-sky-100 text-sky-700",
 };
 
+const MODE_ICONS: Record<ThemeMode, string> = {
+  light: "☀️",
+  dark: "🌙",
+  auto: "💻",
+};
+
+const MODE_LABELS: Record<ThemeMode, string> = {
+  light: "Claro",
+  dark: "Oscuro",
+  auto: "Automático",
+};
+
+type OnlineUser = { id: string; full_name: string; role: string; last_active: string };
+
 export default function Navbar({ userName, userRole }: Props) {
   const router = useRouter();
   const supabase = createClient();
+  const { mode, color, setMode, setColor } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userDropdown, setUserDropdown] = useState(false);
@@ -49,10 +67,17 @@ export default function Navbar({ userName, userRole }: Props) {
   const [showTimeout, setShowTimeout] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [onlineDropdown, setOnlineDropdown] = useState(false);
+  const [themeDropdown, setThemeDropdown] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const sessionExpiry = useRef(Date.now() + SESSION_DURATION);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const calDropdownRef = useRef<HTMLDivElement>(null);
+  const onlineRef = useRef<HTMLDivElement>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
+
+  const isAdmin = ADMIN_ROLES.includes(userRole);
 
   const watermarkBg = useMemo(() => {
     const label = `${userName}  ·  ${ROLE_LABELS[userRole] || userRole}`;
@@ -69,7 +94,6 @@ export default function Navbar({ userName, userRole }: Props) {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id);
     });
-    // If impersonating, override userId with the effective user's ID
     fetch("/api/auth/effective-profile")
       .then((res) => res.json())
       .then((data) => {
@@ -78,13 +102,16 @@ export default function Navbar({ userName, userRole }: Props) {
       .catch(() => {});
   }, [userRole]);
 
-  // Presence: heartbeat + online count polling
+  // Presence: heartbeat + online count/users polling
   useEffect(() => {
     const sendHeartbeat = () => fetch("/api/presence", { method: "POST" }).catch(() => {});
     const fetchOnline = () =>
       fetch("/api/presence")
         .then((r) => r.json())
-        .then((d) => setOnlineCount(d.count || 0))
+        .then((d) => {
+          setOnlineCount(d.count || 0);
+          if (d.users) setOnlineUsers(d.users);
+        })
         .catch(() => {});
     sendHeartbeat();
     fetchOnline();
@@ -145,6 +172,8 @@ export default function Navbar({ userName, userRole }: Props) {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setUserDropdown(false);
       if (calDropdownRef.current && !calDropdownRef.current.contains(e.target as Node)) setCalDropdown(false);
+      if (onlineRef.current && !onlineRef.current.contains(e.target as Node)) setOnlineDropdown(false);
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) setThemeDropdown(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -178,7 +207,7 @@ export default function Navbar({ userName, userRole }: Props) {
         setSearchResults(data.results || []);
       } catch { setSearchResults([]); }
       finally { setSearchLoading(false); }
-    }, 300);
+    }, 150);
     return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
   }, [searchQuery]);
 
@@ -203,9 +232,9 @@ export default function Navbar({ userName, userRole }: Props) {
       {/* Watermark */}
       <div aria-hidden="true" className="fixed inset-0 z-0 pointer-events-none select-none" style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }} />
 
-      <nav className="sticky top-0 z-50 border-b" style={{ background: "var(--nav-bg)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderColor: "var(--nav-border)" }}>
+      <nav className="sticky top-0 z-50 border-b print:hidden" style={{ background: "var(--nav-bg)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderColor: "var(--nav-border)" }}>
         {/* Thin gradient accent bar at top */}
-        <div className="h-[3px] w-full" style={{ background: "linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee)" }} />
+        <div className="h-[3px] w-full" style={{ background: "var(--skin-accent-bar, linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee))" }} />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
@@ -216,14 +245,14 @@ export default function Navbar({ userName, userRole }: Props) {
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-mint-400 border-2 border-white" />
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-sm font-bold bg-gradient-to-r from-primary-600 to-violet-600 bg-clip-text text-transparent" style={{ fontFamily: "var(--font-display)" }}>
+                <span className="text-sm font-bold bg-clip-text text-transparent" style={{ backgroundImage: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))", fontFamily: "var(--font-display)" }}>
                   Mnemósine
                 </span>
                 <span className="text-[10px] text-gray-400 font-medium hidden sm:block">Instituto Don Vasco</span>
               </div>
             </Link>
 
-            {/* Center: time + weather */}
+            {/* Center: time + weather + online */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100">
               <span className="tabular-nums text-xs font-semibold text-gray-600">{currentTime}</span>
               {weather && (
@@ -238,13 +267,59 @@ export default function Navbar({ userName, userRole }: Props) {
               {onlineCount > 0 && (
                 <>
                   <span className="w-px h-3 bg-gray-200" />
-                  <span className="flex items-center gap-1 text-xs text-gray-500" title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea`}>
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  {isAdmin ? (
+                    <div className="relative" ref={onlineRef}>
+                      <button
+                        onClick={() => setOnlineDropdown(!onlineDropdown)}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                        title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea — clic para ver`}
+                      >
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                        </span>
+                        <span className="font-medium">{onlineCount}</span>
+                        <svg className={`w-2.5 h-2.5 text-gray-400 transition-transform duration-200 ${onlineDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {onlineDropdown && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-white rounded-2xl shadow-float border border-gray-100 py-2 z-50 animate-slide-down">
+                          <div className="px-3 py-2 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-700">Usuarios en línea</p>
+                          </div>
+                          <div className="max-h-60 overflow-y-auto">
+                            {onlineUsers.length === 0 ? (
+                              <p className="px-3 py-3 text-xs text-gray-400 text-center">Cargando...</p>
+                            ) : (
+                              onlineUsers.map((u) => (
+                                <div key={u.id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors">
+                                  <div className="relative">
+                                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold" style={{ background: "var(--skin-gradient)", color: "white" }}>
+                                      {u.full_name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border border-white" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-medium text-gray-800 truncate">{u.full_name}</p>
+                                    <p className="text-[10px] text-gray-400">{ROLE_LABELS[u.role] || u.role}</p>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs text-gray-500" title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea`}>
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                      </span>
+                      <span className="font-medium">{onlineCount}</span>
                     </span>
-                    <span className="font-medium">{onlineCount}</span>
-                  </span>
+                  )}
                 </>
               )}
             </div>
@@ -321,10 +396,75 @@ export default function Navbar({ userName, userRole }: Props) {
               )}
               {can("periodos") && <NavLink href="/periodos">Periodos</NavLink>}
 
+              {/* Theme switcher button */}
+              <div className="relative" ref={themeRef}>
+                <button
+                  onClick={() => setThemeDropdown(!themeDropdown)}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                  title="Personalizar tema"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
+                  </svg>
+                </button>
+                {themeDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-float border border-gray-100 py-3 z-50 animate-slide-down">
+                    {/* Mode selector */}
+                    <div className="px-3 mb-2">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Modo</p>
+                      <div className="flex gap-1">
+                        {(["light", "dark", "auto"] as ThemeMode[]).map((m) => (
+                          <button
+                            key={m}
+                            onClick={() => setMode(m)}
+                            className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all duration-200 ${
+                              mode === m
+                                ? "bg-gray-100 text-gray-900 ring-1 ring-gray-200"
+                                : "text-gray-500 hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-sm">{MODE_ICONS[m]}</span>
+                            <span>{MODE_LABELS[m]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="border-t border-gray-100 my-2" />
+                    {/* Color skin */}
+                    <div className="px-3">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Color</p>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {(Object.keys(SKIN_LABELS) as ThemeColor[]).map((c) => (
+                          <button
+                            key={c}
+                            onClick={() => setColor(c)}
+                            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all duration-200 ${
+                              color === c
+                                ? "bg-gray-100 ring-1 ring-gray-200"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <span
+                              className="w-5 h-5 rounded-full border-2 transition-transform duration-200"
+                              style={{
+                                background: SKIN_DOT[c],
+                                borderColor: color === c ? SKIN_DOT[c] : "transparent",
+                                transform: color === c ? "scale(1.15)" : "scale(1)",
+                              }}
+                            />
+                            <span className="text-gray-600">{SKIN_LABELS[c]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* User dropdown */}
               <div className="relative ml-1 pl-3 border-l border-gray-200" ref={dropdownRef}>
                 <button onClick={() => setUserDropdown(!userDropdown)} className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-50 transition-all duration-200">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold" style={{ background: "linear-gradient(135deg, #5c7cfa, #7c3aed)", color: "white" }}>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white" style={{ background: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))" }}>
                     {firstName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-left hidden lg:block">
@@ -433,6 +573,64 @@ export default function Navbar({ userName, userRole }: Props) {
               )}
               {can("periodos") && <MobileNavLink href="/periodos" onClick={() => setMenuOpen(false)}>Periodos</MobileNavLink>}
 
+              {/* Mobile: admin online users list */}
+              {isAdmin && onlineUsers.length > 0 && (
+                <>
+                  <p className="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    En línea ({onlineCount})
+                  </p>
+                  {onlineUsers.map((u) => (
+                    <div key={u.id} className="flex items-center gap-2.5 px-3 py-2 ml-3">
+                      <div className="relative">
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[9px] font-bold text-white" style={{ background: "var(--skin-gradient)" }}>
+                          {u.full_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-500 border border-white" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-gray-700 truncate">{u.full_name}</p>
+                        <p className="text-[9px] text-gray-400">{ROLE_LABELS[u.role] || u.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Mobile: theme switcher */}
+              <p className="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tema</p>
+              <div className="px-3 flex gap-1">
+                {(["light", "dark", "auto"] as ThemeMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-all ${
+                      mode === m
+                        ? "bg-gray-100 text-gray-900 ring-1 ring-gray-200"
+                        : "text-gray-500 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>{MODE_ICONS[m]}</span>
+                    <span>{MODE_LABELS[m]}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="px-3 pt-2 flex gap-2 flex-wrap">
+                {(Object.keys(SKIN_LABELS) as ThemeColor[]).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setColor(c)}
+                    className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
+                      color === c ? "scale-110 shadow-sm" : "opacity-70 hover:opacity-100"
+                    }`}
+                    style={{
+                      background: SKIN_DOT[c],
+                      borderColor: color === c ? SKIN_DOT[c] : "transparent",
+                    }}
+                    title={SKIN_LABELS[c]}
+                  />
+                ))}
+              </div>
+
               <div className="border-t border-gray-100 mt-2 pt-3">
                 <button
                   onClick={() => { setShowTutorial(true); setMenuOpen(false); }}
@@ -445,7 +643,7 @@ export default function Navbar({ userName, userRole }: Props) {
                 )}
                 <div className="px-3 py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #5c7cfa, #7c3aed)" }}>
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style={{ background: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))" }}>
                       {firstName.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-xs text-gray-500">{userName}</span>

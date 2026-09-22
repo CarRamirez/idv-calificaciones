@@ -123,3 +123,41 @@ export async function GET() {
 
   return NextResponse.json({ assignments: data || [] });
 }
+
+
+// PATCH: Batch create assignments (multiple subjects at once)
+export async function PATCH(req: NextRequest) {
+  if (!(await verifyPermission())) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const { teacher_id, group_id, subject_ids } = await req.json();
+  if (!teacher_id || !group_id || !Array.isArray(subject_ids) || subject_ids.length === 0) {
+    return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
+  }
+
+  const admin = createAdminClient();
+
+  // Get existing assignments for this teacher+group
+  const { data: existing } = await admin
+    .from("teacher_assignments")
+    .select("subject_id")
+    .eq("teacher_id", teacher_id)
+    .eq("group_id", group_id);
+
+  const existingSet = new Set((existing || []).map((e) => e.subject_id));
+  const toInsert = subject_ids.filter((sid: string) => !existingSet.has(sid));
+
+  if (toInsert.length === 0) {
+    return NextResponse.json({ inserted: 0 });
+  }
+
+  const rows = toInsert.map((subject_id: string) => ({ teacher_id, group_id, subject_id }));
+  const { error } = await admin.from("teacher_assignments").insert(rows);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  return NextResponse.json({ inserted: toInsert.length });
+}

@@ -53,7 +53,7 @@ export default function AdminProfesoresPage() {
   // Assignment modal
   const [assignTeacher, setAssignTeacher] = useState<Teacher | null>(null);
   const [assignGroup, setAssignGroup] = useState("");
-  const [assignSubject, setAssignSubject] = useState("");
+  const [assignSubjects, setAssignSubjects] = useState<string[]>([]);
 
   // Delete confirmation
   const [deleteTeacher, setDeleteTeacher] = useState<Teacher | null>(null);
@@ -292,21 +292,18 @@ export default function AdminProfesoresPage() {
 
   // Add assignment
   async function handleAddAssignment() {
-    if (!assignTeacher || !assignGroup || !assignSubject) return;
-    const exists = assignments.some(
-      (a) => a.teacher_id === assignTeacher.id && a.group_id === assignGroup && a.subject_id === assignSubject
-    );
-    if (exists) return;
-
+    if (!assignTeacher || !assignGroup || assignSubjects.length === 0) return;
+    // Single batch request instead of N sequential requests
     await fetch("/api/admin/assignments", {
-      method: "POST",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         teacher_id: assignTeacher.id,
         group_id: assignGroup,
-        subject_id: assignSubject,
+        subject_ids: assignSubjects,
       }),
     });
+    setAssignSubjects([]);
     loadAssignments();
   }
 
@@ -468,7 +465,7 @@ export default function AdminProfesoresPage() {
                         onClick={() => {
                           setAssignTeacher(t);
                           setAssignGroup("");
-                          setAssignSubject("");
+                          setAssignSubjects([]);
                         }}
                         className="text-xs text-primary-600 hover:text-primary-800"
                       >
@@ -736,7 +733,7 @@ export default function AdminProfesoresPage() {
                   <label className="text-xs font-medium text-gray-700 mb-1 block">Grupo</label>
                   <select
                     value={assignGroup}
-                    onChange={(e) => { setAssignGroup(e.target.value); setAssignSubject(""); }}
+                    onChange={(e) => { setAssignGroup(e.target.value); setAssignSubjects([]); }}
                     className="input-field"
                   >
                     <option value="">Selecciona grupo...</option>
@@ -746,18 +743,58 @@ export default function AdminProfesoresPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Materia</label>
-                  <select
-                    value={assignSubject}
-                    onChange={(e) => setAssignSubject(e.target.value)}
-                    className="input-field"
-                    disabled={!assignGroup}
-                  >
-                    <option value="">Selecciona materia...</option>
-                    {filteredSubjects.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">
+                    Materias {assignSubjects.length > 0 && <span className="text-primary-600">({assignSubjects.length} seleccionada{assignSubjects.length !== 1 ? "s" : ""})</span>}
+                  </label>
+                  {!assignGroup ? (
+                    <p className="text-xs text-gray-400 py-2">Selecciona un grupo primero</p>
+                  ) : (
+                    <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
+                      {filteredSubjects.length > 1 && (
+                        <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer border-b border-gray-100 mb-1 pb-2">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            checked={assignSubjects.length === filteredSubjects.filter((s) => !assignments.some((a) => a.teacher_id === assignTeacher!.id && a.group_id === assignGroup && a.subject_id === s.id)).length && assignSubjects.length > 0}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                const available = filteredSubjects.filter((s) => !assignments.some((a) => a.teacher_id === assignTeacher!.id && a.group_id === assignGroup && a.subject_id === s.id)).map((s) => s.id);
+                                setAssignSubjects(available);
+                              } else {
+                                setAssignSubjects([]);
+                              }
+                            }}
+                          />
+                          <span className="text-xs font-semibold text-primary-700">Seleccionar todas</span>
+                        </label>
+                      )}
+                      {filteredSubjects.map((s) => {
+                        const alreadyAssigned = assignments.some(
+                          (a) => a.teacher_id === assignTeacher!.id && a.group_id === assignGroup && a.subject_id === s.id
+                        );
+                        return (
+                          <label key={s.id} className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer ${alreadyAssigned ? "opacity-40" : "hover:bg-gray-50"}`}>
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              disabled={alreadyAssigned}
+                              checked={alreadyAssigned || assignSubjects.includes(s.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setAssignSubjects((prev) => [...prev, s.id]);
+                                } else {
+                                  setAssignSubjects((prev) => prev.filter((id) => id !== s.id));
+                                }
+                              }}
+                            />
+                            <span className={`text-xs ${alreadyAssigned ? "text-gray-400 line-through" : "text-gray-700"}`}>
+                              {s.name} {alreadyAssigned ? "(ya asignada)" : ""}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-5">
@@ -765,9 +802,9 @@ export default function AdminProfesoresPage() {
                 <button
                   onClick={handleAddAssignment}
                   className="btn-primary text-sm"
-                  disabled={!assignGroup || !assignSubject}
+                  disabled={!assignGroup || assignSubjects.length === 0}
                 >
-                  Asignar
+                  {assignSubjects.length > 1 ? `Asignar ${assignSubjects.length} materias` : "Asignar"}
                 </button>
               </div>
             </div>
