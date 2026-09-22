@@ -44,12 +44,6 @@ function semaforoClass(score: number | null): string {
   return "bg-green-100 text-green-800";
 }
 
-function semaforoPrintBorder(score: number | null): string {
-  if (score === null) return "";
-  if (score < 7) return "print-semaforo-red";
-  if (score < 8) return "print-semaforo-yellow";
-  return "print-semaforo-green";
-}
 
 export default function BoletaView({ student, group, subjects, gradeMap }: Props) {
   const printRef = useRef<HTMLDivElement>(null);
