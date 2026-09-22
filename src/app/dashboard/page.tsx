@@ -641,7 +641,7 @@ export default async function DashboardPage() {
                         <p className="text-xs text-gray-500 mb-2">
                           {count} alumno{count !== 1 ? "s" : ""}
                         </p>
-                        <div className="grid grid-cols-3 gap-1">
+                        <div className="flex flex-col gap-1">
                           <Link
                             href={`/concentrado/${g.id}`}
                             className={`text-[11px] font-medium px-1.5 py-1 rounded-md text-center ${colors.badge} hover:opacity-80 transition-opacity`}
