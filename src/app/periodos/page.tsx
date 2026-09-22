@@ -210,9 +210,9 @@ function PeriodRow({
           <span className="text-xs text-gray-400 ml-2">Periodo {period.period_number}</span>
           {(period.open_date || period.close_date) && (
             <p className="text-[10px] text-gray-400 mt-0.5">
-              {period.open_date && `Abre: ${new Date(period.open_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}`}
+              {period.open_date && `Abre: ${new Date(period.open_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" })}`}
               {period.open_date && period.close_date && " — "}
-              {period.close_date && `Cierra: ${new Date(period.close_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}`}
+              {period.close_date && `Cierra: ${new Date(period.close_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" })}`}
             </p>
           )}
         </div>

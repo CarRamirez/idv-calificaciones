@@ -83,6 +83,7 @@ export default async function SesionesPage() {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "America/Mexico_City",
     });
   }
 

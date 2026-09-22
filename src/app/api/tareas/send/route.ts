@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
 
   const groupLabel = `${group.grade}°${group.letter}`;
   const today = new Date().toLocaleDateString("es-MX", {
+    timeZone: "America/Mexico_City",
     weekday: "long",
     year: "numeric",
     month: "long",

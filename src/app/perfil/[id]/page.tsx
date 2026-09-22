@@ -110,6 +110,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "America/Mexico_City",
   });
 
   return (
