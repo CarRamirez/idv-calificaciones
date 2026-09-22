@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export type ThemeMode = "light" | "dark" | "auto";
 export type ThemeColor = "indigo" | "blue" | "emerald" | "rose" | "amber" | "cyan";
@@ -8,7 +9,7 @@ export type ThemeColor = "indigo" | "blue" | "emerald" | "rose" | "amber" | "cya
 type ThemeCtx = {
   mode: ThemeMode;
   color: ThemeColor;
-  resolved: "light" | "dark"; // actual applied theme
+  resolved: "light" | "dark";
   setMode: (m: ThemeMode) => void;
   setColor: (c: ThemeColor) => void;
 };
@@ -23,7 +24,6 @@ const ThemeContext = createContext<ThemeCtx>({
 
 export const useTheme = () => useContext(ThemeContext);
 
-// Color skin CSS variable sets
 const COLOR_VARS: Record<ThemeColor, Record<string, string>> = {
   indigo: {
     "--skin-primary": "#5c7cfa",
@@ -93,45 +93,69 @@ export const SKIN_DOT: Record<ThemeColor, string> = {
   cyan: "#0891b2",
 };
 
-function getStoredMode(): ThemeMode {
-  if (typeof window === "undefined") return "light";
-  try { return (localStorage.getItem("theme-mode") as ThemeMode) || "light"; } catch { return "light"; }
-}
-function getStoredColor(): ThemeColor {
-  if (typeof window === "undefined") return "indigo";
-  try { return (localStorage.getItem("theme-color") as ThemeColor) || "indigo"; } catch { return "indigo"; }
-}
-
 function resolveMode(mode: ThemeMode): "light" | "dark" {
   if (mode !== "auto") return mode;
   if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function applyToDOM(m: ThemeMode, c: ThemeColor) {
+  const r = resolveMode(m);
+  document.documentElement.setAttribute("data-theme", r);
+  const vars = COLOR_VARS[c] || COLOR_VARS.indigo;
+  for (const [key, val] of Object.entries(vars)) {
+    document.documentElement.style.setProperty(key, val);
+  }
+  return r;
+}
+
+// Read per-user keys from localStorage
+function readUserPref(userId: string): { mode: ThemeMode; color: ThemeColor } {
+  try {
+    const mode = (localStorage.getItem(`theme-mode-${userId}`) as ThemeMode) || "light";
+    const color = (localStorage.getItem(`theme-color-${userId}`) as ThemeColor) || "indigo";
+    return { mode, color };
+  } catch {
+    return { mode: "light", color: "indigo" };
+  }
+}
+
+function writeUserPref(userId: string, mode: ThemeMode, color: ThemeColor) {
+  try {
+    localStorage.setItem(`theme-mode-${userId}`, mode);
+    localStorage.setItem(`theme-color-${userId}`, color);
+    // Also write generic keys for the flash-prevention script in layout.tsx
+    localStorage.setItem("theme-mode", mode);
+    localStorage.setItem("theme-color", color);
+  } catch {}
+}
+
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>("light");
   const [color, setColorState] = useState<ThemeColor>("indigo");
   const [resolved, setResolved] = useState<"light" | "dark">("light");
+  const userIdRef = useRef<string | null>(null);
 
-  // Init from localStorage
+  // On mount: get user ID, then load their specific preferences
   useEffect(() => {
-    const m = getStoredMode();
-    const c = getStoredColor();
-    setModeState(m);
-    setColorState(c);
-    setResolved(resolveMode(m));
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      userIdRef.current = user.id;
+      const pref = readUserPref(user.id);
+      setModeState(pref.mode);
+      setColorState(pref.color);
+      const r = applyToDOM(pref.mode, pref.color);
+      setResolved(r);
+      // Update generic keys so flash-prevention script stays current for this user
+      writeUserPref(user.id, pref.mode, pref.color);
+    });
   }, []);
 
-  // Apply theme to DOM
+  // Re-apply when mode or color changes
   useEffect(() => {
-    const r = resolveMode(mode);
+    const r = applyToDOM(mode, color);
     setResolved(r);
-    document.documentElement.setAttribute("data-theme", r);
-    // Apply color skin variables
-    const vars = COLOR_VARS[color] || COLOR_VARS.indigo;
-    for (const [key, val] of Object.entries(vars)) {
-      document.documentElement.style.setProperty(key, val);
-    }
   }, [mode, color]);
 
   // Listen for system theme changes when in auto mode
@@ -139,23 +163,22 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     if (mode !== "auto") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
-      const r = resolveMode("auto");
+      const r = applyToDOM("auto", color);
       setResolved(r);
-      document.documentElement.setAttribute("data-theme", r);
     };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, [mode]);
+  }, [mode, color]);
 
   const setMode = useCallback((m: ThemeMode) => {
     setModeState(m);
-    try { localStorage.setItem("theme-mode", m); } catch {}
-  }, []);
+    if (userIdRef.current) writeUserPref(userIdRef.current, m, color);
+  }, [color]);
 
   const setColor = useCallback((c: ThemeColor) => {
     setColorState(c);
-    try { localStorage.setItem("theme-color", c); } catch {}
-  }, []);
+    if (userIdRef.current) writeUserPref(userIdRef.current, mode, c);
+  }, [mode]);
 
   return (
     <ThemeContext.Provider value={{ mode, color, resolved, setMode, setColor }}>
