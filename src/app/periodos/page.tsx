@@ -14,6 +14,7 @@ type EvalPeriod = {
   is_open: boolean;
   open_date: string | null;
   close_date: string | null;
+  effectively_open: boolean;
 };
 
 const TRIMESTER_LABELS: Record<number, string> = {
@@ -106,7 +107,7 @@ export default function PeriodosPage() {
     );
   }
 
-  const openCount = periods.filter((p) => p.is_open).length;
+  const openCount = periods.filter((p) => p.effectively_open).length;
 
   return (
     <div className="page-container">
@@ -138,15 +139,21 @@ export default function PeriodosPage() {
                     <h2 className="text-sm font-bold text-gray-900">
                       {TRIMESTER_LABELS[trimId]}
                     </h2>
-                    {someOpen && (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                        allOpen
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}>
-                        {allOpen ? "Todos abiertos" : "Parcial"}
-                      </span>
-                    )}
+                    {someOpen && (() => {
+                      const effectiveOpen = group.filter((p) => p.effectively_open).length;
+                      const scheduled = group.filter((p) => p.is_open && !p.effectively_open).length;
+                      return (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          effectiveOpen === group.length
+                            ? "bg-green-100 text-green-700"
+                            : effectiveOpen > 0
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}>
+                          {effectiveOpen === group.length ? "Todos abiertos" : effectiveOpen > 0 ? `${effectiveOpen} abierto${effectiveOpen > 1 ? "s" : ""}` : `${scheduled} programado${scheduled > 1 ? "s" : ""}`}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -167,8 +174,8 @@ export default function PeriodosPage() {
         </div>
 
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-700">
-          <strong>Nota:</strong> Cuando un periodo está cerrado, los profesores solo podrán consultar las calificaciones
-          registradas, pero no podrán modificarlas. Solo el administrador puede capturar en periodos cerrados.
+          <strong>Nota:</strong> Cuando un periodo está cerrado o fuera de las fechas programadas, los profesores solo podrán consultar las calificaciones
+          registradas, pero no podrán modificarlas. Si configuras fechas, el periodo se abrirá y cerrará automáticamente. Solo el administrador puede capturar en periodos cerrados.
         </div>
       </main>
     </div>
@@ -197,22 +204,34 @@ function PeriodRow({
 
   return (
     <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border transition-colors ${
-      period.is_open
+      period.effectively_open
         ? "bg-green-50 border-green-200"
+        : period.is_open
+        ? "bg-yellow-50 border-yellow-200"
         : "bg-gray-50 border-gray-200"
     }`}>
       <div className="flex items-center gap-3">
         <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-          period.is_open ? "bg-green-500" : "bg-gray-300"
+          period.effectively_open ? "bg-green-500 animate-pulse" : period.is_open ? "bg-yellow-400" : "bg-gray-300"
         }`} />
         <div>
           <span className="text-sm font-medium text-gray-900">{period.name}</span>
           <span className="text-xs text-gray-400 ml-2">Periodo {period.period_number}</span>
+          {period.is_open && !period.effectively_open && (
+            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 font-medium">
+              {period.open_date && new Date() < new Date(period.open_date) ? "Programado" : "Vencido"}
+            </span>
+          )}
+          {period.effectively_open && (
+            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+              Abierto
+            </span>
+          )}
           {(period.open_date || period.close_date) && (
             <p className="text-[10px] text-gray-400 mt-0.5">
-              {period.open_date && `Abre: ${new Date(period.open_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" })}`}
-              {period.open_date && period.close_date && " — "}
-              {period.close_date && `Cierra: ${new Date(period.close_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" })}`}
+              {period.open_date && new Date(period.open_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" })}
+              {period.open_date && period.close_date && " → "}
+              {period.close_date && new Date(period.close_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" })}
             </p>
           )}
         </div>

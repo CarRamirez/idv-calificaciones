@@ -32,7 +32,20 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ periods: data || [] });
+  // Compute effectively_open: is_open AND within date range (if dates set)
+  const now = new Date();
+  const enriched = (data || []).map((p: any) => {
+    let effectively_open = p.is_open;
+    if (effectively_open && p.open_date) {
+      effectively_open = now >= new Date(p.open_date);
+    }
+    if (effectively_open && p.close_date) {
+      effectively_open = now <= new Date(p.close_date);
+    }
+    return { ...p, effectively_open };
+  });
+
+  return NextResponse.json({ periods: enriched });
 }
 
 // PATCH: Toggle period open/close

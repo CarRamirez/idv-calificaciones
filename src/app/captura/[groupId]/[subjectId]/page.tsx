@@ -158,7 +158,7 @@ export default function CapturaPage({ params }: Props) {
         if (periodsData.periods) {
           const openSet = new Set<number>(
             periodsData.periods
-              .filter((p: any) => p.is_open)
+              .filter((p: any) => p.effectively_open)
               .map((p: any) => p.period_number)
           );
           setOpenPeriods(openSet);

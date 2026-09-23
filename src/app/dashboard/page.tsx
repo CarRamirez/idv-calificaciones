@@ -212,14 +212,22 @@ export default async function DashboardPage() {
       .select("id");
     totalSubjects = subjectRows?.length || 0;
 
-    // Active period
+    // Active period (considering scheduled dates)
     const { data: periods } = await supabase
       .from("evaluation_periods")
-      .select("period_number, name, is_open")
+      .select("period_number, name, is_open, open_date, close_date, school_years!inner(is_current)")
       .eq("is_open", true)
-      .limit(1);
+      .eq("school_years.is_current", true);
     if (periods && periods.length > 0) {
-      activePeriod = { period_number: periods[0].period_number, name: periods[0].name };
+      const now = new Date();
+      const active = periods.find((p: any) => {
+        if (p.open_date && now < new Date(p.open_date)) return false;
+        if (p.close_date && now > new Date(p.close_date)) return false;
+        return true;
+      });
+      if (active) {
+        activePeriod = { period_number: active.period_number, name: active.name };
+      }
     }
 
     // Capture progress: count grades entered vs total possible
