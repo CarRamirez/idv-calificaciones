@@ -35,6 +35,19 @@ export default async function ConcentradoPage({ params }: Props) {
 
   if (!group) redirect("/dashboard");
 
+  // For teachers, get their assigned subject IDs for this group
+  let teacherSubjectIds: string[] | null = null;
+  if (effectiveProfile.role === "teacher") {
+    const { data: assignments } = await supabase
+      .from("teacher_assignments")
+      .select("subject_id")
+      .eq("teacher_id", user!.id)
+      .eq("group_id", params.groupId);
+    if (assignments && assignments.length > 0) {
+      teacherSubjectIds = assignments.map((a) => a.subject_id);
+    }
+  }
+
   const { data: subjects } = await supabase
     .from("subjects")
     .select("id, name, short_name, counts_for_avg, sort_order")
@@ -106,6 +119,7 @@ export default async function ConcentradoPage({ params }: Props) {
           subjects={safeSubjects}
           students={safeStudents}
           gradeMap={gradeMap}
+          teacherSubjectIds={teacherSubjectIds}
         />
       </main>
     </div>

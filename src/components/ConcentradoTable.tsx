@@ -29,6 +29,7 @@ type Props = {
   students: Student[];
   gradeMap: GradeMap;
   groupName?: string;
+  teacherSubjectIds?: string[] | null;
 };
 
 type ViewType = "general" | "t1" | "t2" | "t3";
@@ -44,7 +45,12 @@ function periodShort(id: number): string {
   return PERIODS.find((p) => p.id === id)?.short ?? "";
 }
 
-export default function ConcentradoTable({ subjects, students, gradeMap, groupName }: Props) {
+export default function ConcentradoTable({ subjects, students, gradeMap, groupName, teacherSubjectIds }: Props) {
+  // If teacher, filter to only their subjects
+  const displaySubjects = teacherSubjectIds
+    ? subjects.filter((s) => teacherSubjectIds.includes(s.id))
+    : subjects;
+
   const [view, setView] = useState<ViewType>("general");
 
   const tabs: { key: ViewType; label: string }[] = [
