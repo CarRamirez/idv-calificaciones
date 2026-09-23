@@ -19,11 +19,11 @@
 
   /* ── Dark mode ── */
   [data-theme="dark"] {
-    --page-bg: #0f1117;
-    --card-bg: #1a1b26;
+    --page-bg: #1a1c2e;
+    --card-bg: #232640;
     --card-border: rgba(255, 255, 255, 0.08);
     --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-    --nav-bg: rgba(26, 27, 38, 0.92);
+    --nav-bg: rgba(35, 38, 64, 0.95);
     --nav-border: rgba(255, 255, 255, 0.08);
     color-scheme: dark;
   }
@@ -41,7 +41,7 @@
   }
 
   [data-theme="dark"] .btn-secondary {
-    background: #1e1f2e;
+    background: #2a2d4a;
     border-color: rgba(255,255,255,0.1);
     color: #cbd5e1;
   }
@@ -51,7 +51,7 @@
   }
 
   [data-theme="dark"] .input-field {
-    background: #1e1f2e;
+    background: #2a2d4a;
     border-color: rgba(255,255,255,0.1);
     color: #e2e8f0;
   }
@@ -60,7 +60,7 @@
   }
 
   [data-theme="dark"] .grade-table th {
-    background: #1e1f2e;
+    background: #2a2d4a;
     color: #94a3b8;
     border-color: rgba(255,255,255,0.08);
   }
@@ -81,8 +81,8 @@
 
   /* Dark mode backgrounds */
   [data-theme="dark"] .bg-white { background: var(--card-bg); }
-  [data-theme="dark"] .bg-gray-50 { background: #1e1f2e; }
-  [data-theme="dark"] .bg-gray-100 { background: #252636; }
+  [data-theme="dark"] .bg-gray-50 { background: #2a2d4a; }
+  [data-theme="dark"] .bg-gray-100 { background: #303354; }
 
   /* Dark mode borders */
   [data-theme="dark"] .border-gray-100 { border-color: rgba(255,255,255,0.06); }
