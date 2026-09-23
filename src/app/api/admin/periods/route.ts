@@ -10,7 +10,7 @@ async function verifyAdmin() {
     .select("role")
     .eq("id", user.id)
     .single();
-  if (profile?.role !== "admin") return null;
+  if (profile?.role !== "admin" && profile?.role !== "directora_anita") return null;
   return user;
 }
 

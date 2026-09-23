@@ -47,7 +47,7 @@ export default function PeriodosPage() {
       if (!user) { router.push("/login"); return; }
       const { data: prof } = await supabase
         .from("profiles").select("full_name, role").eq("id", user.id).single();
-      if (!prof || prof.role !== "admin") { router.push("/dashboard"); return; }
+      if (!prof || (prof.role !== "admin" && prof.role !== "directora_anita")) { router.push("/dashboard"); return; }
       setProfile(prof);
       setLoading(false);
     }
