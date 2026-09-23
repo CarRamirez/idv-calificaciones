@@ -365,6 +365,24 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
+        {/* WiFi Docentes */}
+        <div className="mb-6">
+          <div className="card flex items-center gap-4 px-5 py-4">
+            <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800">Red WiFi Docentes</p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-0.5">
+                <span className="text-xs text-gray-500">Red: <span className="font-mono font-medium text-gray-700">_IDV-DOCENTES</span></span>
+                <span className="text-xs text-gray-500">Contraseña: <span className="font-mono font-medium text-gray-700">DVasco2026</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* ═══ Columna principal ═══ */}
         <div>
