@@ -230,7 +230,7 @@ export default function Navbar({ userName, userRole }: Props) {
   return (
     <>
       {/* Watermark */}
-      <div aria-hidden="true" className="fixed inset-0 z-0 pointer-events-none select-none" style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }} />
+      <div aria-hidden="true" className="fixed inset-0 z-0 pointer-events-none select-none print:hidden" style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }} />
 
       <nav className="sticky top-0 z-50 border-b print:hidden" style={{ background: "var(--nav-bg)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderColor: "var(--nav-border)" }}>
         {/* Thin gradient accent bar at top */}

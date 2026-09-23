@@ -151,8 +151,8 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           @page {
-            size: landscape;
-            margin: 8mm 6mm;
+            size: letter portrait;
+            margin: 5mm 6mm;
           }
           body {
             -webkit-print-color-adjust: exact !important;
@@ -161,7 +161,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           .card {
             box-shadow: none !important;
             border: 1px solid #d1d5db !important;
-            border-radius: 4px !important;
+            border-radius: 2px !important;
           }
           .boleta-print-header {
             display: flex !important;
@@ -174,6 +174,39 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           }
           .boleta-print-title {
             display: block !important;
+          }
+          .boleta-copy {
+            height: 48vh;
+            overflow: hidden;
+            page-break-inside: avoid;
+          }
+          .boleta-copy + .boleta-copy {
+            border-top: 1px dashed #999;
+            padding-top: 3mm;
+          }
+          .boleta-copy table {
+            font-size: 6px !important;
+          }
+          .boleta-copy table th,
+          .boleta-copy table td {
+            padding: 0.5px 1.5px !important;
+            line-height: 1.1 !important;
+          }
+          .boleta-copy .boleta-print-header {
+            margin-bottom: 1.5mm !important;
+            padding-bottom: 1.5mm !important;
+          }
+          .boleta-copy .boleta-semaforo-print {
+            margin-bottom: 1mm !important;
+          }
+          .boleta-copy .boleta-signature {
+            margin-top: 4mm !important;
+          }
+          .boleta-copy .boleta-signature .w-48 {
+            width: 35mm !important;
+          }
+          .boleta-copy .boleta-signature .w-56 {
+            width: 45mm !important;
           }
         }
       `}} />
@@ -203,8 +236,10 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
         <span className="px-2 py-1 rounded bg-green-100 text-green-800">Nivel Esperado (8-10)</span>
       </div>
 
-      {/* Contenido imprimible */}
-      <div ref={printRef}>
+      {/* Contenido imprimible — pantalla: 1 vez, impresión: 2 copias */}
+      <div ref={printRef} className="print:block">
+        {[0, 1].map((copyIdx) => (
+        <div key={copyIdx} className={`boleta-copy ${copyIdx === 1 ? "hidden print:block" : ""}`}>
         {/* Header para impresión */}
         <div className="hidden boleta-print-header items-center justify-between mb-3 pb-3 border-b-2 border-indigo-600">
           <div className="flex items-center gap-3">
@@ -363,6 +398,9 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             </div>
           </div>
         </div>
+
+        </div>
+        ))}
 
         {/* Julio (Final) */}
         <div className="mt-6 print:hidden">
