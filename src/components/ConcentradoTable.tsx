@@ -1,5 +1,7 @@
 "use client";
 
+import { formatStudentName } from "@/lib/format-name";
+
 import React, { useState } from "react";
 
 const PERIODS = [
@@ -217,7 +219,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                 return (
                   <tr key={student.id}>
                     <td className="text-center text-gray-500 tabular-nums text-xs">{student.list_num}</td>
-                    <td className="text-xs font-medium text-gray-900">{student.full_name}</td>
+                    <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
                     {subjects.map((s) => {
                       const curricular = getSubjectCurricular(student.id, s.id);
                       const totalAbs = getTotalAbsences(student.id, s.id);
@@ -300,7 +302,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                 return (
                   <tr key={student.id}>
                     <td className="text-center text-gray-500 tabular-nums text-xs">{student.list_num}</td>
-                    <td className="text-xs font-medium text-gray-900">{student.full_name}</td>
+                    <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
                     {subjects.map((s) => {
                       const trimAvg = getTrimesterAvg(student.id, s.id, activeTrimester);
                       const trimAbs = getTrimAbsences(student.id, s.id, activeTrimester.periods);

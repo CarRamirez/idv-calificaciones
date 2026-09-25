@@ -1,5 +1,7 @@
 "use client";
 
+import { formatStudentName } from "@/lib/format-name";
+
 import React, { useRef } from "react";
 
 type Subject = {
@@ -255,7 +257,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             <p className="text-[10px] text-gray-500 mt-0.5">Ciclo Escolar 2026-2027</p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-gray-900">{student.full_name}</p>
+            <p className="text-sm font-bold text-gray-900">{formatStudentName(student.full_name)}</p>
             <p className="text-[10px] text-gray-600">
               {group.grade}° &ldquo;{group.letter}&rdquo; — N° Lista: {student.list_num}
             </p>

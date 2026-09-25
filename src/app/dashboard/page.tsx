@@ -479,7 +479,7 @@ export default async function DashboardPage() {
                           ))}
                         </div>
 
-                        <div className="px-4 pb-4 pt-2 flex gap-2">
+                        <div className="px-4 pb-2 pt-2 flex gap-2">
                           <Link
                             href={`/captura/${gId}/${subjects[0]?.id || ""}`}
                             className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors"
@@ -493,6 +493,20 @@ export default async function DashboardPage() {
                           >
                             <IconDocument className="w-3.5 h-3.5" />
                             Concentrado
+                          </Link>
+                        </div>
+                        <div className="px-4 pb-4 flex gap-2">
+                          <Link
+                            href={`/lista/${gId}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-gray-600 text-[11px] font-medium rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+                          >
+                            Lista
+                          </Link>
+                          <Link
+                            href={`/boleta/grupo/${gId}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-gray-600 text-[11px] font-medium rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+                          >
+                            Boletas
                           </Link>
                         </div>
                       </div>

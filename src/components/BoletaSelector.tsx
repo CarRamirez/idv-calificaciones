@@ -1,5 +1,7 @@
 "use client";
 
+import { formatStudentName } from "@/lib/format-name";
+
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -150,7 +152,7 @@ export default function BoletaSelector({ groups }: Props) {
                       {s.list_num}
                     </span>
                     <span className="text-sm font-medium text-gray-900 group-hover:text-primary-700">
-                      {s.full_name}
+                      {formatStudentName(s.full_name)}
                     </span>
                   </div>
                   <svg

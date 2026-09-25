@@ -1,5 +1,7 @@
 "use client";
 
+import { formatStudentName } from "@/lib/format-name";
+
 import { useEffect, useState, useCallback } from "react";
 import React from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -664,7 +666,7 @@ export default function CapturaPage({ params }: Props) {
                         {student.list_num}
                       </td>
                       <td className="font-medium text-gray-800 text-xs">
-                        {student.full_name}
+                        {formatStudentName(student.full_name)}
                       </td>
                       {currentTrimester.periods.map((p) => {
                         const data = grades[student.id]?.[p.id];
@@ -749,7 +751,7 @@ export default function CapturaPage({ params }: Props) {
                   return (
                     <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
                       <td className="text-center text-gray-400 tabular-nums text-xs font-medium">{student.list_num}</td>
-                      <td className="font-medium text-gray-800 text-xs">{student.full_name}</td>
+                      <td className="font-medium text-gray-800 text-xs">{formatStudentName(student.full_name)}</td>
                       <td className={`text-center ${(subject?.input_type === 'counter' || subject?.input_type === 'counter_max') ? '' : getSemaforoClass(data?.score ?? null)}`}>
                         <input
                           type="number"
@@ -807,7 +809,7 @@ export default function CapturaPage({ params }: Props) {
                   return (
                     <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
                       <td className="text-center text-gray-400 tabular-nums text-xs font-medium">{student.list_num}</td>
-                      <td className="font-medium text-gray-800 text-xs">{student.full_name}</td>
+                      <td className="font-medium text-gray-800 text-xs">{formatStudentName(student.full_name)}</td>
                       {[1, 2, 3].map((t) => {
                         const avg = getTrimesterAvg(student.id, t);
                         const avgNum = avg === "—" ? null : parseFloat(avg);

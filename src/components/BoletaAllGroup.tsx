@@ -1,5 +1,7 @@
 "use client";
 
+import { formatStudentName } from "@/lib/format-name";
+
 import React from "react";
 
 type Subject = {
@@ -134,7 +136,7 @@ function SingleBoleta({
           <p className="text-gray-500" style={{ fontSize: "7px" }}>Ciclo Escolar 2026-2027</p>
         </div>
         <div className="text-right">
-          <p className="font-bold text-gray-900" style={{ fontSize: "9px" }}>{student.full_name}</p>
+          <p className="font-bold text-gray-900" style={{ fontSize: "9px" }}>{formatStudentName(student.full_name)}</p>
           <p className="text-gray-600" style={{ fontSize: "7px" }}>
             {group.grade}° &ldquo;{group.letter}&rdquo; — N° Lista: {student.list_num}
           </p>
@@ -270,7 +272,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             <div key={s.id} className="card p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-xs font-bold text-gray-400 w-6 text-right">{s.list_num}</span>
-                <span className="text-sm font-medium text-gray-900">{s.full_name}</span>
+                <span className="text-sm font-medium text-gray-900">{formatStudentName(s.full_name)}</span>
               </div>
               <span className="text-xs text-gray-400">Boleta {i + 1} de {students.length}</span>
             </div>

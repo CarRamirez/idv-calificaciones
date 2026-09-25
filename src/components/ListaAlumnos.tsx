@@ -1,5 +1,7 @@
 "use client";
 
+import { formatStudentName } from "@/lib/format-name";
+
 type Student = { id: string; full_name: string; list_num: number };
 
 type Props = {
@@ -89,7 +91,7 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
                   {s.list_num}
                 </td>
                 <td className="px-3 py-2 text-sm font-medium text-gray-900">
-                  {s.full_name}
+                  {formatStudentName(s.full_name)}
                 </td>
               </tr>
             ))}
@@ -122,7 +124,7 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
                   {s.list_num}
                 </td>
                 <td className="col-name border border-gray-600 p-1 pl-2 font-medium whitespace-nowrap overflow-hidden" style={{ textOverflow: "ellipsis" }}>
-                  {s.full_name.toUpperCase()}
+                  {formatStudentName(s.full_name)}
                 </td>
                 {cols.map((n) => (
                   <td key={n} className="col-mark border border-gray-400 p-0">&nbsp;</td>
