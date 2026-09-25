@@ -42,7 +42,7 @@ export default async function CapturaIndexPage() {
 
   if (!profile) redirect("/login");
 
-  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  const { effectiveProfile, impersonatedUserId } = await getEffectiveProfile(user.id, profile);
   if (effectiveProfile.role === "viewer") redirect("/dashboard");
 
   let assignments: any[] = [];
@@ -51,7 +51,7 @@ export default async function CapturaIndexPage() {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("id, subjects ( id, name, short_name, sort_order, counts_for_avg ), groups ( id, grade, letter )")
-      .eq("teacher_id", user.id);
+      .eq("teacher_id", impersonatedUserId || user.id);
     assignments = data || [];
   } else if (effectiveProfile.role === "admin" || effectiveProfile.role === "directora_anita") {
     const { data: groups } = await supabase

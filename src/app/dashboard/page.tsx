@@ -481,7 +481,7 @@ export default async function DashboardPage() {
 
                         <div className="px-4 pb-2 pt-2 flex gap-2">
                           <Link
-                            href={`/captura/${gId}/${subjects[0]?.id || ""}`}
+                            href="/captura"
                             className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors"
                           >
                             <IconPencil className="w-3.5 h-3.5" />
