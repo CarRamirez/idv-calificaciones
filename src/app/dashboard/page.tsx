@@ -5,6 +5,9 @@ import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import AnnouncementWall from "@/components/AnnouncementWall";
+import CaptureAlerts from "@/components/CaptureAlerts";
+import PerformanceStats from "@/components/PerformanceStats";
+import PeriodsTimeline from "@/components/PeriodsTimeline";
 
 /* ── SVG Icon helpers ── */
 function IconUsers({ className = "w-6 h-6" }: { className?: string }) {
@@ -653,6 +656,15 @@ export default async function DashboardPage() {
                 </p>
               </div>
             )}
+
+            {/* ── Periods Timeline ── */}
+            <PeriodsTimeline />
+
+            {/* ── Capture Alerts ── */}
+            <CaptureAlerts />
+
+            {/* ── Performance Stats ── */}
+            <PerformanceStats />
 
             {/* ── Group cards ── */}
             <div>
