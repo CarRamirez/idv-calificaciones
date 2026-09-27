@@ -624,6 +624,21 @@ export default async function DashboardPage() {
                   </p>
                   <p className="text-xs text-gray-400">notificar padres</p>
                 </Link>
+                <Link
+                  href="/admin/auditoria"
+                  className="card-interactive p-5 group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                      <IconDocument className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <span className="text-lg font-bold text-slate-600">→</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                    Auditoría
+                  </p>
+                  <p className="text-xs text-gray-400">log de cambios</p>
+                </Link>
               </div>
             )}
 
