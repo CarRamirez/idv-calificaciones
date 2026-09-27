@@ -434,6 +434,149 @@ export default function CapturaPage({ params }: Props) {
     return { filled, total, pct: total ? Math.round((filled / total) * 100) : 0, perPeriod };
   }
 
+
+  /* --- Imprimir registro de captura --- */
+  function handlePrint() {
+    const trimester = activeTab >= 1 && activeTab <= 3
+      ? TRIMESTERS.find((t) => t.id === activeTab)
+      : null;
+    const isJulio = activeTab === 4;
+    const isResumen = activeTab === 0;
+    const inputType = subject?.input_type || "score";
+    const isCounter = inputType === "counter" || inputType === "counter_max";
+
+    const rows = students.map((student) => {
+      if (isResumen) {
+        const t1 = getTrimesterAvg(student.id, 1);
+        const t2 = getTrimesterAvg(student.id, 2);
+        const t3 = getTrimesterAvg(student.id, 3);
+        const julio = grades[student.id]?.[JULIO_FINAL.id]?.score;
+        const pf = getPromedioFinal(student.id);
+        return `<tr>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${student.list_num}</td>
+          <td style="padding:4px 8px;border:1px solid #ccc;font-size:11px;">${formatStudentName(student.full_name)}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${t1}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${t2}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${t3}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${julio !== null && julio !== undefined ? julio : "—"}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;font-weight:bold;">${pf}</td>
+        </tr>`;
+      }
+      if (isJulio) {
+        const data = grades[student.id]?.[JULIO_FINAL.id];
+        return `<tr>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${student.list_num}</td>
+          <td style="padding:4px 8px;border:1px solid #ccc;font-size:11px;">${formatStudentName(student.full_name)}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.score ?? "—"}</td>
+          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.absences ?? 0}</td>
+        </tr>`;
+      }
+      // Trimestre
+      const periodCells = (trimester?.periods || []).map((p) => {
+        const data = grades[student.id]?.[p.id];
+        return `<td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.score ?? "—"}</td>
+                <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.absences ?? 0}</td>`;
+      }).join("");
+      const trimAvg = getTrimesterAvg(student.id, activeTab);
+      const totalAbs = getTrimesterAbsences(student.id, activeTab);
+      return `<tr>
+        <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${student.list_num}</td>
+        <td style="padding:4px 8px;border:1px solid #ccc;font-size:11px;">${formatStudentName(student.full_name)}</td>
+        ${periodCells}
+        <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;font-weight:bold;">${trimAvg}</td>
+        <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${totalAbs || "—"}</td>
+      </tr>`;
+    }).join("");
+
+    let headerRow = "";
+    let subHeaderRow = "";
+    if (isResumen) {
+      headerRow = `<tr style="background:#1d4e9e;color:#fff;">
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;text-align:left;">Nombre del Alumno</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">1er Trim.</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">2do Trim.</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">3er Trim.</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">Julio</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">Prom. Final</th>
+      </tr>`;
+    } else if (isJulio) {
+      headerRow = `<tr style="background:#1d4e9e;color:#fff;">
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;text-align:left;">Nombre del Alumno</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">Calif.</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">Asist.</th>
+      </tr>`;
+    } else {
+      const periodHeaders = (trimester?.periods || []).map((p) =>
+        `<th colspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">${p.short}</th>`
+      ).join("");
+      const periodSubHeaders = (trimester?.periods || []).map(() =>
+        `<th style="padding:4px;border:1px solid #999;font-size:10px;">Cal.</th>
+         <th style="padding:4px;border:1px solid #999;font-size:10px;">Asist.</th>`
+      ).join("");
+      headerRow = `<tr style="background:#1d4e9e;color:#fff;">
+        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
+        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;text-align:left;">Nombre del Alumno</th>
+        ${periodHeaders}
+        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">${isCounter ? "Total" : "Prom."}</th>
+        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">IA</th>
+      </tr>`;
+      subHeaderRow = `<tr style="background:#2563eb;color:#fff;">${periodSubHeaders}</tr>`;
+    }
+
+    const tabName = isResumen ? "Resumen Anual" : isJulio ? "Julio (Final)" : trimester?.name || "";
+    const now = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City", dateStyle: "long", timeStyle: "short" });
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>Registro - ${subject?.name} - ${group?.grade}° ${group?.letter}</title>
+      <style>
+        @page { size: landscape; margin: 1.5cm; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .logo-section { display: flex; align-items: center; gap: 12px; }
+        .school-name { font-size: 14px; font-weight: bold; color: #1d4e9e; }
+        .school-sub { font-size: 11px; color: #666; }
+        .info-section { text-align: right; font-size: 11px; color: #555; }
+        h2 { font-size: 16px; margin: 0 0 4px 0; color: #1a1a1a; }
+        .meta { font-size: 12px; color: #666; margin-bottom: 12px; }
+        .footer { margin-top: 20px; display: flex; justify-content: space-between; }
+        .sign-line { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 4px; font-size: 11px; color: #555; }
+      </style>
+    </head><body>
+      <div class="header">
+        <div class="logo-section">
+          <div>
+            <div class="school-name">Instituto Don Vasco</div>
+            <div class="school-sub">Secundaria — Ciclo 2026-2027</div>
+          </div>
+        </div>
+        <div class="info-section">
+          <div>Impreso: ${now}</div>
+          <div>Profesor: ${(effectiveProfile || profile)?.full_name || ""}</div>
+        </div>
+      </div>
+      <h2>${subject?.name} — ${group?.grade}° "${group?.letter}"</h2>
+      <div class="meta">${tabName} · ${students.length} alumnos</div>
+      <table>
+        <thead>${headerRow}${subHeaderRow}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="footer">
+        <div class="sign-line">Firma del Profesor</div>
+        <div class="sign-line">Firma de Dirección</div>
+      </div>
+    </body></html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.onload = () => { printWindow.print(); };
+    }
+  }
+
   if (loading) {
     return (
       <div className="bg-mesh flex items-center justify-center">
@@ -832,10 +975,19 @@ export default function CapturaPage({ params }: Props) {
                 })}
               </tbody>
             </table>
-            <div className="px-5 py-3" style={{ background: 'rgba(0,0,0,0.01)' }}>
+            <div className="px-5 py-3 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.01)' }}>
               <p className="text-xs text-gray-400">
                 Julio (Final) se muestra como referencia — no se incluye en el promedio final.
               </p>
+              <button
+                onClick={handlePrint}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Imprimir Resumen
+              </button>
             </div>
           </div>
         )}
@@ -843,9 +995,20 @@ export default function CapturaPage({ params }: Props) {
         {/* ===== Barra de guardado (tabs 1-4) ===== */}
         {activeTab !== 0 && (
           <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <p className="text-xs text-gray-400">
-              Los cambios se guardan automáticamente al salir de cada celda. IA = Inasistencias Acumuladas.
-            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrint}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Imprimir Registro
+              </button>
+              <p className="text-xs text-gray-400 hidden sm:block">
+                IA = Inasistencias Acumuladas
+              </p>
+            </div>
             <button
               onClick={() => handleBulkSave(false)}
               disabled={bulkSaving}
