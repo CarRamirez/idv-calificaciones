@@ -131,7 +131,7 @@ export async function GET() {
   // ══════════════════════════════════════════════
   // 2) PERFORMANCE STATS — averages and at-risk students
   // ══════════════════════════════════════════════
-  let performanceByGroup: any[] = [];
+  const performanceByGroup: any[] = [];
 
   if (activePeriod && groups && students) {
     const { data: allGrades } = await supabase
