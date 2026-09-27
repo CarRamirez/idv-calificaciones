@@ -3,6 +3,7 @@
 import { formatStudentName } from "@/lib/format-name";
 
 import React from "react";
+import Link from "next/link";
 
 type Subject = {
   id: string;
@@ -269,13 +270,26 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
         </div>
         <div className="space-y-2">
           {students.map((s, i) => (
-            <div key={s.id} className="card p-3 flex items-center justify-between">
+            <Link
+              key={s.id}
+              href={`/boleta/${s.id}`}
+              className="card p-3 flex items-center justify-between hover:bg-primary-50 transition-colors group"
+            >
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-gray-400 w-6 text-right">{s.list_num}</span>
-                <span className="text-sm font-medium text-gray-900">{formatStudentName(s.full_name)}</span>
+                <span className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold tabular-nums">
+                  {s.list_num}
+                </span>
+                <span className="text-sm font-medium text-gray-900 group-hover:text-primary-700">
+                  {formatStudentName(s.full_name)}
+                </span>
               </div>
-              <span className="text-xs text-gray-400">Boleta {i + 1} de {students.length}</span>
-            </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-400">Boleta {i + 1} de {students.length}</span>
+                <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
