@@ -31,6 +31,7 @@ type Props = {
   students: Student[];
   gradeMap: GradeMap;
   groupName?: string;
+  groupId?: string;
   teacherSubjectIds?: string[] | null;
 };
 
@@ -47,7 +48,7 @@ function periodShort(id: number): string {
   return PERIODS.find((p) => p.id === id)?.short ?? "";
 }
 
-export default function ConcentradoTable({ subjects, students, gradeMap, groupName, teacherSubjectIds }: Props) {
+export default function ConcentradoTable({ subjects, students, gradeMap, groupName, groupId, teacherSubjectIds }: Props) {
   // If teacher, filter to only their subjects
   const displaySubjects = teacherSubjectIds
     ? subjects.filter((s) => teacherSubjectIds.includes(s.id))
@@ -136,8 +137,19 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
         ))}
       </div>
 
-      {/* Print button */}
-      <div className="flex justify-end mb-2 print:hidden">
+      {/* Action buttons */}
+      <div className="flex justify-end gap-2 mb-2 print:hidden">
+        {groupId && (
+          <button
+            onClick={() => window.open("/api/concentrado/" + groupId + "/excel", "_blank")}
+            className="btn-secondary text-sm flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Descargar Excel
+          </button>
+        )}
         <button
           onClick={() => window.print()}
           className="btn-primary text-sm flex items-center gap-2"

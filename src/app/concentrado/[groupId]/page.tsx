@@ -116,6 +116,7 @@ export default async function ConcentradoPage({ params }: Props) {
 
         <ConcentradoTable
           groupName={`${group.grade}° ${group.letter}`}
+          groupId={params.groupId}
           subjects={safeSubjects}
           students={safeStudents}
           gradeMap={gradeMap}
