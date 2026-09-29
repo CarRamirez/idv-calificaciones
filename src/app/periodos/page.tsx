@@ -70,21 +70,21 @@ export default function PeriodosPage() {
       body: JSON.stringify({ id: period.id, is_open: !period.is_open }),
     });
     if (res.ok) {
-      setPeriods((prev) =>
-        prev.map((p) => (p.id === period.id ? { ...p, is_open: !p.is_open } : p))
-      );
+      await loadPeriods();
     }
     setToggling(null);
   }
 
   async function updateDates(periodId: string, openDate: string, closeDate: string) {
+    const hasDates = !!(openDate || closeDate);
     await fetch("/api/admin/periods", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id: periodId,
-        open_date: openDate || null,
-        close_date: closeDate || null,
+        open_date: openDate ? new Date(openDate).toISOString() : null,
+        close_date: closeDate ? new Date(closeDate).toISOString() : null,
+        ...(hasDates ? { is_open: true } : {}),
       }),
     });
     loadPeriods();
@@ -194,8 +194,17 @@ function PeriodRow({
   onUpdateDates: (openDate: string, closeDate: string) => void;
 }) {
   const [showDates, setShowDates] = useState(false);
-  const [openDate, setOpenDate] = useState(period.open_date?.slice(0, 16) || "");
-  const [closeDate, setCloseDate] = useState(period.close_date?.slice(0, 16) || "");
+
+  // Convert UTC ISO string to local datetime-local format for the input
+  function isoToLocal(iso: string | null): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  const [openDate, setOpenDate] = useState(isoToLocal(period.open_date));
+  const [closeDate, setCloseDate] = useState(isoToLocal(period.close_date));
 
   function handleSaveDates() {
     onUpdateDates(openDate, closeDate);
