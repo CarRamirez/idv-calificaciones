@@ -840,7 +840,7 @@ export default function CapturaPage({ params }: Props) {
                 <tr>
                   {currentTrimester.periods.map((p) => (
                     <React.Fragment key={p.id}>
-                      <th className="text-center text-xs w-20 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>CALIF.</th>
+                      <th className="text-center text-xs w-24 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>CALIF.</th>
                       <th className="text-center text-xs w-14">ASIST.</th>
                     </React.Fragment>
                   ))}
@@ -870,7 +870,7 @@ export default function CapturaPage({ params }: Props) {
                               <div className="flex items-center justify-center gap-0.5">
                                 <input
                                   type="number"
-                                  min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
+                                  min="0"
                                   max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
                                   step="1"
                                   value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
@@ -947,7 +947,7 @@ export default function CapturaPage({ params }: Props) {
                 <tr>
                   <th className="w-12">N°</th>
                   <th className="min-w-[200px]">Nombre del Alumno</th>
-                  <th className="text-center w-20">CALIF.</th>
+                  <th className="text-center w-24">CALIF.</th>
                   <th className="text-center w-16">ASIST.</th>
                 </tr>
               </thead>
@@ -965,7 +965,7 @@ export default function CapturaPage({ params }: Props) {
                         <div className="flex items-center justify-center gap-0.5">
                           <input
                             type="number"
-                            min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
+                            min="0"
                             max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
                             step="1"
                             value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
