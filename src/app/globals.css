@@ -205,10 +205,11 @@
     @apply bg-primary-50/50;
   }
   .grade-cell {
-    @apply w-full text-center text-sm py-2 px-1.5 rounded-xl
+    @apply w-full text-center text-sm py-2 px-2.5 rounded-xl
            focus:outline-none tabular-nums transition-all duration-200;
     background: transparent;
     border: 2px solid transparent;
+    min-width: 48px;
   }
   .grade-cell:focus {
     @apply bg-white border-primary-300;

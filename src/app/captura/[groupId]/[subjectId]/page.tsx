@@ -840,7 +840,7 @@ export default function CapturaPage({ params }: Props) {
                 <tr>
                   {currentTrimester.periods.map((p) => (
                     <React.Fragment key={p.id}>
-                      <th className="text-center text-xs w-16 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>CALIF.</th>
+                      <th className="text-center text-xs w-20 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>CALIF.</th>
                       <th className="text-center text-xs w-14">ASIST.</th>
                     </React.Fragment>
                   ))}
