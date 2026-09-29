@@ -40,6 +40,8 @@ export default function PeriodosPage() {
   const [periods, setPeriods] = useState<EvalPeriod[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [notifying, setNotifying] = useState<string | null>(null);
+  const [notifyResult, setNotifyResult] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -90,6 +92,32 @@ export default function PeriodosPage() {
     loadPeriods();
   }
 
+  async function notifyTeachers(period: EvalPeriod) {
+    setNotifying(period.id);
+    setNotifyResult(null);
+    try {
+      const res = await fetch("/api/admin/periods/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          periodName: period.name,
+          openDate: period.open_date,
+          closeDate: period.close_date,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotifyResult({ message: data.message, type: "success" });
+      } else {
+        setNotifyResult({ message: data.error || "Error al enviar", type: "error" });
+      }
+    } catch {
+      setNotifyResult({ message: "Error de conexión", type: "error" });
+    }
+    setNotifying(null);
+    setTimeout(() => setNotifyResult(null), 5000);
+  }
+
   // Group by trimester
   const grouped = periods.reduce<Record<number, EvalPeriod[]>>((acc, p) => {
     if (!acc[p.trimester]) acc[p.trimester] = [];
@@ -124,6 +152,22 @@ export default function PeriodosPage() {
           </div>
           <Link href="/dashboard" className="btn-secondary">← Inicio</Link>
         </div>
+
+        {notifyResult && (
+          <div className={`mb-4 rounded-lg px-4 py-3 text-sm flex items-center gap-2 animate-fade-in ${
+            notifyResult.type === "success"
+              ? "bg-green-50 border border-green-200 text-green-700"
+              : "bg-red-50 border border-red-200 text-red-700"
+          }`}>
+            {notifyResult.type === "success" ? (
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            ) : (
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            )}
+            {notifyResult.message}
+            <button onClick={() => setNotifyResult(null)} className="ml-auto text-xs opacity-60 hover:opacity-100">✕</button>
+          </div>
+        )}
 
         <div className="space-y-6">
           {trimesterOrder.map((trimId) => {
@@ -165,6 +209,8 @@ export default function PeriodosPage() {
                       toggling={toggling === period.id}
                       onToggle={() => togglePeriod(period)}
                       onUpdateDates={(od, cd) => updateDates(period.id, od, cd)}
+                      onNotify={() => notifyTeachers(period)}
+                      notifyingThis={notifying === period.id}
                     />
                   ))}
                 </div>
@@ -187,11 +233,15 @@ function PeriodRow({
   toggling,
   onToggle,
   onUpdateDates,
+  onNotify,
+  notifyingThis,
 }: {
   period: EvalPeriod;
   toggling: boolean;
   onToggle: () => void;
   onUpdateDates: (openDate: string, closeDate: string) => void;
+  onNotify: () => void;
+  notifyingThis: boolean;
 }) {
   const [showDates, setShowDates] = useState(false);
 
@@ -247,6 +297,21 @@ function PeriodRow({
       </div>
 
       <div className="flex items-center gap-2 mt-2 sm:mt-0">
+        {period.effectively_open && (
+          <button
+            onClick={onNotify}
+            disabled={notifyingThis}
+            className="text-[11px] text-indigo-500 hover:text-indigo-700 transition-colors flex items-center gap-1 disabled:opacity-50"
+            title="Notificar maestros por correo"
+          >
+            {notifyingThis ? (
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            )}
+            <span className="hidden sm:inline">Notificar</span>
+          </button>
+        )}
         <button
           onClick={() => setShowDates(!showDates)}
           className="text-[11px] text-gray-400 hover:text-gray-600 transition-colors"

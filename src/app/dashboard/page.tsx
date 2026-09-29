@@ -8,6 +8,7 @@ import AnnouncementWall from "@/components/AnnouncementWall";
 import CaptureAlerts from "@/components/CaptureAlerts";
 import PerformanceStats from "@/components/PerformanceStats";
 import PeriodsTimeline from "@/components/PeriodsTimeline";
+import PeriodBanner from "@/components/PeriodBanner";
 
 /* ── SVG Icon helpers ── */
 function IconUsers({ className = "w-6 h-6" }: { className?: string }) {
@@ -180,9 +181,34 @@ export default async function DashboardPage() {
   const groupStudentCounts: Record<string, number> = {};
 
   // ──── SHARED DATA (periods, progress) ────
-  let activePeriod: { period_number: number; name: string } | null = null;
+  let activePeriod: { period_number: number; name: string; close_date: string | null; open_date: string | null } | null = null;
   let captureProgress = { entered: 0, total: 0 };
   let recentActivity: { teacher: string; group: string; subject: string; count: number; updated_at: string }[] = [];
+
+  // Active period (shared for all roles)
+  {
+    const { data: periods } = await supabase
+      .from("evaluation_periods")
+      .select("period_number, name, is_open, open_date, close_date, school_years!inner(is_current)")
+      .eq("is_open", true)
+      .eq("school_years.is_current", true);
+    if (periods && periods.length > 0) {
+      const now = new Date();
+      const active = periods.find((p: any) => {
+        if (p.open_date && now < new Date(p.open_date)) return false;
+        if (p.close_date && now > new Date(p.close_date)) return false;
+        return true;
+      });
+      if (active) {
+        activePeriod = {
+          period_number: active.period_number,
+          name: active.name,
+          open_date: active.open_date,
+          close_date: active.close_date,
+        };
+      }
+    }
+  }
 
   if (dashboardView === "admin") {
     const { data } = await supabase
@@ -215,23 +241,7 @@ export default async function DashboardPage() {
       .select("id");
     totalSubjects = subjectRows?.length || 0;
 
-    // Active period (considering scheduled dates)
-    const { data: periods } = await supabase
-      .from("evaluation_periods")
-      .select("period_number, name, is_open, open_date, close_date, school_years!inner(is_current)")
-      .eq("is_open", true)
-      .eq("school_years.is_current", true);
-    if (periods && periods.length > 0) {
-      const now = new Date();
-      const active = periods.find((p: any) => {
-        if (p.open_date && now < new Date(p.open_date)) return false;
-        if (p.close_date && now > new Date(p.close_date)) return false;
-        return true;
-      });
-      if (active) {
-        activePeriod = { period_number: active.period_number, name: active.name };
-      }
-    }
+    // Active period loaded below (shared)
 
     // Capture progress: count grades entered vs total possible
     // Total possible = active students × subjects that count for avg (per grade) × open period
@@ -435,6 +445,14 @@ export default async function DashboardPage() {
                 <p className="text-xs text-gray-400">en mis grupos</p>
               </div>
             </div>
+
+            {activePeriod && (
+              <PeriodBanner
+                periodName={activePeriod.name}
+                openDate={activePeriod.open_date}
+                closeDate={activePeriod.close_date}
+              />
+            )}
 
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
               Mis grupos

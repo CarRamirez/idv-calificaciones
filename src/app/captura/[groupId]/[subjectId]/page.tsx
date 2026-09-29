@@ -7,6 +7,7 @@ import React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import PeriodBanner from "@/components/PeriodBanner";
 
 type Student = {
   id: string;
@@ -92,6 +93,7 @@ export default function CapturaPage({ params }: Props) {
   const [showMissingModal, setShowMissingModal] = useState(false);
   const [bulkSaving, setBulkSaving] = useState(false);
   const [openPeriods, setOpenPeriods] = useState<Set<number>>(new Set());
+  const [activePeriodInfo, setActivePeriodInfo] = useState<{ name: string; open_date: string | null; close_date: string | null } | null>(null);
 
   const isPeriodLocked = useCallback(
     (periodId: number) => {
@@ -164,6 +166,10 @@ export default function CapturaPage({ params }: Props) {
               .map((p: any) => p.period_number)
           );
           setOpenPeriods(openSet);
+          const activePeriod = periodsData.periods.find((p: any) => p.effectively_open);
+          if (activePeriod) {
+            setActivePeriodInfo({ name: activePeriod.name, open_date: activePeriod.open_date, close_date: activePeriod.close_date });
+          }
         }
       } catch {
         setOpenPeriods(new Set(ALL_PERIOD_IDS));
@@ -628,6 +634,15 @@ export default function CapturaPage({ params }: Props) {
             </div>
           );
         })()}
+
+        {activePeriodInfo && profile?.role === "teacher" && (
+          <PeriodBanner
+            periodName={activePeriodInfo.name}
+            openDate={activePeriodInfo.open_date}
+            closeDate={activePeriodInfo.close_date}
+            compact
+          />
+        )}
 
         {/* Header */}
         <div className="flex items-start justify-between mb-5 gap-4">
