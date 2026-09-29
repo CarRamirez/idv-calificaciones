@@ -15,7 +15,7 @@ type Student = {
   list_num: number;
 };
 
-type GradeEntry = { score: number | null; absences: number };
+type GradeEntry = { score: number | null; absences: number; comment?: string };
 
 type GradeData = {
   [studentId: string]: {
@@ -95,6 +95,10 @@ export default function CapturaPage({ params }: Props) {
   const [openPeriods, setOpenPeriods] = useState<Set<number>>(new Set());
   const [activePeriodInfo, setActivePeriodInfo] = useState<{ name: string; open_date: string | null; close_date: string | null } | null>(null);
 
+  // Comment popover state
+  const [commentPopover, setCommentPopover] = useState<{ studentId: string; period: number } | null>(null);
+  const [commentDraft, setCommentDraft] = useState("");
+
   const isPeriodLocked = useCallback(
     (periodId: number) => {
       if (!profile || profile.role === "admin" || profile.role === "directora_anita") return false;
@@ -151,6 +155,7 @@ export default function CapturaPage({ params }: Props) {
           gradeMap[g.student_id][g.period] = {
             score: g.score,
             absences: g.absences,
+            comment: g.comment || undefined,
           };
         }
       });
@@ -186,7 +191,8 @@ export default function CapturaPage({ params }: Props) {
       studentId: string,
       period: number,
       score: number | null,
-      absences: number
+      absences: number,
+      comment?: string
     ) => {
       if (isPeriodLocked(period)) return;
       const key = `${studentId}-${period}`;
@@ -203,6 +209,7 @@ export default function CapturaPage({ params }: Props) {
           period,
           score,
           absences,
+          comment: comment ?? null,
           updated_by: user?.id,
           updated_at: new Date().toISOString(),
         },
@@ -267,6 +274,7 @@ export default function CapturaPage({ params }: Props) {
             period: pid,
             score: data.score,
             absences: data.absences,
+            comment: data.comment ?? null,
             updated_by: user?.id,
             updated_at: new Date().toISOString(),
           });
@@ -351,7 +359,32 @@ export default function CapturaPage({ params }: Props) {
         },
       }));
     }
-    saveGrade(studentId, period, score, data.absences);
+    saveGrade(studentId, period, score, data.absences, data.comment);
+  }
+
+  function openCommentPopover(studentId: string, period: number) {
+    const current = grades[studentId]?.[period]?.comment || "";
+    setCommentDraft(current);
+    setCommentPopover({ studentId, period });
+  }
+
+  function saveComment() {
+    if (!commentPopover) return;
+    const { studentId, period } = commentPopover;
+    const trimmed = commentDraft.trim();
+    setGrades((prev) => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [period]: { ...prev[studentId][period], comment: trimmed || undefined },
+      },
+    }));
+    const data = grades[studentId]?.[period];
+    if (data) {
+      saveGrade(studentId, period, data.score, data.absences, trimmed || undefined);
+    }
+    setCommentPopover(null);
+    setCommentDraft("");
   }
 
   function getTrimesterAvg(studentId: string, trimesterId: number): string {
@@ -830,26 +863,43 @@ export default function CapturaPage({ params }: Props) {
                         const data = grades[student.id]?.[p.id];
                         const isSaving = saving === `${student.id}-${p.id}`;
                         const locked = isPeriodLocked(p.id);
+                        const hasComment = !!data?.comment;
                         return (
                           <React.Fragment key={p.id}>
                             <td className={`text-center border-l ${(subject?.input_type === 'counter' || subject?.input_type === 'counter_max') ? '' : getSemaforoClass(data?.score ?? null)}`} style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
-                              <input
-                                type="number"
-                                min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
-                                max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
-                                step="1"
-                                value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
-                                onChange={(e) => handleScoreChange(student.id, p.id, e.target.value)}
-                                onBlur={() => handleBlur(student.id, p.id)}
-                                disabled={locked}
-                                className={`grade-cell ${
-                                  locked
-                                    ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed"
-                                    : isSaving
-                                    ? "!bg-green-50/60 !border-green-300"
-                                    : ""
-                                }`}
-                              />
+                              <div className="flex items-center justify-center gap-0.5">
+                                <input
+                                  type="number"
+                                  min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
+                                  max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
+                                  step="1"
+                                  value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
+                                  onChange={(e) => handleScoreChange(student.id, p.id, e.target.value)}
+                                  onBlur={() => handleBlur(student.id, p.id)}
+                                  disabled={locked}
+                                  className={`grade-cell ${
+                                    locked
+                                      ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed"
+                                      : isSaving
+                                      ? "!bg-green-50/60 !border-green-300"
+                                      : ""
+                                  }`}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => openCommentPopover(student.id, p.id)}
+                                  title={hasComment ? data.comment : "Agregar justificación"}
+                                  className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center transition-colors ${
+                                    hasComment
+                                      ? "text-primary-600 hover:bg-primary-50"
+                                      : "text-gray-300 hover:text-gray-500 hover:bg-gray-50"
+                                  }`}
+                                >
+                                  <svg className="w-3.5 h-3.5" fill={hasComment ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={hasComment ? 0 : 2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                  </svg>
+                                </button>
+                              </div>
                             </td>
                             <td className="text-center">
                               <input
@@ -906,22 +956,39 @@ export default function CapturaPage({ params }: Props) {
                   const data = grades[student.id]?.[JULIO_FINAL.id];
                   const isSaving = saving === `${student.id}-${JULIO_FINAL.id}`;
                   const locked = isPeriodLocked(JULIO_FINAL.id);
+                  const hasComment = !!data?.comment;
                   return (
                     <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
                       <td className="text-center text-gray-400 tabular-nums text-xs font-medium">{student.list_num}</td>
                       <td className="font-medium text-gray-800 text-xs">{formatStudentName(student.full_name)}</td>
                       <td className={`text-center ${(subject?.input_type === 'counter' || subject?.input_type === 'counter_max') ? '' : getSemaforoClass(data?.score ?? null)}`}>
-                        <input
-                          type="number"
-                          min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
-                          max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
-                          step="1"
-                          value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
-                          onChange={(e) => handleScoreChange(student.id, JULIO_FINAL.id, e.target.value)}
-                          onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
-                          disabled={locked}
-                          className={`grade-cell ${locked ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed" : isSaving ? "!bg-green-50/60 !border-green-300" : ""}`}
-                        />
+                        <div className="flex items-center justify-center gap-0.5">
+                          <input
+                            type="number"
+                            min={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? "0" : "5"}
+                            max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
+                            step="1"
+                            value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
+                            onChange={(e) => handleScoreChange(student.id, JULIO_FINAL.id, e.target.value)}
+                            onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
+                            disabled={locked}
+                            className={`grade-cell ${locked ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed" : isSaving ? "!bg-green-50/60 !border-green-300" : ""}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => openCommentPopover(student.id, JULIO_FINAL.id)}
+                            title={hasComment ? data.comment : "Agregar justificación"}
+                            className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center transition-colors ${
+                              hasComment
+                                ? "text-primary-600 hover:bg-primary-50"
+                                : "text-gray-300 hover:text-gray-500 hover:bg-gray-50"
+                            }`}
+                          >
+                            <svg className="w-3.5 h-3.5" fill={hasComment ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={hasComment ? 0 : 2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                       <td className="text-center">
                         <input
@@ -1081,6 +1148,54 @@ export default function CapturaPage({ params }: Props) {
           </div>
         )}
       </main>
+
+      {/* ===== Modal de justificación / comentario ===== */}
+      {commentPopover && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setCommentPopover(null)}>
+          <div className="glass rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden !bg-white/95" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b" style={{ borderColor: 'rgba(29,78,158,0.1)', background: 'rgba(29,78,158,0.03)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-100/80 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">Justificación de calificación</h3>
+                  <p className="text-sm text-gray-500">
+                    {formatStudentName(students.find((s) => s.id === commentPopover.studentId)?.full_name || "")}
+                    {" — "}
+                    Calif: {grades[commentPopover.studentId]?.[commentPopover.period]?.score ?? "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 py-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Comentario (opcional)
+              </label>
+              <textarea
+                autoFocus
+                rows={3}
+                maxLength={500}
+                value={commentDraft}
+                onChange={(e) => setCommentDraft(e.target.value)}
+                placeholder="Ej. No entregó actividades, faltó al examen..."
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all resize-none"
+              />
+              <p className="mt-1.5 text-xs text-gray-400">{commentDraft.length}/500 · Solo visible para maestros y administración</p>
+            </div>
+            <div className="px-5 py-4 border-t flex gap-3 justify-end" style={{ borderColor: 'rgba(0,0,0,0.04)', background: 'rgba(0,0,0,0.01)' }}>
+              <button onClick={() => setCommentPopover(null)} className="btn-secondary">
+                Cancelar
+              </button>
+              <button onClick={saveComment} className="btn-primary text-sm">
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ===== Modal de alumnos sin calificación ===== */}
       {showMissingModal && (
