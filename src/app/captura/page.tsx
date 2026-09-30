@@ -97,6 +97,10 @@ export default async function CapturaIndexPage() {
   const totalGroups = Object.keys(byGroup).length;
   const totalSubjects = assignments.length;
 
+  /* Detect if teacher has a compact layout (few subjects per group on average) */
+  const avgSubjectsPerGroup = totalGroups > 0 ? totalSubjects / totalGroups : 0;
+  const isCompact = effectiveProfile.role === "teacher" && avgSubjectsPerGroup <= 3;
+
   return (
     <div className="bg-mesh">
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
@@ -128,81 +132,125 @@ export default async function CapturaIndexPage() {
           </div>
         </div>
 
-        {/* Grid de grupos */}
-        <div className="space-y-8">
-          {Object.entries(byGroup)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([key, { group, curricular, noCurricular }]) => {
-              const accent = GRADE_ACCENTS[group.grade] || GRADE_ACCENTS[1];
-              return (
-                <div key={key}>
-                  {/* Encabezado de grupo */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${accent.badge}`}>
-                      {group.grade}° {group.letter}
-                    </span>
-                    <div className="flex-1 h-px bg-gradient-to-r from-gray-200/60 to-transparent" />
-                  </div>
+        {isCompact ? (
+          /* ───── Compact layout: one row per group-subject ───── */
+          <div className="card overflow-hidden">
+            <div className="divide-y divide-gray-100">
+              {Object.entries(byGroup)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .flatMap(([key, { group, curricular, noCurricular }]) => {
+                  const accent = GRADE_ACCENTS[group.grade] || GRADE_ACCENTS[1];
+                  const allSubjects = [...curricular, ...noCurricular];
+                  return allSubjects.map((a: any, idx: number) => (
+                    <Link
+                      key={a.id}
+                      href={`/captura/${a.groups.id}/${a.subjects.id}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-primary-50/50 transition-colors group"
+                    >
+                      <span className={`inline-flex items-center justify-center w-10 h-6 rounded-md text-xs font-bold ${accent.badge}`}>
+                        {group.grade}°{group.letter}
+                      </span>
+                      <span className="text-lg flex-shrink-0">
+                        {getIcon(a.subjects.short_name)}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 group-hover:text-primary-700 transition-colors truncate">
+                          {a.subjects.name}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-400 font-mono hidden sm:block">
+                        {a.subjects.short_name}
+                      </span>
+                      {!a.subjects.counts_for_avg && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-400 hidden sm:block">
+                          No curricular
+                        </span>
+                      )}
+                      <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  ));
+                })}
+            </div>
+          </div>
+        ) : (
+          /* ───── Full grid layout (many subjects per group) ───── */
+          <div className="space-y-8">
+            {Object.entries(byGroup)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([key, { group, curricular, noCurricular }]) => {
+                const accent = GRADE_ACCENTS[group.grade] || GRADE_ACCENTS[1];
+                return (
+                  <div key={key}>
+                    {/* Encabezado de grupo */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${accent.badge}`}>
+                        {group.grade}° {group.letter}
+                      </span>
+                      <div className="flex-1 h-px bg-gradient-to-r from-gray-200/60 to-transparent" />
+                    </div>
 
-                  {/* Cards de materias curriculares */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {curricular.map((a: any) => (
-                      <Link
-                        key={a.id}
-                        href={`/captura/${a.groups.id}/${a.subjects.id}`}
-                        className={`group relative card hover:shadow-lg hover:scale-[1.02] transition-all duration-200 ring-1 ${accent.ring} overflow-hidden`}
-                      >
-                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-primary-100/30 to-transparent -translate-y-8 translate-x-8" />
-                        <div className="flex items-center gap-3 relative">
-                          <div className="w-10 h-10 rounded-xl bg-white/60 border border-white/40 shadow-sm flex items-center justify-center text-lg flex-shrink-0">
-                            {getIcon(a.subjects.short_name)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-700 transition-colors truncate">
-                              {a.subjects.name}
-                            </p>
-                            <p className="text-xs text-gray-400 font-mono">
-                              {a.subjects.short_name}
-                            </p>
-                          </div>
-                          <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-
-                  {/* Materias no curriculares */}
-                  {noCurricular.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-2 ml-1">
-                        No curriculares — no abonan al promedio
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-                        {noCurricular.map((a: any) => (
-                          <Link
-                            key={a.id}
-                            href={`/captura/${a.groups.id}/${a.subjects.id}`}
-                            className="group glass-subtle rounded-xl px-3 py-2.5 hover:bg-white/60 transition-all flex items-center gap-2 ring-1 ring-gray-200/40"
-                          >
-                            <span className="text-base flex-shrink-0">
+                    {/* Cards de materias curriculares */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {curricular.map((a: any) => (
+                        <Link
+                          key={a.id}
+                          href={`/captura/${a.groups.id}/${a.subjects.id}`}
+                          className={`group relative card hover:shadow-lg hover:scale-[1.02] transition-all duration-200 ring-1 ${accent.ring} overflow-hidden`}
+                        >
+                          <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-primary-100/30 to-transparent -translate-y-8 translate-x-8" />
+                          <div className="flex items-center gap-3 relative">
+                            <div className="w-10 h-10 rounded-xl bg-white/60 border border-white/40 shadow-sm flex items-center justify-center text-lg flex-shrink-0">
                               {getIcon(a.subjects.short_name)}
-                            </span>
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-gray-600 group-hover:text-gray-800 transition-colors truncate">
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-700 transition-colors truncate">
                                 {a.subjects.name}
                               </p>
+                              <p className="text-xs text-gray-400 font-mono">
+                                {a.subjects.short_name}
+                              </p>
                             </div>
-                          </Link>
-                        ))}
-                      </div>
+                            <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-        </div>
+
+                    {/* Materias no curriculares */}
+                    {noCurricular.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2 ml-1">
+                          No curriculares — no abonan al promedio
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                          {noCurricular.map((a: any) => (
+                            <Link
+                              key={a.id}
+                              href={`/captura/${a.groups.id}/${a.subjects.id}`}
+                              className="group glass-subtle rounded-xl px-3 py-2.5 hover:bg-white/60 transition-all flex items-center gap-2 ring-1 ring-gray-200/40"
+                            >
+                              <span className="text-base flex-shrink-0">
+                                {getIcon(a.subjects.short_name)}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-medium text-gray-600 group-hover:text-gray-800 transition-colors truncate">
+                                  {a.subjects.name}
+                                </p>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        )}
 
         {assignments.length === 0 && (
           <div className="card p-12 text-center">

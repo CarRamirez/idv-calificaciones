@@ -98,6 +98,7 @@ export default function CapturaPage({ params }: Props) {
   // Comment popover state
   const [commentPopover, setCommentPopover] = useState<{ studentId: string; period: number } | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const isPeriodLocked = useCallback(
     (periodId: number) => {
@@ -202,21 +203,27 @@ export default function CapturaPage({ params }: Props) {
         data: { user },
       } = await supabase.auth.getUser();
 
-      const { error } = await supabase.from("grades").upsert(
-        {
+      const row: any = {
           student_id: studentId,
           subject_id: subjectId,
           period,
           score,
           absences,
-          comment: comment ?? null,
           updated_by: user?.id,
           updated_at: new Date().toISOString(),
-        },
+        };
+      if (comment !== undefined) row.comment = comment;
+
+      const { error } = await supabase.from("grades").upsert(
+        row,
         { onConflict: "student_id,subject_id,period" }
       );
 
-      if (error) console.error("Error al guardar:", error);
+      if (error) {
+        console.error("Error al guardar:", error);
+        setSaveError("Error al guardar calificación. Verifica permisos o contacta al administrador.");
+        setTimeout(() => setSaveError(null), 5000);
+      }
 
       setTimeout(() => setSaving(null), 600);
     },
@@ -268,16 +275,17 @@ export default function CapturaPage({ params }: Props) {
       periodIds.forEach((pid) => {
         const data = grades[student.id]?.[pid];
         if (data) {
-          upserts.push({
+          const row: any = {
             student_id: student.id,
             subject_id: subjectId,
             period: pid,
             score: data.score,
             absences: data.absences,
-            comment: data.comment ?? null,
             updated_by: user?.id,
             updated_at: new Date().toISOString(),
-          });
+          };
+          if (data.comment) row.comment = data.comment;
+          upserts.push(row);
         }
       });
     });
@@ -290,6 +298,8 @@ export default function CapturaPage({ params }: Props) {
 
     if (error) {
       console.error("Error al guardar masivo:", error);
+      setSaveError("Error al guardar calificaciones: " + (error.message || "Verifica permisos o contacta al administrador."));
+      setTimeout(() => setSaveError(null), 6000);
       setSaveStatus("idle");
       return;
     }
@@ -695,6 +705,21 @@ export default function CapturaPage({ params }: Props) {
             closeDate={activePeriodInfo.close_date}
             compact
           />
+        )}
+
+        {/* Error toast */}
+        {saveError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 animate-slide-down">
+            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-red-700 flex-1">{saveError}</p>
+            <button onClick={() => setSaveError(null)} className="text-red-400 hover:text-red-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         )}
 
         {/* Header */}

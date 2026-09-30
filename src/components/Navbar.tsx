@@ -378,11 +378,11 @@ export default function Navbar({ userName, userRole }: Props) {
                         </Link>
                       )}
                       {can("concentrado") && (
-                        <Link href="/concentrado" onClick={() => setCalDropdown(false)} className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
+                        <Link href="/concentrados" onClick={() => setCalDropdown(false)} className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
                           Concentrado
                         </Link>
                       )}
-                      {can("boleta") && (
+                      {can("boleta") && userRole !== "teacher" && (
                         <Link href="/boleta" onClick={() => setCalDropdown(false)} className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
                           Boleta
                         </Link>
@@ -564,8 +564,8 @@ export default function Navbar({ userName, userRole }: Props) {
                 <>
                   <p className="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Calificaciones</p>
                   {canAny("calificaciones", "captura") && <MobileNavLink href="/calificaciones" onClick={() => setMenuOpen(false)} indent>Calificaciones</MobileNavLink>}
-                  {can("concentrado") && <MobileNavLink href="/concentrado" onClick={() => setMenuOpen(false)} indent>Concentrado</MobileNavLink>}
-                  {can("boleta") && <MobileNavLink href="/boleta" onClick={() => setMenuOpen(false)} indent>Boleta</MobileNavLink>}
+                  {can("concentrado") && <MobileNavLink href="/concentrados" onClick={() => setMenuOpen(false)} indent>Concentrado</MobileNavLink>}
+                  {can("boleta") && userRole !== "teacher" && <MobileNavLink href="/boleta" onClick={() => setMenuOpen(false)} indent>Boleta</MobileNavLink>}
                 </>
               )}
               {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
