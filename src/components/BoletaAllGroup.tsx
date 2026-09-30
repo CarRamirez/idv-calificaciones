@@ -294,21 +294,28 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
         </div>
       </div>
 
-      {/* Print area: 2 boletas per page */}
+      {/* Print area: same student twice per page (parent copy + school copy) */}
       <div className="boleta-all-print-area">
         {students.map((s, i) => (
           <React.Fragment key={s.id}>
+            {/* First copy — for parents */}
             <SingleBoleta
               student={s}
               group={group}
               subjects={subjects}
               gradeMap={gradeMaps[s.id] || {}}
             />
-            {/* After every 2nd boleta (odd index), add page break */}
-            {i % 2 === 1 && i < students.length - 1 && (
+            {/* Second copy — for school (signed by parent) */}
+            <SingleBoleta
+              student={s}
+              group={group}
+              subjects={subjects}
+              gradeMap={gradeMaps[s.id] || {}}
+            />
+            {/* Page break after each student (except the last) */}
+            {i < students.length - 1 && (
               <div className="boleta-page-break" />
             )}
-            {/* If last student is on a first slot (even index), no need for page break */}
           </React.Fragment>
         ))}
       </div>

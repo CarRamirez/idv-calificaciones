@@ -362,6 +362,26 @@ export default function CapturaPage({ params }: Props) {
     saveGrade(studentId, period, score, data.absences, data.comment);
   }
 
+  function handleEnterKey(e: React.KeyboardEvent<HTMLInputElement>, studentId: string, period: number) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      // Trigger blur on current input to save
+      (e.target as HTMLInputElement).blur();
+      // Find next student's score input in the same column (period)
+      const allInputs = Array.from(
+        document.querySelectorAll<HTMLInputElement>(`input[data-score-col="${period}"]`)
+      );
+      const currentIdx = allInputs.findIndex((inp) => inp.dataset.scoreStudent === studentId);
+      if (currentIdx >= 0 && currentIdx < allInputs.length - 1) {
+        const next = allInputs[currentIdx + 1];
+        setTimeout(() => {
+          next.focus();
+          next.select();
+        }, 50);
+      }
+    }
+  }
+
   function openCommentPopover(studentId: string, period: number) {
     const current = grades[studentId]?.[period]?.comment || "";
     setCommentDraft(current);
@@ -873,9 +893,12 @@ export default function CapturaPage({ params }: Props) {
                                   min="0"
                                   max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
                                   step="1"
+                                  data-score-col={p.id}
+                                  data-score-student={student.id}
                                   value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
                                   onChange={(e) => handleScoreChange(student.id, p.id, e.target.value)}
                                   onBlur={() => handleBlur(student.id, p.id)}
+                                  onKeyDown={(e) => handleEnterKey(e, student.id, p.id)}
                                   disabled={locked}
                                   className={`grade-cell ${
                                     locked
@@ -968,9 +991,12 @@ export default function CapturaPage({ params }: Props) {
                             min="0"
                             max={subject?.input_type === 'counter_max' ? "10" : subject?.input_type === 'counter' ? "999" : "10"}
                             step="1"
+                            data-score-col={JULIO_FINAL.id}
+                            data-score-student={student.id}
                             value={subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? (data?.score ?? 0) : (data?.score ?? "")}
                             onChange={(e) => handleScoreChange(student.id, JULIO_FINAL.id, e.target.value)}
                             onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
+                            onKeyDown={(e) => handleEnterKey(e, student.id, JULIO_FINAL.id)}
                             disabled={locked}
                             className={`grade-cell ${locked ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed" : isSaving ? "!bg-green-50/60 !border-green-300" : ""}`}
                           />
