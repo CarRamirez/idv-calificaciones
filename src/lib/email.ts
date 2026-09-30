@@ -180,7 +180,7 @@ function buildPeriodEmailHTML(data: PeriodNotificationData): string {
         </td></tr>
         <tr><td style="background-color:#f9fafb;padding:20px 32px;border-top:1px solid #f3f4f6;">
           <p style="margin:0;color:#9ca3af;font-size:11px;text-align:center;">
-            Instituto Don Vasco · Uruapan, Michoacán
+            Instituto Don Vasco<br/>Morelos #115, Centro, Apaseo El Grande, Guanajuato.<br/>Dirección Secundaria
           </p>
         </td></tr>
       </table>
