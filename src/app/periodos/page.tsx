@@ -42,6 +42,12 @@ export default function PeriodosPage() {
   const [toggling, setToggling] = useState<string | null>(null);
   const [notifying, setNotifying] = useState<string | null>(null);
   const [notifyResult, setNotifyResult] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [notifyModalPeriod, setNotifyModalPeriod] = useState<EvalPeriod | null>(null);
+  const [allUsers, setAllUsers] = useState<{ id: string; full_name: string; email: string | null; role: string; label: string | null }[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [customMessage, setCustomMessage] = useState("");
 
   useEffect(() => {
     async function init() {
@@ -92,17 +98,59 @@ export default function PeriodosPage() {
     loadPeriods();
   }
 
-  async function notifyTeachers(period: EvalPeriod) {
-    setNotifying(period.id);
+  async function openNotifyModal(period: EvalPeriod) {
+    setNotifyModalPeriod(period);
+    setSelectedUserIds(new Set());
+    setUserSearch("");
+    setCustomMessage("");
+    if (allUsers.length === 0) {
+      setLoadingUsers(true);
+      try {
+        const res = await fetch("/api/admin/users");
+        const data = await res.json();
+        setAllUsers(data.users || []);
+      } catch {
+        setAllUsers([]);
+      }
+      setLoadingUsers(false);
+    }
+  }
+
+  function toggleUser(userId: string) {
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  }
+
+  function selectAllFiltered(users: typeof allUsers) {
+    setSelectedUserIds((prev) => {
+      const next = new Set(prev);
+      users.forEach((u) => { if (u.email) next.add(u.id); });
+      return next;
+    });
+  }
+
+  function deselectAll() {
+    setSelectedUserIds(new Set());
+  }
+
+  async function sendNotification() {
+    if (!notifyModalPeriod || selectedUserIds.size === 0) return;
+    setNotifying(notifyModalPeriod.id);
     setNotifyResult(null);
     try {
       const res = await fetch("/api/admin/periods/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          periodName: period.name,
-          openDate: period.open_date,
-          closeDate: period.close_date,
+          periodName: notifyModalPeriod.name,
+          openDate: notifyModalPeriod.open_date,
+          closeDate: notifyModalPeriod.close_date,
+          recipientIds: Array.from(selectedUserIds),
+          customMessage: customMessage || undefined,
         }),
       });
       const data = await res.json();
@@ -115,6 +163,7 @@ export default function PeriodosPage() {
       setNotifyResult({ message: "Error de conexión", type: "error" });
     }
     setNotifying(null);
+    setNotifyModalPeriod(null);
     setTimeout(() => setNotifyResult(null), 5000);
   }
 
@@ -209,7 +258,7 @@ export default function PeriodosPage() {
                       toggling={toggling === period.id}
                       onToggle={() => togglePeriod(period)}
                       onUpdateDates={(od, cd) => updateDates(period.id, od, cd)}
-                      onNotify={() => notifyTeachers(period)}
+                      onNotify={() => openNotifyModal(period)}
                       notifyingThis={notifying === period.id}
                     />
                   ))}
@@ -223,6 +272,150 @@ export default function PeriodosPage() {
           <strong>Nota:</strong> Cuando un periodo está cerrado o fuera de las fechas programadas, los profesores solo podrán consultar las calificaciones
           registradas, pero no podrán modificarlas. Si configuras fechas, el periodo se abrirá y cerrará automáticamente. Solo el administrador puede capturar en periodos cerrados.
         </div>
+
+        {/* ── Notification Modal ── */}
+        {notifyModalPeriod && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setNotifyModalPeriod(null)}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+              <div className="px-5 py-4 border-b border-gray-200">
+                <h3 className="text-base font-bold text-gray-900">Notificar — {notifyModalPeriod.name}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Selecciona los usuarios a los que deseas enviar la notificación por correo.</p>
+              </div>
+
+              <div className="px-5 py-3 border-b border-gray-100">
+                <input
+                  type="text"
+                  placeholder="Buscar usuario..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="input-field text-sm w-full"
+                />
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    onClick={() => {
+                      const filtered = allUsers.filter((u) => {
+                        if (!u.email) return false;
+                        if (!userSearch.trim()) return true;
+                        return u.full_name.toLowerCase().includes(userSearch.toLowerCase()) || u.role.toLowerCase().includes(userSearch.toLowerCase());
+                      });
+                      selectAllFiltered(filtered);
+                    }}
+                    className="text-xs text-primary-600 hover:text-primary-800 font-medium"
+                  >
+                    Seleccionar todos
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button onClick={deselectAll} className="text-xs text-gray-500 hover:text-gray-700">
+                    Deseleccionar
+                  </button>
+                  <span className="ml-auto text-xs text-gray-400">
+                    {selectedUserIds.size} seleccionado{selectedUserIds.size !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-5 py-2 min-h-0">
+                {loadingUsers ? (
+                  <div className="py-8 text-center text-sm text-gray-400">Cargando usuarios...</div>
+                ) : (
+                  (() => {
+                    const roleLabels: Record<string, string> = {
+                      teacher: "Profesor",
+                      admin: "Administrador",
+                      directora_anita: "Directora",
+                      viewer: "Visor",
+                    };
+                    const q = userSearch.toLowerCase();
+                    const filtered = allUsers.filter((u) => {
+                      if (!q) return true;
+                      return u.full_name.toLowerCase().includes(q) || u.role.toLowerCase().includes(q) || (u.label || "").toLowerCase().includes(q);
+                    });
+
+                    // Group by role
+                    const byRole: Record<string, typeof allUsers> = {};
+                    filtered.forEach((u) => {
+                      const key = u.role;
+                      if (!byRole[key]) byRole[key] = [];
+                      byRole[key].push(u);
+                    });
+
+                    const roleOrder = ["teacher", "admin", "directora_anita", "viewer"];
+                    const sortedRoles = Array.from(new Set([...roleOrder.filter((r) => byRole[r]), ...Object.keys(byRole)]));
+
+                    return sortedRoles.map((role) => (
+                      <div key={role} className="mb-3">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                          {roleLabels[role] || role} ({byRole[role].length})
+                        </p>
+                        {byRole[role].map((u) => (
+                          <label
+                            key={u.id}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                              selectedUserIds.has(u.id) ? "bg-primary-50" : "hover:bg-gray-50"
+                            } ${!u.email ? "opacity-40 cursor-not-allowed" : ""}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedUserIds.has(u.id)}
+                              onChange={() => u.email && toggleUser(u.id)}
+                              disabled={!u.email}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm text-gray-800 font-medium">{u.full_name}</span>
+                              {u.label && <span className="ml-1 text-[10px] text-gray-400">({u.label})</span>}
+                              <span className="block text-[11px] text-gray-400 truncate">
+                                {u.email || "Sin correo registrado"}
+                              </span>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    ));
+                  })()
+                )}
+              </div>
+
+              <div className="px-5 py-3 border-t border-gray-200 space-y-3">
+                <div>
+                  <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block mb-1">Mensaje adicional (opcional)</label>
+                  <textarea
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder="Ej: Favor de capturar antes del viernes..."
+                    rows={2}
+                    className="input-field text-sm w-full resize-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setNotifyModalPeriod(null)}
+                    className="btn-secondary text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={sendNotification}
+                    disabled={selectedUserIds.size === 0 || notifying === notifyModalPeriod.id}
+                    className="btn-primary text-sm disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {notifying === notifyModalPeriod.id ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        Enviar a {selectedUserIds.size} usuario{selectedUserIds.size !== 1 ? "s" : ""}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

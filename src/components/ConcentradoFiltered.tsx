@@ -7,7 +7,7 @@ import React, { useState, useMemo } from "react";
 type Group = { id: string; grade: number; letter: string };
 type Subject = { id: string; name: string; short_name: string; counts_for_avg: boolean; sort_order: number; grade: number };
 type Student = { id: string; full_name: string; list_num: number; group_id: string };
-type GradeEntry = { score: number | null; absences: number };
+type GradeEntry = { score: number | null; absences: number; comment?: string };
 type GradeMap = Record<string, Record<string, Record<number, GradeEntry>>>;
 
 type Props = {
@@ -88,6 +88,9 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
   }
   function getAbsences(studentId: string, subjectId: string, period: number): number {
     return gradeMap[studentId]?.[subjectId]?.[period]?.absences ?? 0;
+  }
+  function getComment(studentId: string, subjectId: string, period: number): string | undefined {
+    return gradeMap[studentId]?.[subjectId]?.[period]?.comment;
   }
   function getTrimesterAvg(studentId: string, subjectId: string, periods: number[]): number | null {
     const scores = periods.map((p) => getScore(studentId, subjectId, p)).filter((s): s is number => s !== null);
@@ -299,10 +302,18 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                       {displaySubjects.map((s) => {
                         const score = getScore(student.id, s.id, selectedPeriod);
                         const abs = getAbsences(student.id, s.id, selectedPeriod);
+                        const comment = getComment(student.id, s.id, selectedPeriod);
                         return (
                           <React.Fragment key={s.id}>
-                            <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)}`}>
+                            <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
                               {fmt(score)}
+                              {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
+                              {comment && (
+                                <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
+                                  {comment}
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                                </div>
+                              )}
                             </td>
                             <td className="text-center text-xs tabular-nums text-gray-400">{abs || "—"}</td>
                           </React.Fragment>
@@ -368,9 +379,19 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                               {activeTrimester.periods.map((p) => {
                                 const score = getScore(student.id, s.id, p);
                                 const abs = getAbsences(student.id, s.id, p);
+                                const comment = getComment(student.id, s.id, p);
                                 return (
                                   <React.Fragment key={p}>
-                                    <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)}`}>{fmt(score)}</td>
+                                    <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
+                                      {fmt(score)}
+                                      {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
+                                      {comment && (
+                                        <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
+                                          {comment}
+                                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                                        </div>
+                                      )}
+                                    </td>
                                     <td className="text-center text-xs tabular-nums text-gray-400">{abs || "—"}</td>
                                   </React.Fragment>
                                 );

@@ -102,6 +102,7 @@ interface PeriodNotificationData {
   periodName: string;
   openDate: string | null;
   closeDate: string | null;
+  customMessage?: string;
 }
 
 function formatDateMX(dateStr: string): string {
@@ -166,6 +167,12 @@ function buildPeriodEmailHTML(data: PeriodNotificationData): string {
               </td>` : ""}
             </tr>
           </table>
+          ${data.customMessage ? `
+          <div style="background-color:#fef9e7;border-left:4px solid #d4a017;padding:12px 16px;border-radius:0 6px 6px 0;margin:0 0 24px;">
+            <p style="margin:0 0 4px;color:#92400e;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Mensaje de la dirección</p>
+            <p style="color:#7a6c0a;font-size:14px;margin:0;">${data.customMessage}</p>
+          </div>
+          ` : ""}
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr><td align="center" style="padding:8px 0 16px;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://idv-calificaciones.vercel.app"}/dashboard"

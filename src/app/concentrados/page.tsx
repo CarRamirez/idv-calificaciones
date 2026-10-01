@@ -48,18 +48,18 @@ export default async function ConcentradosPage() {
       const chunk = studentIds.slice(i, i + 500);
       const { data } = await supabase
         .from("grades")
-        .select("student_id, subject_id, period, score, absences")
+        .select("student_id, subject_id, period, score, absences, comment")
         .in("student_id", chunk);
       if (data) allGrades = allGrades.concat(data);
     }
   }
 
   // Build grade map: { studentId: { subjectId: { period: { score, absences } } } }
-  const gradeMap: Record<string, Record<string, Record<number, { score: number | null; absences: number }>>> = {};
+  const gradeMap: Record<string, Record<string, Record<number, { score: number | null; absences: number; comment?: string }>>> = {};
   allGrades.forEach((g) => {
     if (!gradeMap[g.student_id]) gradeMap[g.student_id] = {};
     if (!gradeMap[g.student_id][g.subject_id]) gradeMap[g.student_id][g.subject_id] = {};
-    gradeMap[g.student_id][g.subject_id][g.period] = { score: g.score, absences: g.absences };
+    gradeMap[g.student_id][g.subject_id][g.period] = { score: g.score, absences: g.absences, comment: g.comment || undefined };
   });
 
   const safeGroups = (groups || []).map((g) => ({ id: g.id, grade: g.grade, letter: g.letter }));
