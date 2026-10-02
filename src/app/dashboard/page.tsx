@@ -488,26 +488,26 @@ export default async function DashboardPage() {
                           </span>
                         </div>
 
-                        <div className="px-4 py-3 space-y-1.5">
+                        <div className="px-4 py-3 space-y-1">
                           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            Materias asignadas
+                            Materias — clic para calificar
                           </p>
                           {subjects.map((s: any) => (
-                            <div key={s.id} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-700">{s.name}</span>
-                              <span className="text-xs text-gray-400 font-mono">{s.short_name}</span>
-                            </div>
+                            <Link
+                              key={s.id}
+                              href={`/captura/${gId}/${s.id}`}
+                              className="flex items-center justify-between text-sm px-2 py-1.5 -mx-2 rounded-lg hover:bg-primary-50 group/subj transition-colors"
+                            >
+                              <span className="text-gray-700 group-hover/subj:text-primary-700 transition-colors">{s.name}</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs text-gray-400 font-mono">{s.short_name}</span>
+                                <IconPencil className="w-3 h-3 text-gray-300 group-hover/subj:text-primary-500 transition-colors" />
+                              </div>
+                            </Link>
                           ))}
                         </div>
 
                         <div className="px-4 pb-2 pt-2 flex gap-2">
-                          <Link
-                            href="/captura"
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors"
-                          >
-                            <IconPencil className="w-3.5 h-3.5" />
-                            Calificar
-                          </Link>
                           <Link
                             href={`/concentrado/${gId}`}
                             className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-primary-600 text-xs font-medium rounded-lg border border-primary-200 hover:bg-primary-50 transition-colors"
@@ -671,6 +671,40 @@ export default async function DashboardPage() {
                     Concentrados
                   </p>
                   <p className="text-xs text-gray-400">filtrar y descargar</p>
+                </Link>
+                <Link
+                  href="/avance"
+                  className="card-interactive p-5 group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                      <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                      </svg>
+                    </div>
+                    <span className="text-lg font-bold text-emerald-600">→</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                    Avance
+                  </p>
+                  <p className="text-xs text-gray-400">captura por profesor</p>
+                </Link>
+                <Link
+                  href="/rendimiento"
+                  className="card-interactive p-5 group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-11 h-11 rounded-xl bg-rose-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
+                      <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+                      </svg>
+                    </div>
+                    <span className="text-lg font-bold text-rose-600">→</span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                    Rendimiento
+                  </p>
+                  <p className="text-xs text-gray-400">por grupo detallado</p>
                 </Link>
                 <Link
                   href="/avance"

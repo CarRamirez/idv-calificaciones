@@ -109,6 +109,7 @@ export async function GET() {
         subject_name: string;
         subject_short: string;
         subject_id: string;
+        periods: Record<number, { expected: number; captured: number }>;
       }[];
       periods: Record<number, { expected: number; captured: number }>;
     };
@@ -134,12 +135,22 @@ export async function GET() {
       const groupStudents = studentsByGroup[a.group_id] || [];
       const groupLabel = `${a.groups?.grade}°${a.groups?.letter}`;
 
+      const assignmentPeriods: Record<number, { expected: number; captured: number }> = {};
+      for (let p = 1; p <= 8; p++) {
+        let captured = 0;
+        for (const sid of groupStudents) {
+          if (capturedSet.has(`${sid}:${a.subject_id}:${p}`)) captured++;
+        }
+        assignmentPeriods[p] = { expected: groupStudents.length, captured };
+      }
+
       teacherMap[a.teacher_id].assignments.push({
         group_id: a.group_id,
         group_label: groupLabel,
         subject_name: a.subjects?.name || "?",
         subject_short: a.subjects?.short_name || "?",
         subject_id: a.subject_id,
+        periods: assignmentPeriods,
       });
 
       for (let p = 1; p <= 8; p++) {

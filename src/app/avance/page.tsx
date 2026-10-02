@@ -13,6 +13,7 @@ type Assignment = {
   subject_name: string;
   subject_short: string;
   subject_id: string;
+  periods: Record<number, { expected: number; captured: number }>;
 };
 
 type TeacherProgress = {
@@ -316,28 +317,41 @@ export default function AvancePage() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {teacher.assignments.map((a, idx) => {
-                                    // Per-assignment progress: count from captured set
-                                    return (
+                                  {teacher.assignments.map((a, idx) => (
                                       <tr key={idx} className="border-t border-gray-200">
                                         <td className="py-1.5 pr-4 font-medium text-gray-700">{a.group_label}</td>
                                         <td className="py-1.5 pr-4 text-gray-600">{a.subject_short}</td>
                                         {viewMode === "periods"
                                           ? periods.map((p) => {
-                                              const prog = teacher.periods[p.period_number];
-                                              // We don't have per-assignment breakdown in the API response,
-                                              // so show "—" for detail (could enhance later)
+                                              const ap = a.periods?.[p.period_number];
+                                              if (!ap || ap.expected === 0) {
+                                                return <td key={p.period_number} className="text-center py-1.5 text-gray-300">—</td>;
+                                              }
+                                              const pct = ap.captured / ap.expected;
+                                              const st = statusColor(ap.captured, ap.expected);
                                               return (
-                                                <td key={p.period_number} className="text-center py-1.5 text-gray-400">—</td>
+                                                <td key={p.period_number} className={`text-center py-1.5 ${st.bg}`}>
+                                                  <span className={`text-[10px] font-semibold ${st.text}`}>{ap.captured}/{ap.expected}</span>
+                                                  {pct < 1 && pct > 0 && (
+                                                    <span className="block text-[9px] text-gray-400">faltan {ap.expected - ap.captured}</span>
+                                                  )}
+                                                </td>
                                               );
                                             })
-                                          : TRIMESTERS.map((t) => (
-                                              <td key={t.id} className="text-center py-1.5 text-gray-400">—</td>
-                                            ))
+                                          : TRIMESTERS.map((t) => {
+                                              const tExp = t.periods.reduce((s, pn) => s + (a.periods?.[pn]?.expected || 0), 0);
+                                              const tCap = t.periods.reduce((s, pn) => s + (a.periods?.[pn]?.captured || 0), 0);
+                                              if (tExp === 0) return <td key={t.id} className="text-center py-1.5 text-gray-300">—</td>;
+                                              const st = statusColor(tCap, tExp);
+                                              return (
+                                                <td key={t.id} className={`text-center py-1.5 ${st.bg}`}>
+                                                  <span className={`text-[10px] font-semibold ${st.text}`}>{tCap}/{tExp}</span>
+                                                </td>
+                                              );
+                                            })
                                         }
                                       </tr>
-                                    );
-                                  })}
+                                    ))}
                                 </tbody>
                               </table>
                             </div>

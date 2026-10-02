@@ -15,6 +15,7 @@ export default function CaptureAlerts() {
   const [alerts, setAlerts] = useState<CaptureAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetch("/api/dashboard/stats")
@@ -54,19 +55,33 @@ export default function CaptureAlerts() {
     );
   }
 
+  const PREVIEW_COUNT = 5;
+  const visibleAlerts = showAll ? alerts : alerts.slice(0, PREVIEW_COUNT);
+  const hiddenCount = alerts.length - PREVIEW_COUNT;
+
   return (
     <div className="card overflow-hidden">
-      <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 flex items-center gap-2">
-        <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-        <h3 className="text-sm font-semibold text-amber-800">
-          Captura pendiente ({alerts.length} profesor{alerts.length !== 1 ? "es" : ""})
-        </h3>
+      <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <h3 className="text-sm font-semibold text-amber-800">
+            Captura pendiente ({alerts.length} profesor{alerts.length !== 1 ? "es" : ""})
+          </h3>
+        </div>
+        {alerts.length > PREVIEW_COUNT && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-xs font-medium text-amber-700 hover:text-amber-900 transition-colors"
+          >
+            {showAll ? "Ver menos" : `Ver todos (${alerts.length})`}
+          </button>
+        )}
       </div>
 
       <div className="divide-y divide-gray-100">
-        {alerts.map((a) => (
+        {visibleAlerts.map((a) => (
           <div key={a.teacherId} className="px-4 py-3">
             <button
               onClick={() => setExpanded(expanded === a.teacherId ? null : a.teacherId)}
@@ -124,6 +139,18 @@ export default function CaptureAlerts() {
           </div>
         ))}
       </div>
+
+      {!showAll && hiddenCount > 0 && (
+        <button
+          onClick={() => setShowAll(true)}
+          className="w-full px-4 py-3 text-sm font-medium text-amber-700 bg-amber-50/50 hover:bg-amber-50 border-t border-amber-100 transition-colors flex items-center justify-center gap-1"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+          Mostrar {hiddenCount} profesor{hiddenCount !== 1 ? "es" : ""} más
+        </button>
+      )}
     </div>
   );
 }

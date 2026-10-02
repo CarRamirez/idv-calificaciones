@@ -61,8 +61,8 @@ export default function PeriodsTimeline() {
         Periodos de evaluación
       </h3>
 
-      {/* Timeline bar */}
-      <div className="flex gap-2">
+      {/* Responsive grid: 2 cols on mobile, 4 on sm, full row on lg */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
         {periods.map((p) => {
           const isActive = activePeriod?.period_number === p.period_number;
           const isPast = !p.effectively_open && !isActive && p.close_date && new Date(p.close_date) < new Date();
@@ -71,7 +71,7 @@ export default function PeriodsTimeline() {
           return (
             <div
               key={p.period_number}
-              className={`flex-1 rounded-xl p-3 border transition-all ${
+              className={`rounded-xl p-3 border transition-all ${
                 isActive
                   ? "bg-primary-50 border-primary-300 ring-2 ring-primary-200 shadow-sm"
                   : isPast
@@ -88,7 +88,6 @@ export default function PeriodsTimeline() {
                 {isActive && (
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[10px] text-green-600 font-medium">Activo</span>
                   </span>
                 )}
                 {isPast && (
@@ -103,12 +102,16 @@ export default function PeriodsTimeline() {
                 )}
               </div>
 
-              <div className="text-[10px] text-gray-400 space-y-0.5">
+              {isActive && (
+                <span className="text-[9px] text-green-600 font-medium">Activo</span>
+              )}
+
+              <div className="text-[10px] text-gray-400 space-y-0.5 mt-1">
                 {p.open_date && (
-                  <p>Abre: {formatDate(p.open_date)}</p>
+                  <p>{formatDate(p.open_date)}</p>
                 )}
                 {p.close_date && (
-                  <p>Cierra: {formatDate(p.close_date)}</p>
+                  <p className="text-gray-500">{formatDate(p.close_date)}</p>
                 )}
                 {!p.open_date && !p.close_date && (
                   <p className="italic">Sin fechas</p>

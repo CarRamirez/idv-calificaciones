@@ -124,7 +124,6 @@ export async function GET() {
           pendingDetails: pending.map((p) => `${p.group} ${p.subject} (${p.captured}/${p.total})`),
         };
       })
-      .filter((a) => a.pct < 100)
       .sort((a, b) => a.pct - b.pct);
   }
 
