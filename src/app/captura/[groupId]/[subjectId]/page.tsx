@@ -504,6 +504,16 @@ export default function CapturaPage({ params }: Props) {
   }
 
 
+  /* --- Descargar Excel --- */
+  function handleDownloadExcel() {
+    const link = document.createElement("a");
+    link.href = `/api/captura/${groupId}/${subjectId}/excel`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   /* --- Imprimir registro de captura --- */
   function handlePrint() {
     const trimester = activeTab >= 1 && activeTab <= 3
@@ -1112,15 +1122,26 @@ export default function CapturaPage({ params }: Props) {
               <p className="text-xs text-gray-400">
                 Julio (Final) se muestra como referencia — no se incluye en el promedio final.
               </p>
-              <button
-                onClick={handlePrint}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Imprimir Resumen
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePrint}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Imprimir Resumen
+                </button>
+                <button
+                  onClick={handleDownloadExcel}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all border-2 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 active:scale-[0.98]"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Descargar Excel
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1137,6 +1158,15 @@ export default function CapturaPage({ params }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
                 Imprimir Registro
+              </button>
+              <button
+                onClick={handleDownloadExcel}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 active:scale-[0.98]"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descargar Excel
               </button>
               <p className="text-xs text-gray-400 hidden sm:block">
                 IA = Inasistencias Acumuladas

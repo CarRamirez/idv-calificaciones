@@ -238,6 +238,29 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
           {/* Action buttons */}
           <div className="flex justify-end gap-2 mb-3 print-hidden">
             <button
+              onClick={() => {
+                const params = new URLSearchParams({
+                  groupId: selectedGroupId,
+                  filterMode,
+                  period: selectedPeriod.toString(),
+                  trimester: selectedTrimester.toString(),
+                  subjectId: selectedSubjectId,
+                });
+                const link = document.createElement("a");
+                link.href = `/api/concentrados/excel?${params.toString()}`;
+                link.download = "";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="btn-secondary text-sm flex items-center gap-2 !border-green-200 !text-green-700 hover:!bg-green-50 hover:!border-green-300"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Descargar Excel
+            </button>
+            <button
               onClick={() => window.print()}
               className="btn-primary text-sm flex items-center gap-2"
             >
