@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEffectiveProfile } from "@/lib/impersonation";
 import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
+import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
 const TRIMESTERS = [
   { id: 1, name: "1er Trimestre", periods: [1, 2] },
@@ -57,14 +58,15 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     .order("list_num");
 
   const studentIds = (students || []).map((s) => s.id);
-  const { data: allGrades } = await supabase
-    .from("grades")
-    .select("student_id, subject_id, period, score, absences")
-    .in("student_id", studentIds);
+  const allGrades = studentIds.length > 0
+    ? await fetchAllGrades(supabase, studentIds, {
+        columns: "student_id, subject_id, period, score, absences",
+      })
+    : [];
 
   // Build grade map
   const gradeMap: Record<string, Record<string, Record<number, { score: number | null; absences: number }>>> = {};
-  (allGrades || []).forEach((g) => {
+  allGrades.forEach((g) => {
     if (!gradeMap[g.student_id]) gradeMap[g.student_id] = {};
     if (!gradeMap[g.student_id][g.subject_id]) gradeMap[g.student_id][g.subject_id] = {};
     gradeMap[g.student_id][g.subject_id][g.period] = { score: g.score, absences: g.absences };

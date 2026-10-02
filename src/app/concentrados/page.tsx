@@ -4,6 +4,7 @@ import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ConcentradoFiltered from "@/components/ConcentradoFiltered";
+import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
 export default async function ConcentradosPage() {
   const supabase = createServerSupabaseClient();
@@ -39,20 +40,11 @@ export default async function ConcentradosPage() {
     .eq("is_active", true)
     .order("list_num");
 
-  // Get ALL grades for all students
+  // Get ALL grades for all students (paginated to avoid Supabase 1000-row limit)
   const studentIds = (students || []).map((s) => s.id);
-  let allGrades: any[] = [];
-  if (studentIds.length > 0) {
-    // Fetch in chunks of 500 to avoid query limits
-    for (let i = 0; i < studentIds.length; i += 500) {
-      const chunk = studentIds.slice(i, i + 500);
-      const { data } = await supabase
-        .from("grades")
-        .select("student_id, subject_id, period, score, absences, comment")
-        .in("student_id", chunk);
-      if (data) allGrades = allGrades.concat(data);
-    }
-  }
+  const allGrades = studentIds.length > 0
+    ? await fetchAllGrades(supabase, studentIds)
+    : [];
 
   // Build grade map: { studentId: { subjectId: { period: { score, absences } } } }
   const gradeMap: Record<string, Record<string, Record<number, { score: number | null; absences: number; comment?: string }>>> = {};

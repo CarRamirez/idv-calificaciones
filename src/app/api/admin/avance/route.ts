@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
 const ADMIN_ROLES = ["admin", "directora_anita"];
 
@@ -69,18 +70,12 @@ export async function GET() {
     // 4. Get all grades (just student_id, subject_id, period, score) 
     //    to count how many have been captured
     const studentIds = (students || []).map((s: any) => s.id);
-    let allGrades: { student_id: string; subject_id: string; period: number; score: number | null }[] = [];
-    if (studentIds.length > 0) {
-      for (let i = 0; i < studentIds.length; i += 500) {
-        const chunk = studentIds.slice(i, i + 500);
-        const { data } = await admin
-          .from("grades")
-          .select("student_id, subject_id, period, score")
-          .in("student_id", chunk)
-          .not("score", "is", null);
-        if (data) allGrades = allGrades.concat(data);
-      }
-    }
+    const allGrades = studentIds.length > 0
+      ? await fetchAllGrades(admin, studentIds, {
+          columns: "student_id, subject_id, period, score",
+          extraFilter: (q: any) => q.not("score", "is", null),
+        })
+      : [];
 
     // Build a set of captured grades: "studentId:subjectId:period"
     const capturedSet = new Set<string>();

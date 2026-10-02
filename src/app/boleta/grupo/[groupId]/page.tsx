@@ -4,6 +4,7 @@ import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import BoletaAllGroup from "@/components/BoletaAllGroup";
 import Link from "next/link";
+import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
 type Props = { params: { groupId: string } };
 
@@ -43,14 +44,15 @@ export default async function BoletaGroupPage({ params }: Props) {
     .order("sort_order");
 
   const studentIds = (students || []).map((s) => s.id);
-  const { data: grades } = await supabase
-    .from("grades")
-    .select("student_id, subject_id, period, score, absences")
-    .in("student_id", studentIds);
+  const grades = studentIds.length > 0
+    ? await fetchAllGrades(supabase, studentIds, {
+        columns: "student_id, subject_id, period, score, absences",
+      })
+    : [];
 
   const gradeMaps: Record<string, Record<string, Record<number, { score: number | null; absences: number }>>> = {};
   (students || []).forEach((s) => { gradeMaps[s.id] = {}; });
-  (grades || []).forEach((g) => {
+  grades.forEach((g) => {
     if (!gradeMaps[g.student_id]) return;
     if (!gradeMaps[g.student_id][g.subject_id]) gradeMaps[g.student_id][g.subject_id] = {};
     gradeMaps[g.student_id][g.subject_id][g.period] = { score: g.score, absences: g.absences };

@@ -4,6 +4,7 @@ import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ConcentradoTable from "@/components/ConcentradoTable";
+import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
 type Props = {
   params: { groupId: string };
@@ -62,17 +63,18 @@ export default async function ConcentradoPage({ params }: Props) {
     .order("list_num");
 
   const studentIds = (students || []).map((s) => s.id);
-  const { data: allGrades } = await supabase
-    .from("grades")
-    .select("student_id, subject_id, period, score, absences")
-    .in("student_id", studentIds);
+  const allGrades = studentIds.length > 0
+    ? await fetchAllGrades(supabase, studentIds, {
+        columns: "student_id, subject_id, period, score, absences",
+      })
+    : [];
 
   // Build grade map for client component
   const gradeMap: Record<
     string,
     Record<string, Record<number, { score: number | null; absences: number }>>
   > = {};
-  (allGrades || []).forEach((g) => {
+  allGrades.forEach((g) => {
     if (!gradeMap[g.student_id]) gradeMap[g.student_id] = {};
     if (!gradeMap[g.student_id][g.subject_id])
       gradeMap[g.student_id][g.subject_id] = {};

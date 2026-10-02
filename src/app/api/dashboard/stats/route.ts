@@ -2,6 +2,21 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEffectiveProfile } from "@/lib/impersonation";
 import { NextResponse } from "next/server";
 
+// Paginated fetch to bypass Supabase 1000-row default limit
+async function fetchPaginated(supabase: any, queryBuilder: () => any): Promise<any[]> {
+  const pageSize = 1000;
+  let all: any[] = [];
+  let from = 0;
+  while (true) {
+    const { data } = await queryBuilder().range(from, from + pageSize - 1);
+    if (!data || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return all;
+}
+
 export async function GET() {
   const supabase = createServerSupabaseClient();
   const {
@@ -72,14 +87,16 @@ export async function GET() {
   let captureAlerts: any[] = [];
 
   if (activePeriod && assignments && students) {
-    const { data: gradesData } = await supabase
-      .from("grades")
-      .select("student_id, subject_id, score")
-      .eq("period", activePeriod.period_number)
-      .not("score", "is", null);
+    const gradesData = await fetchPaginated(supabase, () =>
+      supabase
+        .from("grades")
+        .select("student_id, subject_id, score")
+        .eq("period", activePeriod.period_number)
+        .not("score", "is", null)
+    );
 
     const gradedSet = new Set(
-      (gradesData || []).map((g: any) => `${g.student_id}-${g.subject_id}`)
+      gradesData.map((g: any) => `${g.student_id}-${g.subject_id}`)
     );
 
     const teacherProgress: Record<string, {
@@ -133,11 +150,13 @@ export async function GET() {
   const performanceByGroup: any[] = [];
 
   if (activePeriod && groups && students) {
-    const { data: allGrades } = await supabase
-      .from("grades")
-      .select("student_id, subject_id, score")
-      .eq("period", activePeriod.period_number)
-      .not("score", "is", null);
+    const allGrades = await fetchPaginated(supabase, () =>
+      supabase
+        .from("grades")
+        .select("student_id, subject_id, score")
+        .eq("period", activePeriod.period_number)
+        .not("score", "is", null)
+    );
 
     const { data: subjects } = await supabase
       .from("subjects")
@@ -151,7 +170,7 @@ export async function GET() {
     (subjects || []).forEach((s: any) => { subjectMap[s.id] = s; });
 
     const gradesByStudent: Record<string, Record<string, number>> = {};
-    (allGrades || []).forEach((g: any) => {
+    allGrades.forEach((g: any) => {
       if (!gradesByStudent[g.student_id]) gradesByStudent[g.student_id] = {};
       gradesByStudent[g.student_id][g.subject_id] = g.score;
     });
