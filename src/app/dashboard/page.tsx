@@ -134,52 +134,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // ──── TEACHER DATA ────
-  let teacherAssignments: any[] = [];
-  let teacherGroupIds: string[] = [];
-  const teacherStudentCounts: Record<string, number> = {};
-
-  if (dashboardView === "teacher") {
-    const { data } = await supabase
-      .from("teacher_assignments")
-      .select("id, subjects ( id, name, short_name ), groups ( id, grade, letter )")
-      .eq("teacher_id", impersonatedUserId || user.id);
-    teacherAssignments = data || [];
-
-    teacherGroupIds = Array.from(
-      new Set(teacherAssignments.map((a: any) => a.groups.id))
-    );
-
-    if (teacherGroupIds.length > 0) {
-      const { data: students } = await supabase
-        .from("students")
-        .select("id, group_id")
-        .in("group_id", teacherGroupIds)
-        .eq("is_active", true);
-      (students || []).forEach((s: any) => {
-        teacherStudentCounts[s.group_id] =
-          (teacherStudentCounts[s.group_id] || 0) + 1;
-      });
-    }
-  }
-
-  // Group assignments by group for teacher view
-  const teacherByGroup: Record<string, { group: any; subjects: any[] }> = {};
-  teacherAssignments.forEach((a: any) => {
-    const gId = a.groups.id;
-    if (!teacherByGroup[gId]) {
-      teacherByGroup[gId] = { group: a.groups, subjects: [] };
-    }
-    teacherByGroup[gId].subjects.push(a.subjects);
-  });
-
-  // ──── ADMIN / VIEWER DATA ────
-  let groups: any[] = [];
-  let totalStudents = 0;
-  let totalTeachers = 0;
-  let totalSubjects = 0;
-  const groupStudentCounts: Record<string, number> = {};
-
   // ──── SHARED DATA (periods, progress) ────
   let activePeriod: { period_number: number; name: string; close_date: string | null; open_date: string | null } | null = null;
   let captureProgress = { entered: 0, total: 0 };
@@ -209,6 +163,108 @@ export default async function DashboardPage() {
       }
     }
   }
+
+  // ──── TEACHER DATA ────
+  let teacherAssignments: any[] = [];
+  let teacherGroupIds: string[] = [];
+  const teacherStudentCounts: Record<string, number> = {};
+
+  if (dashboardView === "teacher") {
+    const { data } = await supabase
+      .from("teacher_assignments")
+      .select("id, subjects ( id, name, short_name ), groups ( id, grade, letter )")
+      .eq("teacher_id", impersonatedUserId || user.id);
+    teacherAssignments = data || [];
+
+    teacherGroupIds = Array.from(
+      new Set(teacherAssignments.map((a: any) => a.groups.id))
+    );
+
+    if (teacherGroupIds.length > 0) {
+      const { data: students } = await supabase
+        .from("students")
+        .select("id, group_id")
+        .in("group_id", teacherGroupIds)
+        .eq("is_active", true);
+      (students || []).forEach((s: any) => {
+        teacherStudentCounts[s.group_id] =
+          (teacherStudentCounts[s.group_id] || 0) + 1;
+      });
+    }
+  }
+
+  // ──── TEACHER CAPTURE PROGRESS ────
+  let teacherCaptureTotal = 0;
+  let teacherCaptureEntered = 0;
+  // Per-group-subject progress: { "groupId:subjectId": { entered, total } }
+  const teacherSubjectProgress: Record<string, { entered: number; total: number }> = {};
+
+  if (dashboardView === "teacher" && activePeriod && teacherAssignments.length > 0) {
+    // Total expected = sum of students per group for each assignment
+    teacherAssignments.forEach((a: any) => {
+      const count = teacherStudentCounts[a.groups.id] || 0;
+      teacherCaptureTotal += count;
+      teacherSubjectProgress[`${a.groups.id}:${a.subjects.id}`] = { entered: 0, total: count };
+    });
+
+    // Count grades entered by this teacher's assignments for the active period
+    // Fetch students per group, then check grades
+    const allTeacherStudentIds: string[] = [];
+    const studentGroupMap: Record<string, string> = {};
+    if (teacherGroupIds.length > 0) {
+      const { data: tStudents } = await supabase
+        .from("students")
+        .select("id, group_id")
+        .in("group_id", teacherGroupIds)
+        .eq("is_active", true);
+      (tStudents || []).forEach((s: any) => {
+        allTeacherStudentIds.push(s.id);
+        studentGroupMap[s.id] = s.group_id;
+      });
+    }
+
+    if (allTeacherStudentIds.length > 0) {
+      // Fetch grades for active period for these students + teacher's subjects
+      const teacherSubjectIds = teacherAssignments.map((a: any) => a.subjects.id);
+      const { fetchAllGrades: fetchGrades } = await import("@/lib/fetch-all-grades");
+      const teacherGrades = await fetchGrades(supabase, allTeacherStudentIds, {
+        columns: "student_id, subject_id",
+        extraFilter: (q: any) => q
+          .eq("period", activePeriod!.period_number)
+          .in("subject_id", teacherSubjectIds)
+          .not("score", "is", null),
+      });
+
+      teacherGrades.forEach((g: any) => {
+        const groupId = studentGroupMap[g.student_id];
+        if (groupId) {
+          const key = `${groupId}:${g.subject_id}`;
+          if (teacherSubjectProgress[key]) {
+            teacherSubjectProgress[key].entered++;
+          }
+        }
+      });
+
+      teacherCaptureEntered = teacherGrades.length;
+    }
+  }
+
+  // Group assignments by group for teacher view
+  const teacherByGroup: Record<string, { group: any; subjects: any[] }> = {};
+  teacherAssignments.forEach((a: any) => {
+    const gId = a.groups.id;
+    if (!teacherByGroup[gId]) {
+      teacherByGroup[gId] = { group: a.groups, subjects: [] };
+    }
+    teacherByGroup[gId].subjects.push(a.subjects);
+  });
+
+  // ──── ADMIN / VIEWER DATA ────
+  let groups: any[] = [];
+  let totalStudents = 0;
+  let totalTeachers = 0;
+  let totalSubjects = 0;
+  const groupStudentCounts: Record<string, number> = {};
 
   if (dashboardView === "admin") {
     const { data } = await supabase
@@ -454,6 +510,35 @@ export default async function DashboardPage() {
               />
             )}
 
+            {activePeriod && teacherCaptureTotal > 0 && (
+              <div className="card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-800">Mi avance de captura</h3>
+                    <p className="text-xs text-gray-400">{activePeriod.name} — {teacherCaptureEntered} de {teacherCaptureTotal} calificaciones</p>
+                  </div>
+                  <span className="text-2xl font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: teacherCaptureEntered >= teacherCaptureTotal ? "#16a34a" : teacherCaptureEntered / teacherCaptureTotal > 0.5 ? "#d97706" : "#dc2626" }}>
+                    {teacherCaptureTotal > 0 ? Math.round((teacherCaptureEntered / teacherCaptureTotal) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${teacherCaptureTotal > 0 ? Math.min(100, (teacherCaptureEntered / teacherCaptureTotal) * 100) : 0}%`,
+                      backgroundColor: teacherCaptureEntered >= teacherCaptureTotal ? "#16a34a" : teacherCaptureEntered / teacherCaptureTotal > 0.5 ? "#d97706" : "#dc2626",
+                    }}
+                  />
+                </div>
+                {teacherCaptureEntered >= teacherCaptureTotal && (
+                  <p className="text-xs text-green-600 font-medium mt-2 flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Captura completa para este periodo
+                  </p>
+                )}
+              </div>
+            )}
+
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
               Mis grupos
             </h2>
@@ -492,19 +577,41 @@ export default async function DashboardPage() {
                           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Materias — clic para calificar
                           </p>
-                          {subjects.map((s: any) => (
-                            <Link
-                              key={s.id}
-                              href={`/captura/${gId}/${s.id}`}
-                              className="flex items-center justify-between text-sm px-2 py-1.5 -mx-2 rounded-lg hover:bg-primary-50 group/subj transition-colors"
-                            >
-                              <span className="text-gray-700 group-hover/subj:text-primary-700 transition-colors">{s.name}</span>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs text-gray-400 font-mono">{s.short_name}</span>
-                                <IconPencil className="w-3 h-3 text-gray-300 group-hover/subj:text-primary-500 transition-colors" />
-                              </div>
-                            </Link>
-                          ))}
+                          {subjects.map((s: any) => {
+                            const prog = teacherSubjectProgress[`${gId}:${s.id}`];
+                            const pct = prog && prog.total > 0 ? Math.round((prog.entered / prog.total) * 100) : 0;
+                            const done = prog ? prog.entered >= prog.total : false;
+                            return (
+                              <Link
+                                key={s.id}
+                                href={`/captura/${gId}/${s.id}`}
+                                className="block px-2 py-1.5 -mx-2 rounded-lg hover:bg-primary-50 group/subj transition-colors"
+                              >
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-700 group-hover/subj:text-primary-700 transition-colors">{s.name}</span>
+                                  <div className="flex items-center gap-1.5">
+                                    {prog && (
+                                      <span className={`text-[10px] tabular-nums font-medium ${done ? "text-green-600" : "text-gray-400"}`}>
+                                        {prog.entered}/{prog.total}
+                                      </span>
+                                    )}
+                                    <IconPencil className="w-3 h-3 text-gray-300 group-hover/subj:text-primary-500 transition-colors" />
+                                  </div>
+                                </div>
+                                {prog && prog.total > 0 && (
+                                  <div className="w-full h-1 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{
+                                        width: `${pct}%`,
+                                        backgroundColor: done ? "#16a34a" : pct > 0 ? "#f59e0b" : "#e5e7eb",
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </Link>
+                            );
+                          })}
                         </div>
 
                         <div className="px-4 pb-2 pt-2 flex gap-2">
