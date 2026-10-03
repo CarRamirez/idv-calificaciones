@@ -136,11 +136,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: Historial de notificaciones
+// GET: Historial de notificaciones (admin/tareas only)
 export async function GET() {
-  const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const admin = await verifyAdmin();
+  if (!admin) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 

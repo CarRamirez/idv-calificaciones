@@ -199,35 +199,38 @@ export default function CapturaPage({ params }: Props) {
       const key = `${studentId}-${period}`;
       setSaving(key);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      try {
+        const res = await fetch("/api/grades/upsert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            groupId,
+            subjectId,
+            grades: [{
+              student_id: studentId,
+              period,
+              score,
+              absences,
+              comment: comment !== undefined ? comment : undefined,
+            }],
+          }),
+        });
 
-      const row: any = {
-          student_id: studentId,
-          subject_id: subjectId,
-          period,
-          score,
-          absences,
-          updated_by: user?.id,
-          updated_at: new Date().toISOString(),
-        };
-      if (comment !== undefined) row.comment = comment;
-
-      const { error } = await supabase.from("grades").upsert(
-        row,
-        { onConflict: "student_id,subject_id,period" }
-      );
-
-      if (error) {
-        console.error("Error al guardar:", error);
-        setSaveError("Error al guardar calificación. Verifica permisos o contacta al administrador.");
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          console.error("Error al guardar:", data.error);
+          setSaveError(data.error || "Error al guardar calificación.");
+          setTimeout(() => setSaveError(null), 5000);
+        }
+      } catch (err) {
+        console.error("Error de red:", err);
+        setSaveError("Error de conexión al guardar.");
         setTimeout(() => setSaveError(null), 5000);
       }
 
       setTimeout(() => setSaving(null), 600);
     },
-    [supabase, subjectId, isPeriodLocked]
+    [groupId, subjectId, isPeriodLocked]
   );
 
   function getCurrentPeriodIds(): number[] {
@@ -266,39 +269,47 @@ export default function CapturaPage({ params }: Props) {
     setBulkSaving(true);
     setSaveStatus("saving");
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    const upserts: any[] = [];
+    const gradeRows: any[] = [];
     students.forEach((student) => {
       periodIds.forEach((pid) => {
         const data = grades[student.id]?.[pid];
         if (data) {
-          const row: any = {
+          gradeRows.push({
             student_id: student.id,
-            subject_id: subjectId,
             period: pid,
             score: data.score,
             absences: data.absences,
-            updated_by: user?.id,
-            updated_at: new Date().toISOString(),
-          };
-          if (data.comment) row.comment = data.comment;
-          upserts.push(row);
+            comment: data.comment || undefined,
+          });
         }
       });
     });
 
-    const { error } = await supabase
-      .from("grades")
-      .upsert(upserts, { onConflict: "student_id,subject_id,period" });
+    try {
+      const res = await fetch("/api/grades/upsert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          groupId,
+          subjectId,
+          grades: gradeRows,
+        }),
+      });
 
-    setBulkSaving(false);
+      setBulkSaving(false);
 
-    if (error) {
-      console.error("Error al guardar masivo:", error);
-      setSaveError("Error al guardar calificaciones: " + (error.message || "Verifica permisos o contacta al administrador."));
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error("Error al guardar masivo:", data.error);
+        setSaveError("Error al guardar calificaciones: " + (data.error || "Contacta al administrador."));
+        setTimeout(() => setSaveError(null), 6000);
+        setSaveStatus("idle");
+        return;
+      }
+    } catch (err) {
+      setBulkSaving(false);
+      console.error("Error de red:", err);
+      setSaveError("Error de conexión al guardar.");
       setTimeout(() => setSaveError(null), 6000);
       setSaveStatus("idle");
       return;
