@@ -67,6 +67,7 @@ export default function TareasPage() {
       const { data: grps } = await supabase
         .from("groups")
         .select("id, grade, letter, parent_email")
+        .neq("letter", "Bajas")
         .order("grade")
         .order("letter");
       setGroups(grps || []);

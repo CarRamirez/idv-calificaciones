@@ -26,6 +26,7 @@ export default async function ConcentradoIndexPage() {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
+      .neq("letter", "Bajas")
       .order("grade")
       .order("letter");
     groups = data || [];
@@ -41,12 +42,14 @@ export default async function ConcentradoIndexPage() {
         groups.push(a.groups);
       }
     });
+    groups = groups.filter((g) => g.letter !== "Bajas");
     groups.sort((a, b) => a.grade - b.grade || a.letter.localeCompare(b.letter));
   } else if (effectiveProfile.role === "viewer") {
     // Viewer: access via dashboard concentrado links
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
+      .neq("letter", "Bajas")
       .order("grade")
       .order("letter");
     groups = data || [];

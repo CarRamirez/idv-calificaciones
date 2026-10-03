@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import AvatarUpload from "@/components/AvatarUpload";
 
 type Group = { id: string; grade: number; letter: string };
 type Student = {
@@ -14,7 +15,13 @@ type Student = {
   list_num: number;
   group_id: string;
   status: string; // 'activo' | 'inactivo' | 'baja'
+  avatar_url: string | null;
 };
+
+// Helper to identify "Bajas" groups
+function isBajasGroup(g: Group): boolean {
+  return g.letter === "Bajas";
+}
 
 const STATUS_OPTIONS = [
   { value: "activo", label: "Activo", color: "bg-green-100 text-green-700" },
@@ -57,6 +64,7 @@ export default function AdminAlumnosPage() {
   const [groupChangeStudent, setGroupChangeStudent] = useState<Student | null>(null);
   const [targetGroup, setTargetGroup] = useState<string>("");
   const [groupChangeError, setGroupChangeError] = useState("");
+  const [pendingReactivateStatus, setPendingReactivateStatus] = useState<string | null>(null);
 
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -124,10 +132,18 @@ export default function AdminAlumnosPage() {
   const currentGroup = groups.find((g) => g.id === selectedGroup);
   const groupLabel = currentGroup ? `${currentGroup.grade}° ${currentGroup.letter}` : "";
 
-  // Same-grade groups for transfers
+  // Same-grade groups for transfers (exclude Bajas groups)
   const sameGradeGroups = currentGroup
-    ? groups.filter((g) => g.grade === currentGroup.grade && g.id !== selectedGroup)
+    ? groups.filter((g) => g.grade === currentGroup.grade && g.id !== selectedGroup && !isBajasGroup(g))
     : [];
+
+  // Find the Bajas group for the current grade
+  const bajasGroupForGrade = currentGroup
+    ? groups.find((g) => g.grade === currentGroup.grade && isBajasGroup(g))
+    : null;
+
+  // Is current group a Bajas group?
+  const isCurrentBajas = currentGroup ? isBajasGroup(currentGroup) : false;
 
   // ── Add modal ──
   function openAdd() {
@@ -188,11 +204,41 @@ export default function AdminAlumnosPage() {
 
   // ── Status change ──
   async function handleStatusChange(studentId: string, newStatus: string) {
+    const student = students.find((s) => s.id === studentId);
+    if (!student) return;
+
     setChangingStatus(studentId);
-    await supabase
-      .from("students")
-      .update({ status: newStatus })
-      .eq("id", studentId);
+
+    if (newStatus === "baja" && bajasGroupForGrade && !isCurrentBajas) {
+      // Auto-move to Bajas group
+      const { data: targetStudents } = await supabase
+        .from("students")
+        .select("list_num")
+        .eq("group_id", bajasGroupForGrade.id)
+        .order("list_num", { ascending: false })
+        .limit(1);
+      const nextNum = targetStudents && targetStudents.length > 0 ? targetStudents[0].list_num + 1 : 1;
+
+      await supabase
+        .from("students")
+        .update({ status: "baja", group_id: bajasGroupForGrade.id, list_num: nextNum })
+        .eq("id", studentId);
+    } else if (newStatus !== "baja" && isCurrentBajas) {
+      // Reactivating from Bajas — need to pick a group
+      setGroupChangeStudent(student);
+      setTargetGroup(sameGradeGroups.length > 0 ? sameGradeGroups[0].id : "");
+      setGroupChangeError("");
+      setPendingReactivateStatus(newStatus);
+      setShowGroupModal(true);
+      setChangingStatus(null);
+      return;
+    } else {
+      await supabase
+        .from("students")
+        .update({ status: newStatus })
+        .eq("id", studentId);
+    }
+
     await loadStudents();
     setChangingStatus(null);
   }
@@ -222,9 +268,15 @@ export default function AdminAlumnosPage() {
       ? targetStudents[0].list_num + 1
       : 1;
 
+    // If reactivating from Bajas, also update status
+    const updateData: Record<string, unknown> = { group_id: targetGroup, list_num: nextNum };
+    if (pendingReactivateStatus) {
+      updateData.status = pendingReactivateStatus;
+    }
+
     const { error } = await supabase
       .from("students")
-      .update({ group_id: targetGroup, list_num: nextNum })
+      .update(updateData)
       .eq("id", groupChangeStudent.id);
 
     if (error) {
@@ -236,6 +288,7 @@ export default function AdminAlumnosPage() {
     setSaving(false);
     setShowGroupModal(false);
     setGroupChangeStudent(null);
+    setPendingReactivateStatus(null);
     loadStudents();
   }
 
@@ -279,7 +332,7 @@ export default function AdminAlumnosPage() {
 
         {/* Group tabs */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {groups.map((g) => (
+          {groups.filter((g) => !isBajasGroup(g)).map((g) => (
             <button
               key={g.id}
               onClick={() => setSelectedGroup(g.id)}
@@ -292,6 +345,25 @@ export default function AdminAlumnosPage() {
               {g.grade}° {g.letter}
             </button>
           ))}
+          {/* Separator + Bajas groups */}
+          {groups.some((g) => isBajasGroup(g)) && (
+            <>
+              <span className="text-gray-300 self-center">|</span>
+              {groups.filter((g) => isBajasGroup(g)).map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setSelectedGroup(g.id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    selectedGroup === g.id
+                      ? "bg-red-600 text-white"
+                      : "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                  }`}
+                >
+                  ⊘ {g.grade}° Bajas
+                </button>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Actions bar */}
@@ -343,7 +415,19 @@ export default function AdminAlumnosPage() {
                 filtered.map((s) => (
                   <tr key={s.id} className={s.status !== "activo" ? "opacity-50" : ""}>
                     <td className="text-center font-medium">{s.list_num}</td>
-                    <td className="font-medium">{s.full_name}</td>
+                    <td className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {s.avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={s.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {s.full_name.charAt(0)}
+                          </div>
+                        )}
+                        {s.full_name}
+                      </div>
+                    </td>
                     <td className="hidden sm:table-cell text-xs text-gray-500 font-mono">
                       {s.curp || "—"}
                     </td>
@@ -370,7 +454,7 @@ export default function AdminAlumnosPage() {
                         >
                           Editar
                         </button>
-                        {sameGradeGroups.length > 0 && (
+                        {sameGradeGroups.length > 0 && !isCurrentBajas && (
                           <button
                             onClick={() => openGroupChange(s)}
                             className="text-xs text-violet-600 hover:text-violet-800 px-1.5 py-0.5"
@@ -410,6 +494,20 @@ export default function AdminAlumnosPage() {
               <h2 className="text-base font-bold text-gray-900 mb-4">
                 {editStudent ? "Editar alumno" : `Nuevo alumno — ${groupLabel}`}
               </h2>
+
+              {editStudent && (
+                <div className="flex justify-center mb-4">
+                  <AvatarUpload
+                    currentUrl={editStudent.avatar_url}
+                    entityType="student"
+                    entityId={editStudent.id}
+                    size={80}
+                    onUploaded={(url) => {
+                      setStudents((prev) => prev.map((s) => s.id === editStudent.id ? { ...s, avatar_url: url } : s));
+                    }}
+                  />
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div>
@@ -470,10 +568,15 @@ export default function AdminAlumnosPage() {
         {showGroupModal && groupChangeStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-2">Cambiar de grupo</h2>
+              <h2 className="text-base font-bold text-gray-900 mb-2">
+                {pendingReactivateStatus ? "Reactivar alumno — Seleccionar grupo" : "Cambiar de grupo"}
+              </h2>
               <p className="text-sm text-gray-600 mb-4">
-                Mover a <span className="font-semibold">{groupChangeStudent.full_name}</span> de{" "}
-                <span className="font-semibold">{groupLabel}</span> a:
+                {pendingReactivateStatus
+                  ? <>Selecciona el grupo destino para <span className="font-semibold">{groupChangeStudent.full_name}</span>:</>
+                  : <>Mover a <span className="font-semibold">{groupChangeStudent.full_name}</span> de{" "}
+                    <span className="font-semibold">{groupLabel}</span> a:</>
+                }
               </p>
 
               <div className="flex flex-wrap gap-2 mb-4">
@@ -502,7 +605,7 @@ export default function AdminAlumnosPage() {
 
               <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => { setShowGroupModal(false); setGroupChangeStudent(null); }}
+                  onClick={() => { setShowGroupModal(false); setGroupChangeStudent(null); setPendingReactivateStatus(null); }}
                   className="btn-secondary"
                   disabled={saving}
                 >

@@ -270,6 +270,7 @@ export default async function DashboardPage() {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter, school_years ( name )")
+      .neq("letter", "Bajas")
       .order("grade")
       .order("letter");
     groups = data || [];

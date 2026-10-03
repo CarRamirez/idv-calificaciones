@@ -30,6 +30,7 @@ export default async function BoletaIndexPage() {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
+      .neq("letter", "Bajas")
       .order("grade")
       .order("letter");
     groups = data || [];

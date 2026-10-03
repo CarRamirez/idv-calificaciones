@@ -65,6 +65,7 @@ export default async function BoletaDetailPage({ params }: Props) {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
+      .neq("letter", "Bajas")
       .order("grade")
       .order("letter");
     allGroups = data || [];

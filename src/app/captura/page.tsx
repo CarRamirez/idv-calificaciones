@@ -57,6 +57,7 @@ export default async function CapturaIndexPage() {
     const { data: groups } = await supabase
       .from("groups")
       .select("id, grade, letter")
+      .neq("letter", "Bajas")
       .order("grade")
       .order("letter");
 

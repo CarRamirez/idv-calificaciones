@@ -7,6 +7,7 @@ import Link from "next/link";
 import ProfileContactInfo from "@/components/ProfileContactInfo";
 import ImpersonateButton from "@/components/ImpersonateButton";
 import ProfileSelfEdit from "@/components/ProfileSelfEdit";
+import ProfileAvatarSection from "@/components/ProfileAvatarSection";
 
 export default async function PerfilPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();
@@ -26,7 +27,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
   const admin = createAdminClient();
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, full_name, email, role, label, created_at")
+    .select("id, full_name, email, role, label, created_at, avatar_url")
     .eq("id", params.id)
     .single();
 
@@ -129,9 +130,14 @@ export default async function PerfilPage({ params }: { params: { id: string } })
         {/* Profile card */}
         <div className="card p-6 mb-6">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xl font-bold flex-shrink-0">
-              {profile.full_name.charAt(0)}
-            </div>
+            {profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatar_url} alt="" className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-gray-200" />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xl font-bold flex-shrink-0">
+                {profile.full_name.charAt(0)}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>{profile.full_name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -167,6 +173,14 @@ export default async function PerfilPage({ params }: { params: { id: string } })
           initialLabel={profile.label || ""}
           isOwnProfile={isOwnProfile}
         />
+
+        {/* Avatar upload — own profile or admin */}
+        {(isOwnProfile || myProfile.role === "admin") && (
+          <ProfileAvatarSection
+            profileId={profile.id}
+            currentUrl={profile.avatar_url}
+          />
+        )}
 
         {/* Impersonate button — admin only */}
         {canImpersonate && (

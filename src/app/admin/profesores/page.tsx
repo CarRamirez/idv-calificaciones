@@ -85,7 +85,7 @@ export default function AdminProfesoresPage() {
       setProfile(prof);
 
       const [grps, subs] = await Promise.all([
-        supabase.from("groups").select("id, grade, letter").order("grade").order("letter"),
+        supabase.from("groups").select("id, grade, letter").neq("letter", "Bajas").order("grade").order("letter"),
         supabase.from("subjects").select("id, name, short_name, grade").order("grade").order("sort_order"),
       ]);
       setGroups(grps.data || []);

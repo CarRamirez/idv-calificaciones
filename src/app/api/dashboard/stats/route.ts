@@ -60,6 +60,7 @@ export async function GET() {
     .from("groups")
     .select("id, grade, letter, school_years!inner(is_current)")
     .eq("school_years.is_current", true)
+    .neq("letter", "Bajas")
     .order("grade")
     .order("letter");
 

@@ -37,11 +37,20 @@ const TRIMESTERS = [
 
 type FilterMode = "month" | "trimester" | "general";
 
+// Subjects where score = count of infractions (not a grade)
+const PENALTY_SUBJECTS = new Set(["TAR", "INAS", "INC"]);
+
 function semaforoClass(score: number | null): string {
   if (score === null) return "";
   if (score < 7) return "bg-red-100 text-red-800";
   if (score < 8) return "bg-yellow-100 text-yellow-800";
   return "bg-green-100 text-green-800";
+}
+
+function penaltyClass(score: number | null): string {
+  if (score === null || score === 0) return "";
+  if (score <= 2) return "bg-amber-100 text-amber-800";
+  return "bg-red-100 text-red-800";
 }
 
 function fmt(n: number | null): string {
@@ -292,10 +301,13 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
           </div>
 
           {/* Semáforo */}
-          <div className="flex gap-4 mb-3 text-xs">
+          <div className="flex flex-wrap gap-4 mb-3 text-xs">
             <span className="px-2 py-1 rounded bg-red-100 text-red-800">5-6.9</span>
             <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">7-7.9</span>
             <span className="px-2 py-1 rounded bg-green-100 text-green-800">8-10</span>
+            <span className="text-gray-300">|</span>
+            <span className="px-2 py-1 rounded bg-red-100 text-red-800">≥3 incump.</span>
+            <span className="px-2 py-1 rounded bg-amber-100 text-amber-800">1-2 incump.</span>
           </div>
 
           <div className="card overflow-x-auto">
@@ -328,7 +340,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                         const comment = getComment(student.id, s.id, selectedPeriod);
                         return (
                           <React.Fragment key={s.id}>
-                            <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
+                            <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(score) : semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
                               {fmt(score)}
                               {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
                               {comment && (
@@ -419,7 +431,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                                   </React.Fragment>
                                 );
                               })}
-                              <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${semaforoClass(trimAvg)}`}>{fmt(trimAvg)}</td>
+                              <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(trimAvg) : semaforoClass(trimAvg)}`}>{fmt(trimAvg)}</td>
                               <td className="text-center text-xs tabular-nums text-gray-500 font-medium">{trimAbs || "—"}</td>
                             </React.Fragment>
                           );
@@ -467,7 +479,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                           const totalAbs = [1,2,3,4,5,6,7,8].reduce((sum, p) => sum + getAbsences(student.id, s.id, p), 0);
                           return (
                             <React.Fragment key={s.id}>
-                              <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(final)}`}>{fmt(final)}</td>
+                              <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(final) : semaforoClass(final)}`}>{fmt(final)}</td>
                               <td className="text-center text-xs tabular-nums text-gray-500">{totalAbs || "—"}</td>
                             </React.Fragment>
                           );

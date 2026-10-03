@@ -24,6 +24,7 @@ export default async function ConcentradosPage() {
   const { data: groups } = await supabase
     .from("groups")
     .select("id, grade, letter")
+    .neq("letter", "Bajas")
     .order("grade")
     .order("letter");
 

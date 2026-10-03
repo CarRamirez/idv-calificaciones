@@ -37,11 +37,20 @@ type Props = {
 
 type ViewType = "general" | "t1" | "t2" | "t3";
 
+// Subjects where score = count of infractions (not a grade)
+const PENALTY_SUBJECTS = new Set(["TAR", "INAS", "INC"]);
+
 function semaforoClass(score: number | null): string {
   if (score === null) return "";
   if (score < 7) return "bg-red-100 text-red-800";
   if (score < 8) return "bg-yellow-100 text-yellow-800";
   return "bg-green-100 text-green-800";
+}
+
+function penaltyClass(score: number | null): string {
+  if (score === null || score === 0) return "";
+  if (score <= 2) return "bg-amber-100 text-amber-800";
+  return "bg-red-100 text-red-800";
 }
 
 function periodShort(id: number): string {
@@ -191,10 +200,13 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
       </div>
 
       {/* Semáforo */}
-      <div className="flex gap-4 mb-4 text-xs">
+      <div className="flex flex-wrap gap-4 mb-4 text-xs">
         <span className="px-2 py-1 rounded bg-red-100 text-red-800">5-6.9</span>
         <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">7-7.9</span>
         <span className="px-2 py-1 rounded bg-green-100 text-green-800">8-10</span>
+        <span className="text-gray-300">|</span>
+        <span className="px-2 py-1 rounded bg-red-100 text-red-800">≥3 incump.</span>
+        <span className="px-2 py-1 rounded bg-amber-100 text-amber-800">1-2 incump.</span>
         <span className="px-2 py-1 rounded bg-gray-100 text-gray-500 italic">N/C = No curricular</span>
       </div>
 
@@ -237,7 +249,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                       const totalAbs = getTotalAbsences(student.id, s.id);
                       return (
                         <React.Fragment key={s.id}>
-                          <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(curricular)}`}>
+                          <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(curricular) : semaforoClass(curricular)}`}>
                             {curricular !== null ? Math.round(curricular).toString() : "—"}
                           </td>
                           <td className="text-center text-xs tabular-nums text-gray-500">
@@ -325,7 +337,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                             const abs = getAbsences(student.id, s.id, p);
                             return (
                               <React.Fragment key={p}>
-                                <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)}`}>
+                                <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(score) : semaforoClass(score)}`}>
                                   {score !== null ? Math.round(score).toString() : "—"}
                                 </td>
                                 <td className="text-center text-xs tabular-nums text-gray-400">
@@ -334,7 +346,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                               </React.Fragment>
                             );
                           })}
-                          <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${semaforoClass(trimAvg)}`}>
+                          <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(trimAvg) : semaforoClass(trimAvg)}`}>
                             {trimAvg !== null ? Math.round(trimAvg).toString() : "—"}
                           </td>
                           <td className="text-center text-xs tabular-nums text-gray-500 font-medium">
