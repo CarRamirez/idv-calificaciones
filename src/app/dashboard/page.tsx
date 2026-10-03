@@ -185,7 +185,7 @@ export default async function DashboardPage() {
         .from("students")
         .select("id, group_id")
         .in("group_id", teacherGroupIds)
-        .eq("is_active", true);
+        .eq("status", "activo");
       (students || []).forEach((s: any) => {
         teacherStudentCounts[s.group_id] =
           (teacherStudentCounts[s.group_id] || 0) + 1;
@@ -216,7 +216,7 @@ export default async function DashboardPage() {
         .from("students")
         .select("id, group_id")
         .in("group_id", teacherGroupIds)
-        .eq("is_active", true);
+        .eq("status", "activo");
       (tStudents || []).forEach((s: any) => {
         allTeacherStudentIds.push(s.id);
         studentGroupMap[s.id] = s.group_id;
@@ -277,7 +277,7 @@ export default async function DashboardPage() {
     const { data: students } = await supabase
       .from("students")
       .select("id, group_id")
-      .eq("is_active", true);
+      .eq("status", "activo");
 
     totalStudents = students?.length || 0;
     (students || []).forEach((s: any) => {

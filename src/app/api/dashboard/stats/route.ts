@@ -72,7 +72,7 @@ export async function GET() {
   const { data: students } = await supabase
     .from("students")
     .select("id, group_id, full_name")
-    .eq("is_active", true);
+    .eq("status", "activo");
 
   // Students by group (reused)
   const studentsByGroup: Record<string, any[]> = {};

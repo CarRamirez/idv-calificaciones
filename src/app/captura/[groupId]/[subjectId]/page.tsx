@@ -127,7 +127,7 @@ export default function CapturaPage({ params }: Props) {
             .from("students")
             .select("id, full_name, list_num")
             .eq("group_id", groupId)
-            .eq("is_active", true)
+            .eq("status", "activo")
             .order("list_num"),
         ]);
 

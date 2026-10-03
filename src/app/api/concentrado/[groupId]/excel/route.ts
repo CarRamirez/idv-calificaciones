@@ -54,7 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     .from("students")
     .select("id, full_name, list_num")
     .eq("group_id", params.groupId)
-    .eq("is_active", true)
+    .eq("status", "activo")
     .order("list_num");
 
   const studentIds = (students || []).map((s) => s.id);

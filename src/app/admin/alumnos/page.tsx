@@ -13,8 +13,14 @@ type Student = {
   curp: string | null;
   list_num: number;
   group_id: string;
-  is_active: boolean;
+  status: string; // 'activo' | 'inactivo' | 'baja'
 };
+
+const STATUS_OPTIONS = [
+  { value: "activo", label: "Activo", color: "bg-green-100 text-green-700" },
+  { value: "inactivo", label: "Inactivo", color: "bg-amber-100 text-amber-700" },
+  { value: "baja", label: "Baja", color: "bg-red-100 text-red-700" },
+];
 
 export default function AdminAlumnosPage() {
   const supabase = createClient();
@@ -29,14 +35,16 @@ export default function AdminAlumnosPage() {
       .then((data) => { if (data.full_name) setEffectiveProfile(data); })
       .catch(() => {});
   }, []);
+
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("todos");
 
-  // Modal state
+  // Modal state for add/edit
   const [showModal, setShowModal] = useState(false);
   const [editStudent, setEditStudent] = useState<Student | null>(null);
   const [formName, setFormName] = useState("");
@@ -44,10 +52,19 @@ export default function AdminAlumnosPage() {
   const [formListNum, setFormListNum] = useState("");
   const [formError, setFormError] = useState("");
 
+  // Group change modal
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [groupChangeStudent, setGroupChangeStudent] = useState<Student | null>(null);
+  const [targetGroup, setTargetGroup] = useState<string>("");
+  const [groupChangeError, setGroupChangeError] = useState("");
+
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  // Init: check auth, load groups
+  // Status change (inline)
+  const [changingStatus, setChangingStatus] = useState<string | null>(null);
+
+  // Init
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -60,7 +77,6 @@ export default function AdminAlumnosPage() {
         .single();
 
       if (!prof) { router.push("/dashboard"); return; }
-      // Check via permissions API (respects impersonation)
       const permRes = await fetch("/api/auth/permissions");
       const { permissions } = await permRes.json();
       if (!permissions?.includes("admin_alumnos")) {
@@ -83,7 +99,7 @@ export default function AdminAlumnosPage() {
     init();
   }, []);
 
-  // Load students when group changes
+  // Load students
   const loadStudents = useCallback(async () => {
     if (!selectedGroup) return;
     const { data } = await supabase
@@ -97,24 +113,33 @@ export default function AdminAlumnosPage() {
   useEffect(() => { loadStudents(); }, [loadStudents]);
 
   // Filter students
-  const filtered = students.filter((s) =>
-    s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    (s.curp && s.curp.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = students.filter((s) => {
+    const matchesSearch =
+      s.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      (s.curp && s.curp.toLowerCase().includes(search.toLowerCase()));
+    const matchesStatus = filterStatus === "todos" || s.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
-  // Open modal for add
+  const currentGroup = groups.find((g) => g.id === selectedGroup);
+  const groupLabel = currentGroup ? `${currentGroup.grade}° ${currentGroup.letter}` : "";
+
+  // Same-grade groups for transfers
+  const sameGradeGroups = currentGroup
+    ? groups.filter((g) => g.grade === currentGroup.grade && g.id !== selectedGroup)
+    : [];
+
+  // ── Add modal ──
   function openAdd() {
     setEditStudent(null);
     setFormName("");
     setFormCurp("");
-    // Auto-assign next list number
     const maxNum = students.length > 0 ? Math.max(...students.map((s) => s.list_num)) : 0;
     setFormListNum(String(maxNum + 1));
     setFormError("");
     setShowModal(true);
   }
 
-  // Open modal for edit
   function openEdit(s: Student) {
     setEditStudent(s);
     setFormName(s.full_name);
@@ -124,7 +149,6 @@ export default function AdminAlumnosPage() {
     setShowModal(true);
   }
 
-  // Save (add or edit)
   async function handleSave() {
     const name = formName.trim();
     if (!name) { setFormError("El nombre es obligatorio"); return; }
@@ -135,7 +159,6 @@ export default function AdminAlumnosPage() {
     setFormError("");
 
     if (editStudent) {
-      // Update
       const { error } = await supabase
         .from("students")
         .update({
@@ -144,10 +167,8 @@ export default function AdminAlumnosPage() {
           list_num: num,
         })
         .eq("id", editStudent.id);
-
       if (error) { setFormError(error.message); setSaving(false); return; }
     } else {
-      // Insert
       const { error } = await supabase
         .from("students")
         .insert({
@@ -155,8 +176,8 @@ export default function AdminAlumnosPage() {
           curp: formCurp.trim().toUpperCase() || null,
           list_num: num,
           group_id: selectedGroup,
+          status: "activo",
         });
-
       if (error) { setFormError(error.message); setSaving(false); return; }
     }
 
@@ -165,7 +186,60 @@ export default function AdminAlumnosPage() {
     loadStudents();
   }
 
-  // Delete
+  // ── Status change ──
+  async function handleStatusChange(studentId: string, newStatus: string) {
+    setChangingStatus(studentId);
+    await supabase
+      .from("students")
+      .update({ status: newStatus })
+      .eq("id", studentId);
+    await loadStudents();
+    setChangingStatus(null);
+  }
+
+  // ── Group change ──
+  function openGroupChange(s: Student) {
+    setGroupChangeStudent(s);
+    setTargetGroup(sameGradeGroups.length > 0 ? sameGradeGroups[0].id : "");
+    setGroupChangeError("");
+    setShowGroupModal(true);
+  }
+
+  async function handleGroupChange() {
+    if (!groupChangeStudent || !targetGroup) return;
+    setSaving(true);
+    setGroupChangeError("");
+
+    // Get next available list_num in target group
+    const { data: targetStudents } = await supabase
+      .from("students")
+      .select("list_num")
+      .eq("group_id", targetGroup)
+      .order("list_num", { ascending: false })
+      .limit(1);
+
+    const nextNum = targetStudents && targetStudents.length > 0
+      ? targetStudents[0].list_num + 1
+      : 1;
+
+    const { error } = await supabase
+      .from("students")
+      .update({ group_id: targetGroup, list_num: nextNum })
+      .eq("id", groupChangeStudent.id);
+
+    if (error) {
+      setGroupChangeError(error.message);
+      setSaving(false);
+      return;
+    }
+
+    setSaving(false);
+    setShowGroupModal(false);
+    setGroupChangeStudent(null);
+    loadStudents();
+  }
+
+  // ── Delete ──
   async function handleDelete() {
     if (!deleteId) return;
     await supabase.from("students").delete().eq("id", deleteId);
@@ -173,17 +247,12 @@ export default function AdminAlumnosPage() {
     loadStudents();
   }
 
-  // Toggle active
-  async function toggleActive(s: Student) {
-    await supabase
-      .from("students")
-      .update({ is_active: !s.is_active })
-      .eq("id", s.id);
-    loadStudents();
-  }
-
-  const currentGroup = groups.find((g) => g.id === selectedGroup);
-  const groupLabel = currentGroup ? `${currentGroup.grade}° ${currentGroup.letter}` : "";
+  // ── Counts ──
+  const countByStatus = {
+    activo: students.filter((s) => s.status === "activo").length,
+    inactivo: students.filter((s) => s.status === "inactivo").length,
+    baja: students.filter((s) => s.status === "baja").length,
+  };
 
   if (loading || !profile) {
     return (
@@ -199,7 +268,12 @@ export default function AdminAlumnosPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Alumnos</h1>
+          <div>
+            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+              Alumnos
+            </h1>
+            <p className="text-sm text-gray-500">Gestión de alumnos por grupo</p>
+          </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
         </div>
 
@@ -229,6 +303,16 @@ export default function AdminAlumnosPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="input-field flex-1"
           />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="input-field w-auto"
+          >
+            <option value="todos">Todos ({students.length})</option>
+            <option value="activo">Activos ({countByStatus.activo})</option>
+            <option value="inactivo">Inactivos ({countByStatus.inactivo})</option>
+            <option value="baja">Bajas ({countByStatus.baja})</option>
+          </select>
           <button onClick={openAdd} className="btn-primary text-sm whitespace-nowrap">
             + Agregar alumno
           </button>
@@ -239,11 +323,11 @@ export default function AdminAlumnosPage() {
           <table className="grade-table">
             <thead>
               <tr>
-                <th className="w-16">N°</th>
+                <th className="w-14">N°</th>
                 <th>Nombre completo</th>
                 <th className="hidden sm:table-cell">CURP</th>
-                <th className="w-20 text-center">Estado</th>
-                <th className="w-28 text-center">Acciones</th>
+                <th className="w-28 text-center">Estado</th>
+                <th className="w-36 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -252,42 +336,57 @@ export default function AdminAlumnosPage() {
                   <td colSpan={5} className="text-center py-8 text-gray-400 text-sm">
                     {students.length === 0
                       ? `No hay alumnos en ${groupLabel}. Agrega el primero.`
-                      : "Sin resultados para la búsqueda."}
+                      : "Sin resultados para el filtro aplicado."}
                   </td>
                 </tr>
               ) : (
                 filtered.map((s) => (
-                  <tr key={s.id} className={!s.is_active ? "opacity-50" : ""}>
+                  <tr key={s.id} className={s.status !== "activo" ? "opacity-50" : ""}>
                     <td className="text-center font-medium">{s.list_num}</td>
                     <td className="font-medium">{s.full_name}</td>
                     <td className="hidden sm:table-cell text-xs text-gray-500 font-mono">
                       {s.curp || "—"}
                     </td>
                     <td className="text-center">
-                      <button
-                        onClick={() => toggleActive(s)}
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          s.is_active
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                      <select
+                        value={s.status}
+                        onChange={(e) => handleStatusChange(s.id, e.target.value)}
+                        disabled={changingStatus === s.id}
+                        className={`text-xs px-2 py-1 rounded-lg border-0 font-medium cursor-pointer ${
+                          STATUS_OPTIONS.find((o) => o.value === s.status)?.color || "bg-gray-100 text-gray-700"
                         }`}
                       >
-                        {s.is_active ? "Activo" : "Baja"}
-                      </button>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="text-center">
-                      <button
-                        onClick={() => openEdit(s)}
-                        className="text-xs text-primary-600 hover:text-primary-800 mr-2"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => setDeleteId(s.id)}
-                        className="text-xs text-red-600 hover:text-red-800"
-                      >
-                        Eliminar
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => openEdit(s)}
+                          className="text-xs text-primary-600 hover:text-primary-800 px-1.5 py-0.5"
+                          title="Editar datos"
+                        >
+                          Editar
+                        </button>
+                        {sameGradeGroups.length > 0 && (
+                          <button
+                            onClick={() => openGroupChange(s)}
+                            className="text-xs text-violet-600 hover:text-violet-800 px-1.5 py-0.5"
+                            title="Cambiar de grupo"
+                          >
+                            Mover
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setDeleteId(s.id)}
+                          className="text-xs text-red-600 hover:text-red-800 px-1.5 py-0.5"
+                          title="Eliminar alumno"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -295,13 +394,16 @@ export default function AdminAlumnosPage() {
             </tbody>
           </table>
           {students.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500 text-right">
-              {students.filter((s) => s.is_active).length} activos de {students.length} alumnos en {groupLabel}
+            <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500 text-right flex flex-wrap gap-3 justify-end">
+              <span className="text-green-600 font-medium">{countByStatus.activo} activos</span>
+              {countByStatus.inactivo > 0 && <span className="text-amber-600">{countByStatus.inactivo} inactivos</span>}
+              {countByStatus.baja > 0 && <span className="text-red-600">{countByStatus.baja} bajas</span>}
+              <span>· {students.length} total en {groupLabel}</span>
             </div>
           )}
         </div>
 
-        {/* Add/Edit Modal */}
+        {/* ── Add/Edit Modal ── */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
@@ -353,18 +455,10 @@ export default function AdminAlumnosPage() {
               )}
 
               <div className="flex justify-end gap-2 mt-5">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="btn-secondary"
-                  disabled={saving}
-                >
+                <button onClick={() => setShowModal(false)} className="btn-secondary" disabled={saving}>
                   Cancelar
                 </button>
-                <button
-                  onClick={handleSave}
-                  className="btn-primary text-sm"
-                  disabled={saving}
-                >
+                <button onClick={handleSave} className="btn-primary text-sm" disabled={saving}>
                   {saving ? "Guardando..." : editStudent ? "Guardar cambios" : "Agregar"}
                 </button>
               </div>
@@ -372,7 +466,61 @@ export default function AdminAlumnosPage() {
           </div>
         )}
 
-        {/* Delete confirmation */}
+        {/* ── Group Change Modal ── */}
+        {showGroupModal && groupChangeStudent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
+              <h2 className="text-base font-bold text-gray-900 mb-2">Cambiar de grupo</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Mover a <span className="font-semibold">{groupChangeStudent.full_name}</span> de{" "}
+                <span className="font-semibold">{groupLabel}</span> a:
+              </p>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {sameGradeGroups.map((g) => (
+                  <button
+                    key={g.id}
+                    onClick={() => setTargetGroup(g.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      targetGroup === g.id
+                        ? "bg-violet-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {g.grade}° {g.letter}
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs text-gray-400 mb-4">
+                Se asignará el siguiente número de lista disponible en el grupo destino. Las calificaciones existentes se conservan.
+              </p>
+
+              {groupChangeError && (
+                <p className="text-xs text-red-600 mb-3">{groupChangeError}</p>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => { setShowGroupModal(false); setGroupChangeStudent(null); }}
+                  className="btn-secondary"
+                  disabled={saving}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleGroupChange}
+                  className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors"
+                  disabled={saving || !targetGroup}
+                >
+                  {saving ? "Moviendo..." : "Confirmar cambio"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Delete confirmation ── */}
         {deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">

@@ -37,7 +37,7 @@ export default async function ConcentradosPage() {
   const { data: students } = await supabase
     .from("students")
     .select("id, full_name, list_num, group_id")
-    .eq("is_active", true)
+    .eq("status", "activo")
     .order("list_num");
 
   // Get ALL grades for all students (paginated to avoid Supabase 1000-row limit)

@@ -33,7 +33,7 @@ export default function BoletaSelector({ groups }: Props) {
       .from("students")
       .select("id, full_name, list_num")
       .eq("group_id", selectedGroup)
-      .eq("is_active", true)
+      .eq("status", "activo")
       .order("list_num")
       .then(({ data }) => {
         setStudents(data || []);

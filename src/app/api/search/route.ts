@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
   const { data: students } = await admin
     .from("students")
     .select("id, full_name, group_id, groups!inner(grade, letter)")
-    .eq("is_active", true)
+    .eq("status", "activo")
     .ilike("full_name", `%${q}%`)
     .limit(8);
 

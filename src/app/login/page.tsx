@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -145,12 +146,50 @@ export default function LoginPage() {
                 ) : "Iniciar sesión"}
               </button>
             </form>
+
+            <button
+              type="button"
+              onClick={() => setShowForgot(true)}
+              className="w-full text-center text-sm text-primary-600 hover:text-primary-800 mt-4 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-6">
             Camino, Verdad, Vida — Ciclo 2026-2027
           </p>
         </div>
+
+        {/* Forgot password modal */}
+        {showForgot && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 animate-slide-up">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </div>
+                <h2 className="text-base font-bold text-gray-900">Recuperar contraseña</h2>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed mb-2">
+                Para restablecer tu contraseña, comunícate con el administrador del sistema:
+              </p>
+              <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                <p className="text-sm font-semibold text-gray-800">Dirección Escolar</p>
+                <p className="text-sm text-gray-600 mt-1">Instituto Don Vasco</p>
+                <p className="text-xs text-gray-500 mt-1">Acude directamente a la dirección o envía un mensaje al administrador para solicitar el restablecimiento de tu contraseña.</p>
+              </div>
+              <button
+                onClick={() => setShowForgot(false)}
+                className="btn-primary w-full text-sm"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

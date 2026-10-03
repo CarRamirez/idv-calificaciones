@@ -43,7 +43,7 @@ export async function GET(
       .from("students")
       .select("id, full_name, list_num")
       .eq("group_id", params.groupId)
-      .eq("is_active", true)
+      .eq("status", "activo")
       .order("list_num"),
   ]);
 

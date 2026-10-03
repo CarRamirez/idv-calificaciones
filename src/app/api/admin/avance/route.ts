@@ -59,7 +59,7 @@ export async function GET() {
     const { data: students } = await admin
       .from("students")
       .select("id, group_id")
-      .eq("is_active", true);
+      .eq("status", "activo");
 
     // Count students per group
     const studentsPerGroup: Record<string, number> = {};

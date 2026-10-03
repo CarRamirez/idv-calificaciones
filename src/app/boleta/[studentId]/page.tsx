@@ -51,7 +51,7 @@ export default async function BoletaDetailPage({ params }: Props) {
     .from("students")
     .select("id, full_name, list_num")
     .eq("group_id", student.group_id)
-    .eq("is_active", true)
+    .eq("status", "activo")
     .order("list_num");
 
   const classmates = classmatesRaw || [];
@@ -91,7 +91,7 @@ export default async function BoletaDetailPage({ params }: Props) {
       .from("students")
       .select("id, group_id, list_num")
       .in("group_id", groupIds)
-      .eq("is_active", true)
+      .eq("status", "activo")
       .order("list_num");
     (firstStudents || []).forEach((s) => {
       if (!groupFirstStudent[s.group_id]) {

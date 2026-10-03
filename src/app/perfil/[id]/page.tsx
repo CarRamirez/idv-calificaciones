@@ -94,7 +94,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
       .from("students")
       .select("id, group_id")
       .in("group_id", groupIds)
-      .eq("is_active", true);
+      .eq("status", "activo");
     (students || []).forEach((s: any) => {
       studentCounts[s.group_id] = (studentCounts[s.group_id] || 0) + 1;
     });
