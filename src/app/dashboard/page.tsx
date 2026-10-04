@@ -303,15 +303,18 @@ export default async function DashboardPage() {
     // Capture progress: count grades entered vs total possible
     // Total possible = active students × subjects that count for avg (per grade) × open period
     if (activePeriod && students && students.length > 0) {
-      // Get subjects per grade that count for avg
+      // Get curricular subjects per grade (exclude penalty subjects: TAR, INAS, INC)
+      const PENALTY_SUBJECTS = new Set(["TAR", "INAS", "INC"]);
       const { data: subjects } = await supabase
         .from("subjects")
-        .select("id, grade, counts_for_avg");
+        .select("id, short_name, grade, counts_for_avg");
 
+      const curricularSubjectIds = new Set<string>();
       const subjectsByGrade: Record<number, number> = {};
       (subjects || []).forEach((s: any) => {
-        if (s.counts_for_avg) {
+        if (s.counts_for_avg && !PENALTY_SUBJECTS.has(s.short_name)) {
           subjectsByGrade[s.grade] = (subjectsByGrade[s.grade] || 0) + 1;
+          curricularSubjectIds.add(s.id);
         }
       });
 
@@ -330,14 +333,18 @@ export default async function DashboardPage() {
         totalExpected += (studentsByGrade[grade] || 0) * (subjectsByGrade[grade] || 0);
       });
 
-      // Grades entered for active period
-      const { count: gradesEntered } = await supabase
+      // Grades entered for active period (only curricular subjects)
+      const { data: enteredGrades } = await supabase
         .from("grades")
-        .select("id", { count: "exact", head: true })
+        .select("subject_id")
         .eq("period", activePeriod.period_number)
         .not("score", "is", null);
 
-      captureProgress = { entered: gradesEntered || 0, total: totalExpected };
+      const gradesEntered = (enteredGrades || []).filter(
+        (g: any) => curricularSubjectIds.has(g.subject_id)
+      ).length;
+
+      captureProgress = { entered: gradesEntered, total: totalExpected };
     }
 
     // Recent activity: last 5 grade updates
@@ -385,7 +392,7 @@ export default async function DashboardPage() {
   }
 
   const progressPct = captureProgress.total > 0
-    ? Math.round((captureProgress.entered / captureProgress.total) * 100)
+    ? Math.min(100, Math.round((captureProgress.entered / captureProgress.total) * 100))
     : 0;
 
   return (
@@ -838,7 +845,7 @@ export default async function DashboardPage() {
                         ? "bg-amber-500"
                         : "bg-red-500"
                     }`}
-                    style={{ width: `${progressPct}%` }}
+                    style={{ width: `${Math.min(progressPct, 100)}%` }}
                   />
                 </div>
                 <p className="text-xs text-gray-400 mt-1.5">
