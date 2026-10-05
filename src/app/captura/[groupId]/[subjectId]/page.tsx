@@ -345,18 +345,6 @@ export default function CapturaPage({ params }: Props) {
     }
   }
 
-  function handleAbsencesChange(studentId: string, period: number, value: string) {
-    const num = value === "" ? 0 : parseInt(value);
-    if (isNaN(num) || num < 0) return;
-    setGrades((prev) => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        [period]: { ...prev[studentId][period], absences: num },
-      },
-    }));
-  }
-
   function handleBlur(studentId: string, period: number) {
     const data = grades[studentId]?.[period];
     if (!data) return;
@@ -380,7 +368,7 @@ export default function CapturaPage({ params }: Props) {
         },
       }));
     }
-    saveGrade(studentId, period, score, data.absences, data.comment);
+    saveGrade(studentId, period, score, 0, data.comment);
   }
 
   function handleEnterKey(e: React.KeyboardEvent<HTMLInputElement>, studentId: string, period: number) {
@@ -422,7 +410,7 @@ export default function CapturaPage({ params }: Props) {
     }));
     const data = grades[studentId]?.[period];
     if (data) {
-      saveGrade(studentId, period, data.score, data.absences, trimmed || undefined);
+      saveGrade(studentId, period, data.score, 0, trimmed || undefined);
     }
     setCommentPopover(null);
     setCommentDraft("");
@@ -464,14 +452,6 @@ export default function CapturaPage({ params }: Props) {
     if (trimAvgs.length === 0) return "—";
     const avg = trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length;
     return Math.round(avg).toString();
-  }
-
-  function getTrimesterAbsences(studentId: string, trimesterId: number): number {
-    const trimester = TRIMESTERS.find((t) => t.id === trimesterId);
-    if (!trimester) return 0;
-    const data = grades[studentId];
-    if (!data) return 0;
-    return trimester.periods.reduce((sum, p) => sum + (data[p.id]?.absences ?? 0), 0);
   }
 
   function getSemaforoClass(score: number | null): string {
@@ -558,23 +538,19 @@ export default function CapturaPage({ params }: Props) {
           <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${student.list_num}</td>
           <td style="padding:4px 8px;border:1px solid #ccc;font-size:11px;">${formatStudentName(student.full_name)}</td>
           <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.score ?? "—"}</td>
-          <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.absences ?? 0}</td>
         </tr>`;
       }
       // Trimestre
       const periodCells = (trimester?.periods || []).map((p) => {
         const data = grades[student.id]?.[p.id];
-        return `<td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.score ?? "—"}</td>
-                <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.absences ?? 0}</td>`;
+        return `<td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${data?.score ?? "—"}</td>`;
       }).join("");
       const trimAvg = getTrimesterAvg(student.id, activeTab);
-      const totalAbs = getTrimesterAbsences(student.id, activeTab);
       return `<tr>
         <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${student.list_num}</td>
         <td style="padding:4px 8px;border:1px solid #ccc;font-size:11px;">${formatStudentName(student.full_name)}</td>
         ${periodCells}
         <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;font-weight:bold;">${trimAvg}</td>
-        <td style="text-align:center;padding:4px 6px;border:1px solid #ccc;font-size:11px;">${totalAbs || "—"}</td>
       </tr>`;
     }).join("");
 
@@ -595,24 +571,17 @@ export default function CapturaPage({ params }: Props) {
         <th style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
         <th style="padding:6px;border:1px solid #999;font-size:11px;text-align:left;">Nombre del Alumno</th>
         <th style="padding:6px;border:1px solid #999;font-size:11px;">Calif.</th>
-        <th style="padding:6px;border:1px solid #999;font-size:11px;">Asist.</th>
       </tr>`;
     } else {
       const periodHeaders = (trimester?.periods || []).map((p) =>
-        `<th colspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">${p.short}</th>`
-      ).join("");
-      const periodSubHeaders = (trimester?.periods || []).map(() =>
-        `<th style="padding:4px;border:1px solid #999;font-size:10px;">Cal.</th>
-         <th style="padding:4px;border:1px solid #999;font-size:10px;">Asist.</th>`
+        `<th style="padding:6px;border:1px solid #999;font-size:11px;">${p.short}</th>`
       ).join("");
       headerRow = `<tr style="background:#1d4e9e;color:#fff;">
-        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
-        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;text-align:left;">Nombre del Alumno</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;text-align:left;">Nombre del Alumno</th>
         ${periodHeaders}
-        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">${isCounter ? "Total" : "Prom."}</th>
-        <th rowspan="2" style="padding:6px;border:1px solid #999;font-size:11px;">IA</th>
+        <th style="padding:6px;border:1px solid #999;font-size:11px;">${isCounter ? "Total" : "Prom."}</th>
       </tr>`;
-      subHeaderRow = `<tr style="background:#2563eb;color:#fff;">${periodSubHeaders}</tr>`;
     }
 
     const tabName = isResumen ? "Resumen Anual" : isJulio ? "Julio (Final)" : trimester?.name || "";
@@ -891,32 +860,22 @@ export default function CapturaPage({ params }: Props) {
             <table className="grade-table">
               <thead>
                 <tr>
-                  <th rowSpan={2} className="w-12 !rounded-tl-2xl">N°</th>
-                  <th rowSpan={2} className="min-w-[200px]">Nombre del Alumno</th>
+                  <th className="w-12 !rounded-tl-2xl">N°</th>
+                  <th className="min-w-[200px]">Nombre del Alumno</th>
                   {currentTrimester.periods.map((p) => (
-                    <th key={p.id} colSpan={2} className="text-center border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>
+                    <th key={p.id} className="text-center w-24 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>
                       {p.short}
                     </th>
                   ))}
-                  <th rowSpan={2} className="w-16 text-center border-l" style={{ borderColor: 'rgba(29,78,158,0.12)', background: 'rgba(29,78,158,0.06)' }}>
+                  <th className="w-16 text-center border-l !rounded-tr-2xl" style={{ borderColor: 'rgba(29,78,158,0.12)', background: 'rgba(29,78,158,0.06)' }}>
                     {subject?.input_type === 'counter' || subject?.input_type === 'counter_max' ? 'TOTAL' : 'PROM.'}
                   </th>
-                  <th rowSpan={2} className="w-14 text-center !rounded-tr-2xl" style={{ background: 'rgba(29,78,158,0.06)' }}>IA</th>
-                </tr>
-                <tr>
-                  {currentTrimester.periods.map((p) => (
-                    <React.Fragment key={p.id}>
-                      <th className="text-center text-xs w-24 border-l" style={{ borderColor: 'rgba(29,78,158,0.08)' }}>CALIF.</th>
-                      <th className="text-center text-xs w-14">ASIST.</th>
-                    </React.Fragment>
-                  ))}
                 </tr>
               </thead>
               <tbody>
                 {students.map((student, idx) => {
                   const trimAvg = getTrimesterAvg(student.id, activeTab);
                   const trimAvgNum = trimAvg === "—" ? null : parseFloat(trimAvg);
-                  const totalAbs = getTrimesterAbsences(student.id, activeTab);
                   return (
                     <tr key={student.id} className={idx % 2 === 0 ? "" : "bg-white/30"}>
                       <td className="text-center text-gray-400 tabular-nums text-xs font-medium">
@@ -970,30 +929,11 @@ export default function CapturaPage({ params }: Props) {
                                 </button>
                               </div>
                             </td>
-                            <td className="text-center">
-                              <input
-                                type="number" min="0"
-                                value={data?.absences ?? 0}
-                                onChange={(e) => handleAbsencesChange(student.id, p.id, e.target.value)}
-                                onBlur={() => handleBlur(student.id, p.id)}
-                                disabled={locked}
-                                className={`grade-cell ${
-                                  locked
-                                    ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed"
-                                    : isSaving
-                                    ? "!bg-green-50/60 !border-green-300"
-                                    : ""
-                                }`}
-                              />
-                            </td>
                           </React.Fragment>
                         );
                       })}
                       <td className={`text-center font-bold tabular-nums border-l ${getSemaforoClass(trimAvgNum)}`} style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
                         {trimAvg}
-                      </td>
-                      <td className="text-center tabular-nums text-gray-400 text-xs">
-                        {totalAbs || "—"}
                       </td>
                     </tr>
                   );
@@ -1017,7 +957,6 @@ export default function CapturaPage({ params }: Props) {
                   <th className="w-12">N°</th>
                   <th className="min-w-[200px]">Nombre del Alumno</th>
                   <th className="text-center w-24">CALIF.</th>
-                  <th className="text-center w-16">ASIST.</th>
                 </tr>
               </thead>
               <tbody>
@@ -1062,16 +1001,6 @@ export default function CapturaPage({ params }: Props) {
                           </button>
                         </div>
                       </td>
-                      <td className="text-center">
-                        <input
-                          type="number" min="0"
-                          value={data?.absences ?? 0}
-                          onChange={(e) => handleAbsencesChange(student.id, JULIO_FINAL.id, e.target.value)}
-                          onBlur={() => handleBlur(student.id, JULIO_FINAL.id)}
-                          disabled={locked}
-                          className={`grade-cell ${locked ? "!bg-gray-100/60 text-gray-400 cursor-not-allowed" : isSaving ? "!bg-green-50/60 !border-green-300" : ""}`}
-                        />
-                      </td>
                     </tr>
                   );
                 })}
@@ -1089,11 +1018,8 @@ export default function CapturaPage({ params }: Props) {
                   <th className="w-12 !rounded-tl-2xl">N°</th>
                   <th className="min-w-[200px]">Nombre del Alumno</th>
                   <th className="text-center w-20">1er Trim.</th>
-                  <th className="text-center w-14">IA</th>
                   <th className="text-center w-20">2do Trim.</th>
-                  <th className="text-center w-14">IA</th>
                   <th className="text-center w-20">3er Trim.</th>
-                  <th className="text-center w-14">IA</th>
                   <th className="text-center w-20 border-l" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>Julio</th>
                   <th className="text-center w-20 font-bold border-l !rounded-tr-2xl" style={{ borderColor: 'rgba(0,0,0,0.06)', background: 'rgba(29,78,158,0.06)' }}>PROM. FINAL</th>
                 </tr>
@@ -1110,12 +1036,8 @@ export default function CapturaPage({ params }: Props) {
                       {[1, 2, 3].map((t) => {
                         const avg = getTrimesterAvg(student.id, t);
                         const avgNum = avg === "—" ? null : parseFloat(avg);
-                        const abs = getTrimesterAbsences(student.id, t);
                         return (
-                          <React.Fragment key={t}>
-                            <td className={`text-center tabular-nums font-semibold ${getSemaforoClass(avgNum)}`}>{avg}</td>
-                            <td className="text-center tabular-nums text-gray-400 text-xs">{abs || "—"}</td>
-                          </React.Fragment>
+                          <td key={t} className={`text-center tabular-nums font-semibold ${getSemaforoClass(avgNum)}`}>{avg}</td>
                         );
                       })}
                       <td className={`text-center tabular-nums border-l italic text-gray-500 ${getSemaforoClass(julioScore)}`} style={{ borderColor: 'rgba(0,0,0,0.04)' }}>
@@ -1179,9 +1101,6 @@ export default function CapturaPage({ params }: Props) {
                 </svg>
                 Descargar Excel
               </button>
-              <p className="text-xs text-gray-400 hidden sm:block">
-                IA = Inasistencias Acumuladas
-              </p>
             </div>
             <button
               onClick={() => handleBulkSave(false)}
