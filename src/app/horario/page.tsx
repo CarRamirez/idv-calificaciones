@@ -31,54 +31,54 @@ const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"] as const;
 // This is placeholder data — replace with the real schedule
 const SCHEDULE: Record<string, CellData[][]> = {
   Lunes: [
-    [{ subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "INGLES" }],
-    [{ subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "INGLES" }],
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "GEO" }, { subject: "FCE" }, { subject: "MATE" }],
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "FCE" }, { subject: "MATE" }],
-    [{ subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "TECNO" }, { subject: "INGLES" }, { subject: "ARTES" }],
-    [{ subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "INGLES" }, { subject: "ARTES" }, { subject: "TECNO" }],
-    [{ subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "ORTO" }, { subject: "SALUD" }, { subject: "VIDA" }, { subject: "VALORES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "FCE" }],
+    [{ subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "INGLES" }, { subject: "" }, { subject: "" }],
+    [{ subject: "GEO" }, { subject: "ORTO" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "VALORES" }],
+    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "VALORES" }, { subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }],
+    [{ subject: "MATE" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "TECNO" }],
+    [{ subject: "VALORES" }, { subject: "GEO" }, { subject: "ORTO" }, { subject: "ESPAÑOL" }, { subject: "TECNO" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }],
+    [{ subject: "BRENDA" }, { subject: "VALORES" }, { subject: "ANGEL" }, { subject: "TECNO" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }],
+    [{ subject: "INGLES" }, { subject: "" }, { subject: "TECNO" }, { subject: "CIENCIAS" }, { subject: "VALORES" }, { subject: "FCE" }, { subject: "MATE" }],
+    [{ subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "INGLES" }, { subject: "" }, { subject: "MATE" }, { subject: "TECNO" }, { subject: "ESPAÑOL" }],
   ],
   Martes: [
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "INGLES" }, { subject: "TECNO" }],
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "INGLES" }, { subject: "TECNO" }],
-    [{ subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "INGLES" }, { subject: "ARTES" }, { subject: "FCE" }],
-    [{ subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "INGLES" }],
-    [{ subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "TECNO" }, { subject: "FCE" }, { subject: "ARTES" }],
-    [{ subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "HISTORIA" }, { subject: "GEO" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "MATE" }],
-    [{ subject: "SALUD" }, { subject: "ORTO" }, { subject: "VALORES" }, { subject: "VIDA" }, { subject: "DEPORTES" }, { subject: "MATE" }, { subject: "DEPORTES" }],
+    [{ subject: "TECNO" }, { subject: "FCE" }, { subject: "INGLES" }, { subject: "" }, { subject: "SALUD" }, { subject: "ESPAÑOL" }, { subject: "ANGEL" }],
+    [{ subject: "INGLES" }, { subject: "" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "TECNO" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }],
+    [{ subject: "MATE" }, { subject: "GINA" }, { subject: "HISTORIA" }, { subject: "TECNO" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "ESPAÑOL" }],
+    [{ subject: "TECNO" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "BETO" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "MATE" }],
+    [{ subject: "ESPAÑOL" }, { subject: "GEO" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "DEPORTES" }, { subject: "" }, { subject: "" }],
+    [{ subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "DEPORTES" }, { subject: "" }, { subject: "TECNO" }, { subject: "ORTO" }, { subject: "HISTORIA" }],
+    [{ subject: "DEPORTES" }, { subject: "" }, { subject: "TECNO" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "FCE" }, { subject: "CIENCIAS" }],
+    [{ subject: "CIENCIAS" }, { subject: "TECNO" }, { subject: "SALUD" }, { subject: "MATE" }, { subject: "INGLES" }, { subject: "" }, { subject: "" }],
   ],
   Miércoles: [
-    [{ subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "GEO" }, { subject: "INGLES" }, { subject: "ARTES" }, { subject: "FCE" }],
-    [{ subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "GEO" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "INGLES" }],
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "TECNO" }, { subject: "INGLES" }, { subject: "ARTES" }],
-    [{ subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "FCE" }, { subject: "MATE" }, { subject: "TECNO" }],
-    [{ subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "DEPORTES" }],
-    [{ subject: "HISTORIA" }, { subject: "MATE" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "HISTORIA" }, { subject: "GEO" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "MATE" }],
-    [{ subject: "ORTO" }, { subject: "VIDA" }, { subject: "SALUD" }, { subject: "VALORES" }, { subject: "TECNO" }, { subject: "MATE" }, { subject: "INGLES" }],
+    [{ subject: "INGLES" }, { subject: "" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "ARTES" }, { subject: "BETO" }, { subject: "HISTORIA" }],
+    [{ subject: "VIDA" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "ARTES" }],
+    [{ subject: "CIENCIAS" }, { subject: "GEO" }, { subject: "MATE" }, { subject: "ARTES" }, { subject: "HISTORIA" }, { subject: "VIDA" }, { subject: "ESPAÑOL" }],
+    [{ subject: "GEO" }, { subject: "ESPAÑOL" }, { subject: "ARTES" }, { subject: "FCE" }, { subject: "VIDA" }, { subject: "MATE" }, { subject: "TECNO" }],
+    [{ subject: "MATE" }, { subject: "HISTORIA" }, { subject: "INGLES" }, { subject: "" }, { subject: "ESPAÑOL" }, { subject: "ARTES" }, { subject: "VIDA" }],
+    [{ subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "VIDA" }, { subject: "ORTO" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "TECNO" }],
+    [{ subject: "ARTES" }, { subject: "TECNO" }, { subject: "FCE" }, { subject: "VIDA" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "SALUD" }],
+    [{ subject: "FCE" }, { subject: "VIDA" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "INGLES" }, { subject: "" }, { subject: "" }],
   ],
   Jueves: [
-    [{ subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "ARTES" }, { subject: "INGLES" }, { subject: "TECNO" }],
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "TECNO" }, { subject: "ARTES" }, { subject: "INGLES" }],
-    [{ subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "INGLES" }, { subject: "TECNO" }, { subject: "FCE" }],
-    [{ subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "HISTORIA" }, { subject: "GEO" }, { subject: "FCE" }, { subject: "MATE" }, { subject: "ARTES" }],
-    [{ subject: "HISTORIA" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "MATE" }],
-    [{ subject: "ESPAÑOL" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "MATE" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "GEO" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "VIDA" }, { subject: "SALUD" }, { subject: "VALORES" }, { subject: "ORTO" }, { subject: "INGLES" }, { subject: "INGLES" }, { subject: "MATE" }],
+    [{ subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "INGLES" }, { subject: "" }, { subject: "" }],
+    [{ subject: "CIENCIAS" }, { subject: "ARTES" }, { subject: "INGLES" }, { subject: "" }, { subject: "FCE" }, { subject: "ESPAÑOL" }, { subject: "MATE" }],
+    [{ subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "ANGEL" }, { subject: "VALORES" }, { subject: "ARTES" }],
+    [{ subject: "TECNO" }, { subject: "ESPAÑOL" }, { subject: "ARTES" }, { subject: "SALUD" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "HISTORIA" }],
+    [{ subject: "ARTES" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "DEPORTES" }, { subject: "" }, { subject: "" }],
+    [{ subject: "DEPORTES" }, { subject: "" }, { subject: "VALORES" }, { subject: "ESPAÑOL" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "FCE" }],
+    [{ subject: "FCE" }, { subject: "MATE" }, { subject: "DEPORTES" }, { subject: "" }, { subject: "MATE" }, { subject: "ARTES" }, { subject: "CIENCIAS" }],
+    [{ subject: "INGLES" }, { subject: "" }, { subject: "TECNO" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "CIENCIAS" }, { subject: "MATE" }],
   ],
   Viernes: [
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "TECNO" }, { subject: "FCE" }, { subject: "ARTES" }],
-    [{ subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "GEO" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "INGLES" }, { subject: "TECNO" }],
-    [{ subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "INGLES" }, { subject: "ARTES" }, { subject: "FCE" }],
-    [{ subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "TECNO" }, { subject: "INGLES" }],
-    [{ subject: "MATE" }, { subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "MATE" }, { subject: "MATE" }],
-    [{ subject: "GEO" }, { subject: "HISTORIA" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "VALORES" }, { subject: "GEO" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }, { subject: "DEPORTES" }],
-    [{ subject: "SALUD" }, { subject: "ORTO" }, { subject: "VIDA" }, { subject: "VALORES" }, { subject: "MATE" }, { subject: "MATE" }, { subject: "DEPORTES" }],
+    [{ subject: "ARTES" }, { subject: "GEO" }, { subject: "ESPAÑOL" }, { subject: "HISTORIA" }, { subject: "INGLES" }, { subject: "" }, { subject: "" }],
+    [{ subject: "GEO" }, { subject: "MATE" }, { subject: "FCE" }, { subject: "ARTES" }, { subject: "ORTO" }, { subject: "SALUD" }, { subject: "ESPAÑOL" }],
+    [{ subject: "ORTO" }, { subject: "ESPAÑOL" }, { subject: "MATE" }, { subject: "CIENCIAS" }, { subject: "CIENCIAS" }, { subject: "HISTORIA" }, { subject: "ARTES" }],
+    [{ subject: "MATE" }, { subject: "TECNO" }, { subject: "CIENCIAS" }, { subject: "MATE" }, { subject: "HISTORIA" }, { subject: "ARTES" }, { subject: "ESPAÑOL" }],
+    [{ subject: "GEO" }, { subject: "CIENCIAS" }, { subject: "ARTES" }, { subject: "TECNO" }, { subject: "MATE" }, { subject: "ESPAÑOL" }, { subject: "FCE" }],
+    [{ subject: "MATE" }, { subject: "ARTES" }, { subject: "CIENCIAS" }, { subject: "ESPAÑOL" }, { subject: "FCE" }, { subject: "MATE" }, { subject: "CIENCIAS" }],
+    [{ subject: "INGLES" }, { subject: "" }, { subject: "HISTORIA" }, { subject: "CIENCIAS" }, { subject: "ARTES" }, { subject: "CIENCIAS" }, { subject: "ORTO" }],
+    [{ subject: "ESPAÑOL" }, { subject: "FCE" }, { subject: "INGLES" }, { subject: "" }, { subject: "CIENCIAS" }, { subject: "TECNO" }, { subject: "MATE" }],
   ],
 };
 
@@ -99,6 +99,10 @@ const SUBJECT_COLORS: Record<string, { bg: string; text: string }> = {
   VIDA:     { bg: "bg-emerald-100", text: "text-emerald-800" },
   VALORES:  { bg: "bg-indigo-100", text: "text-indigo-800" },
   DEPORTES: { bg: "bg-yellow-100", text: "text-yellow-800" },
+  BRENDA:   { bg: "bg-gray-200", text: "text-gray-700" },
+  GINA:     { bg: "bg-gray-200", text: "text-gray-700" },
+  BETO:     { bg: "bg-gray-200", text: "text-gray-700" },
+  ANGEL:    { bg: "bg-gray-200", text: "text-gray-700" },
 };
 
 const DEFAULT_COLOR = { bg: "bg-gray-100", text: "text-gray-700" };
@@ -249,7 +253,7 @@ export default function HorarioPage() {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Horario Escolar</h1>
-              <p className="text-sm text-gray-500">Ciclo escolar 2025-2026 — Instituto Don Vasco</p>
+              <p className="text-sm text-gray-500">Ciclo escolar 2026-2027 — Instituto Don Vasco</p>
             </div>
           </div>
 

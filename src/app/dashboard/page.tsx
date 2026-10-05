@@ -333,16 +333,26 @@ export default async function DashboardPage() {
         totalExpected += (studentsByGrade[grade] || 0) * (subjectsByGrade[grade] || 0);
       });
 
-      // Grades entered for active period (only curricular subjects)
-      const { data: enteredGrades } = await supabase
-        .from("grades")
-        .select("subject_id")
-        .eq("period", activePeriod.period_number)
-        .not("score", "is", null);
-
-      const gradesEntered = (enteredGrades || []).filter(
-        (g: any) => curricularSubjectIds.has(g.subject_id)
-      ).length;
+      // Grades entered for active period (only curricular subjects, only active students)
+      // Use pagination to avoid Supabase's default 1000-row limit
+      const activeStudentIds = new Set((students || []).map((s: any) => s.id));
+      let gradesEntered = 0;
+      let gradeFrom = 0;
+      const gradePageSize = 1000;
+      while (true) {
+        const { data: gradePage } = await supabase
+          .from("grades")
+          .select("subject_id, student_id")
+          .eq("period", activePeriod.period_number)
+          .not("score", "is", null)
+          .range(gradeFrom, gradeFrom + gradePageSize - 1);
+        if (!gradePage || gradePage.length === 0) break;
+        gradesEntered += gradePage.filter(
+          (g: any) => curricularSubjectIds.has(g.subject_id) && activeStudentIds.has(g.student_id)
+        ).length;
+        if (gradePage.length < gradePageSize) break;
+        gradeFrom += gradePageSize;
+      }
 
       captureProgress = { entered: gradesEntered, total: totalExpected };
     }

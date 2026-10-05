@@ -54,22 +54,22 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     .from("students")
     .select("id, full_name, list_num")
     .eq("group_id", params.groupId)
-    .eq("status", "activo")
+    .eq("is_active", true)
     .order("list_num");
 
   const studentIds = (students || []).map((s) => s.id);
   const allGrades = studentIds.length > 0
     ? await fetchAllGrades(supabase, studentIds, {
-        columns: "student_id, subject_id, period, score, absences",
+        columns: "student_id, subject_id, period, score",
       })
     : [];
 
   // Build grade map
-  const gradeMap: Record<string, Record<string, Record<number, { score: number | null; absences: number }>>> = {};
+  const gradeMap: Record<string, Record<string, Record<number, { score: number | null }>>> = {};
   allGrades.forEach((g) => {
     if (!gradeMap[g.student_id]) gradeMap[g.student_id] = {};
     if (!gradeMap[g.student_id][g.subject_id]) gradeMap[g.student_id][g.subject_id] = {};
-    gradeMap[g.student_id][g.subject_id][g.period] = { score: g.score, absences: g.absences };
+    gradeMap[g.student_id][g.subject_id][g.period] = { score: g.score };
   });
 
   const subs = subjects || [];
@@ -78,10 +78,6 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   // ── Helper functions ──
   function getScore(studentId: string, subjectId: string, period: number): number | null {
     return gradeMap[studentId]?.[subjectId]?.[period]?.score ?? null;
-  }
-
-  function getAbsences(studentId: string, subjectId: string, period: number): number {
-    return gradeMap[studentId]?.[subjectId]?.[period]?.absences ?? 0;
   }
 
   function getTrimesterAvg(studentId: string, subjectId: string, trimester: { periods: number[] }): number | null {
@@ -100,10 +96,6 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     const avgs = subs.filter((s) => s.counts_for_avg).map((s) => getSubjectFinal(studentId, s.id)).filter((a): a is number => a !== null);
     if (avgs.length === 0) return null;
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
-  }
-
-  function getTotalAbsences(studentId: string, subjectId: string): number {
-    return [1, 2, 3, 4, 5, 6, 7, 8].reduce((sum, p) => sum + getAbsences(studentId, subjectId, p), 0);
   }
 
   // ── Build workbook ──
@@ -134,7 +126,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   const wsGen = wb.addWorksheet(`Concentrado ${group.grade}°${group.letter}`);
 
   // Title row
-  wsGen.mergeCells(1, 1, 1, 2 + subs.length * 2 + 1);
+  wsGen.mergeCells(1, 1, 1, 2 + subs.length + 1);
   const titleCell = wsGen.getCell(1, 1);
   titleCell.value = `Concentrado de Calificaciones — ${group.grade}° "${group.letter}" — Ciclo 2026-2027`;
   titleCell.font = { bold: true, size: 12 };
@@ -149,45 +141,26 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
   let col = 3;
   for (const s of subs) {
-    wsGen.mergeCells(hRow, col, hRow, col + 1);
     wsGen.getCell(hRow, col).value = s.short_name + (s.counts_for_avg ? "" : " (N/C)");
-    wsGen.getColumn(col).width = 7;
-    wsGen.getColumn(col + 1).width = 5;
-    col += 2;
+    wsGen.getColumn(col).width = 8;
+    col += 1;
   }
   wsGen.getCell(hRow, col).value = "Prom. Gral.";
   wsGen.getColumn(col).width = 10;
 
-  // Sub-headers row 4
-  const shRow = 4;
-  wsGen.getCell(shRow, 1).value = "";
-  wsGen.getCell(shRow, 2).value = "";
-  let col2 = 3;
-  for (const s of subs) {
-    wsGen.getCell(shRow, col2).value = "Cal.";
-    wsGen.getCell(shRow, col2 + 1).value = "IA";
-    col2 += 2;
-  }
-
   // Style headers
-  const lastCol = 2 + subs.length * 2 + 1;
+  const lastCol = 2 + subs.length + 1;
   for (let c = 1; c <= lastCol; c++) {
     const cell3 = wsGen.getCell(hRow, c);
     cell3.fill = headerFill;
     cell3.font = headerFont;
     cell3.alignment = { horizontal: "center", vertical: "middle" };
     cell3.border = thinBorder;
-
-    const cell4 = wsGen.getCell(shRow, c);
-    cell4.fill = subHeaderFill;
-    cell4.font = subHeaderFont;
-    cell4.alignment = { horizontal: "center" };
-    cell4.border = thinBorder;
   }
 
-  // Data rows
+  // Data rows (start at row 4 — no sub-header row needed)
   studs.forEach((student, idx) => {
-    const row = shRow + 1 + idx;
+    const row = hRow + 1 + idx;
     wsGen.getCell(row, 1).value = student.list_num;
     wsGen.getCell(row, 1).alignment = { horizontal: "center" };
     wsGen.getCell(row, 2).value = student.full_name;
@@ -196,7 +169,6 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     let c = 3;
     for (const s of subs) {
       const final = getSubjectFinal(student.id, s.id);
-      const abs = getTotalAbsences(student.id, s.id);
 
       const scoreCell = wsGen.getCell(row, c);
       scoreCell.value = final !== null ? Math.round(final) : null;
@@ -204,12 +176,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
       const fill = semaforoFill(final);
       if (fill) scoreCell.fill = fill;
 
-      const absCell = wsGen.getCell(row, c + 1);
-      absCell.value = abs || null;
-      absCell.alignment = { horizontal: "center" };
-      absCell.font = { size: 9, color: { argb: "FF6B7280" } };
-
-      c += 2;
+      c += 1;
     }
 
     const genAvg = getGeneralAvg(student.id);
@@ -230,7 +197,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   for (const trim of TRIMESTERS) {
     const ws = wb.addWorksheet(`${trim.id}° Trimestre`);
 
-    ws.mergeCells(1, 1, 1, 2 + subs.length * (trim.periods.length * 2 + 2) + 1);
+    ws.mergeCells(1, 1, 1, 2 + subs.length * (trim.periods.length + 1) + 1);
     const tCell = ws.getCell(1, 1);
     tCell.value = `${trim.name} — ${group.grade}° "${group.letter}" — Ciclo 2026-2027`;
     tCell.font = { bold: true, size: 12 };
@@ -245,49 +212,31 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
     let c = 3;
     for (const s of subs) {
-      const span = trim.periods.length * 2 + 2;
+      const span = trim.periods.length + 1;
       ws.mergeCells(r1, c, r1, c + span - 1);
       ws.getCell(r1, c).value = s.short_name;
       c += span;
     }
     ws.getCell(r1, c).value = "Prom. Trim.";
 
-    // Row 4: period names
+    // Row 4: period names + Prom
     const r2 = 4;
     c = 3;
     for (const s of subs) {
       for (const p of trim.periods) {
-        ws.mergeCells(r2, c, r2, c + 1);
         ws.getCell(r2, c).value = PERIOD_NAMES[p];
-        ws.getColumn(c).width = 6;
-        ws.getColumn(c + 1).width = 4;
-        c += 2;
+        ws.getColumn(c).width = 7;
+        c += 1;
       }
-      ws.mergeCells(r2, c, r2, c + 1);
       ws.getCell(r2, c).value = "Prom.";
-      ws.getColumn(c).width = 6;
-      ws.getColumn(c + 1).width = 4;
-      c += 2;
+      ws.getColumn(c).width = 7;
+      c += 1;
     }
     ws.getColumn(c).width = 10;
 
-    // Row 5: Cal/IA
-    const r3 = 5;
-    c = 3;
-    for (const s of subs) {
-      for (const p of trim.periods) {
-        ws.getCell(r3, c).value = "Cal.";
-        ws.getCell(r3, c + 1).value = "IA";
-        c += 2;
-      }
-      ws.getCell(r3, c).value = "Cal.";
-      ws.getCell(r3, c + 1).value = "IA";
-      c += 2;
-    }
-
     // Style header rows
     const lastC = c;
-    for (let rr = r1; rr <= r3; rr++) {
+    for (let rr = r1; rr <= r2; rr++) {
       for (let cc = 1; cc <= lastC; cc++) {
         const cell = ws.getCell(rr, cc);
         cell.fill = rr === r1 ? headerFill : subHeaderFill;
@@ -299,7 +248,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
     // Data
     studs.forEach((student, idx) => {
-      const row = r3 + 1 + idx;
+      const row = r2 + 1 + idx;
       ws.getCell(row, 1).value = student.list_num;
       ws.getCell(row, 1).alignment = { horizontal: "center" };
       ws.getCell(row, 2).value = student.full_name;
@@ -309,7 +258,6 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
       for (const s of subs) {
         for (const p of trim.periods) {
           const score = getScore(student.id, s.id, p);
-          const abs = getAbsences(student.id, s.id, p);
 
           const sc = ws.getCell(row, c);
           sc.value = score !== null ? Math.round(score) : null;
@@ -317,16 +265,10 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
           const f = semaforoFill(score);
           if (f) sc.fill = f;
 
-          const ac = ws.getCell(row, c + 1);
-          ac.value = abs || null;
-          ac.alignment = { horizontal: "center" };
-          ac.font = { size: 9, color: { argb: "FF6B7280" } };
-
-          c += 2;
+          c += 1;
         }
 
         const trimAvg = getTrimesterAvg(student.id, s.id, trim);
-        const trimAbs = trim.periods.reduce((sum, p) => sum + getAbsences(student.id, s.id, p), 0);
 
         const tc = ws.getCell(row, c);
         tc.value = trimAvg !== null ? Math.round(trimAvg) : null;
@@ -335,12 +277,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         const tf = semaforoFill(trimAvg);
         if (tf) tc.fill = tf;
 
-        const tac = ws.getCell(row, c + 1);
-        tac.value = trimAbs || null;
-        tac.alignment = { horizontal: "center" };
-        tac.font = { size: 9, color: { argb: "FF6B7280" } };
-
-        c += 2;
+        c += 1;
       }
 
       // Trim general avg

@@ -95,9 +95,6 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
   function getScore(studentId: string, subjectId: string, period: number): number | null {
     return gradeMap[studentId]?.[subjectId]?.[period]?.score ?? null;
   }
-  function getAbsences(studentId: string, subjectId: string, period: number): number {
-    return gradeMap[studentId]?.[subjectId]?.[period]?.absences ?? 0;
-  }
   function getComment(studentId: string, subjectId: string, period: number): string | undefined {
     return gradeMap[studentId]?.[subjectId]?.[period]?.comment;
   }
@@ -319,13 +316,10 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     <th className="w-10">N°</th>
                     <th className="min-w-[180px]">Nombre</th>
                     {displaySubjects.map((s) => (
-                      <React.Fragment key={s.id}>
-                        <th className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
-                          {s.short_name}
-                          {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
-                        </th>
-                        <th className={`text-center text-xs w-10 ${!s.counts_for_avg ? "bg-gray-50" : ""}`}>IA</th>
-                      </React.Fragment>
+                      <th key={s.id} className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
+                        {s.short_name}
+                        {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -336,22 +330,18 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                       <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
                       {displaySubjects.map((s) => {
                         const score = getScore(student.id, s.id, selectedPeriod);
-                        const abs = getAbsences(student.id, s.id, selectedPeriod);
                         const comment = getComment(student.id, s.id, selectedPeriod);
                         return (
-                          <React.Fragment key={s.id}>
-                            <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(score) : semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
-                              {fmt(score)}
-                              {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
-                              {comment && (
-                                <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
-                                  {comment}
-                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
-                                </div>
-                              )}
-                            </td>
-                            <td className="text-center text-xs tabular-nums text-gray-400">{abs || "—"}</td>
-                          </React.Fragment>
+                          <td key={s.id} className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(score) : semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
+                            {fmt(score)}
+                            {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
+                            {comment && (
+                              <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
+                                {comment}
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                              </div>
+                            )}
+                          </td>
                         );
                       })}
                     </tr>
@@ -370,7 +360,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     {displaySubjects.map((s) => (
                       <th
                         key={s.id}
-                        colSpan={activeTrimester.periods.length * 2 + 2}
+                        colSpan={activeTrimester.periods.length + 1}
                         className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}
                       >
                         {s.short_name}
@@ -383,13 +373,9 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     {displaySubjects.map((s) => (
                       <React.Fragment key={s.id}>
                         {activeTrimester.periods.map((p) => (
-                          <React.Fragment key={p}>
-                            <th className="text-center text-xs w-12 border-l border-gray-200">{PERIODS.find((pp) => pp.id === p)?.short ?? ""}</th>
-                            <th className="text-center text-xs w-10">IA</th>
-                          </React.Fragment>
+                          <th key={p} className="text-center text-xs w-12 border-l border-gray-200">{PERIODS.find((pp) => pp.id === p)?.short ?? ""}</th>
                         ))}
                         <th className="text-center text-xs w-12 border-l border-gray-200 bg-primary-50/50 font-bold">Prom.</th>
-                        <th className="text-center text-xs w-10 bg-primary-50/50">IA</th>
                       </React.Fragment>
                     ))}
                   </tr>
@@ -408,31 +394,25 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                         <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
                         {displaySubjects.map((s) => {
                           const trimAvg = getTrimesterAvg(student.id, s.id, activeTrimester.periods);
-                          const trimAbs = activeTrimester.periods.reduce((sum, p) => sum + getAbsences(student.id, s.id, p), 0);
                           return (
                             <React.Fragment key={s.id}>
                               {activeTrimester.periods.map((p) => {
                                 const score = getScore(student.id, s.id, p);
-                                const abs = getAbsences(student.id, s.id, p);
                                 const comment = getComment(student.id, s.id, p);
                                 return (
-                                  <React.Fragment key={p}>
-                                    <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
-                                      {fmt(score)}
-                                      {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
-                                      {comment && (
-                                        <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
-                                          {comment}
-                                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="text-center text-xs tabular-nums text-gray-400">{abs || "—"}</td>
-                                  </React.Fragment>
+                                  <td key={p} className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
+                                    {fmt(score)}
+                                    {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
+                                    {comment && (
+                                      <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
+                                        {comment}
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                                      </div>
+                                    )}
+                                  </td>
                                 );
                               })}
                               <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(trimAvg) : semaforoClass(trimAvg)}`}>{fmt(trimAvg)}</td>
-                              <td className="text-center text-xs tabular-nums text-gray-500 font-medium">{trimAbs || "—"}</td>
                             </React.Fragment>
                           );
                         })}
@@ -452,13 +432,10 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     <th className="w-10">N°</th>
                     <th className="min-w-[180px]">Nombre</th>
                     {displaySubjects.map((s) => (
-                      <React.Fragment key={s.id}>
-                        <th className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
-                          {s.short_name}
-                          {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
-                        </th>
-                        <th className={`text-center text-xs w-12 ${!s.counts_for_avg ? "bg-gray-50" : ""}`}>IA</th>
-                      </React.Fragment>
+                      <th key={s.id} className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
+                        {s.short_name}
+                        {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
+                      </th>
                     ))}
                     <th className="w-16 text-center border-l border-gray-300 bg-gray-100">Prom. Gral.</th>
                   </tr>
@@ -476,12 +453,8 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                         <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
                         {displaySubjects.map((s) => {
                           const final = getSubjectFinal(student.id, s.id);
-                          const totalAbs = [1,2,3,4,5,6,7,8].reduce((sum, p) => sum + getAbsences(student.id, s.id, p), 0);
                           return (
-                            <React.Fragment key={s.id}>
-                              <td className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(final) : semaforoClass(final)}`}>{fmt(final)}</td>
-                              <td className="text-center text-xs tabular-nums text-gray-500">{totalAbs || "—"}</td>
-                            </React.Fragment>
+                            <td key={s.id} className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(final) : semaforoClass(final)}`}>{fmt(final)}</td>
                           );
                         })}
                         <td className={`text-center text-xs font-bold tabular-nums border-l border-gray-200 ${semaforoClass(genAvg)}`}>{fmt(genAvg)}</td>
