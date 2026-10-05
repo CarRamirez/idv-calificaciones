@@ -2,8 +2,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEffectiveProfile } from "@/lib/impersonation";
 import { NextResponse } from "next/server";
 
-// Subjects excluded from progress counts (penalty/infraction tracking, not curricular)
-const PENALTY_SUBJECTS = new Set(["TAR", "INAS", "INC"]);
+// Subjects excluded from progress counts (penalty/infraction + tutoría)
+const EXCLUDED_FROM_PROGRESS = new Set(["TAR", "INAS", "INC", "TUT"]);
 
 // Paginated fetch to bypass Supabase 1000-row default limit
 async function fetchPaginated(supabase: any, queryBuilder: () => any): Promise<any[]> {
@@ -110,8 +110,8 @@ export async function GET() {
 
     (assignments || []).forEach((a: any) => {
       if (!a.subjects || !a.groups || !a.profiles) return;
-      // Skip penalty subjects from progress counts
-      if (PENALTY_SUBJECTS.has(a.subjects.short_name)) return;
+      // Skip excluded subjects from progress counts
+      if (EXCLUDED_FROM_PROGRESS.has(a.subjects.short_name)) return;
       const groupStudents = studentsByGroup[a.groups.id] || [];
       const total = groupStudents.length;
       if (total === 0) return;

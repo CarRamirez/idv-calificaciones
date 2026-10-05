@@ -303,16 +303,16 @@ export default async function DashboardPage() {
     // Capture progress: count grades entered vs total possible
     // Total possible = active students × subjects that count for avg (per grade) × open period
     if (activePeriod && students && students.length > 0) {
-      // Get curricular subjects per grade (exclude penalty subjects: TAR, INAS, INC)
-      const PENALTY_SUBJECTS = new Set(["TAR", "INAS", "INC"]);
+      // Get subjects for progress tracking (exclude TAR, INAS, INC, TUT)
+      const EXCLUDED_FROM_PROGRESS = new Set(["TAR", "INAS", "INC", "TUT"]);
       const { data: subjects } = await supabase
         .from("subjects")
-        .select("id, short_name, grade, counts_for_avg");
+        .select("id, short_name, grade");
 
       const curricularSubjectIds = new Set<string>();
       const subjectsByGrade: Record<number, number> = {};
       (subjects || []).forEach((s: any) => {
-        if (s.counts_for_avg && !PENALTY_SUBJECTS.has(s.short_name)) {
+        if (!EXCLUDED_FROM_PROGRESS.has(s.short_name)) {
           subjectsByGrade[s.grade] = (subjectsByGrade[s.grade] || 0) + 1;
           curricularSubjectIds.add(s.id);
         }
