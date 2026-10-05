@@ -555,7 +555,7 @@ export default function CapturaPage({ params }: Props) {
     }).join("");
 
     let headerRow = "";
-    let subHeaderRow = "";
+    const subHeaderRow = "";
     if (isResumen) {
       headerRow = `<tr style="background:#1d4e9e;color:#fff;">
         <th style="padding:6px;border:1px solid #999;font-size:11px;">N°</th>
