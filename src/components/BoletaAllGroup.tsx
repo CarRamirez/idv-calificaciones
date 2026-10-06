@@ -79,13 +79,6 @@ function SingleBoleta({
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
   }
 
-  function getTotalAbsences(subjectId: string): number {
-    return [1, 2, 3, 4, 5, 6, 7, 8].reduce(
-      (sum, p) => sum + (gradeMap[subjectId]?.[p]?.absences ?? 0),
-      0
-    );
-  }
-
   const generalAvg = (() => {
     const avgs = curricular
       .map((s) => getSubjectFinal(s.id))
@@ -97,7 +90,6 @@ function SingleBoleta({
   function renderRows(list: Subject[]) {
     return list.map((s) => {
       const final = getSubjectFinal(s.id);
-      const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id}>
           <td className="px-1 py-0.5 text-left font-medium text-gray-900 whitespace-nowrap">{s.name}</td>
@@ -114,7 +106,6 @@ function SingleBoleta({
             </React.Fragment>
           ))}
           <td className={`text-center font-bold tabular-nums border-l-2 border-gray-300 ${semaforoClass(final)}`}>{fmt(final)}</td>
-          <td className="text-center tabular-nums text-gray-500 border-l border-gray-100">{totalAbs || "—"}</td>
         </tr>
       );
     });
@@ -162,7 +153,6 @@ function SingleBoleta({
               </th>
             ))}
             <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-gray-300 py-0.5" style={{ width: "28px" }}>Final</th>
-            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-gray-100 py-0.5" style={{ width: "22px" }}>IA</th>
           </tr>
           <tr className="bg-indigo-50/60">
             {TRIMESTERS.map((t) => (
@@ -192,7 +182,6 @@ function SingleBoleta({
               );
             })}
             <td className={`text-center font-bold tabular-nums border-l-2 border-gray-300 ${semaforoClass(generalAvg)}`}>{fmt(generalAvg)}</td>
-            <td className="border-l border-gray-100" />
           </tr>
           {noCurricular.length > 0 && (
             <>

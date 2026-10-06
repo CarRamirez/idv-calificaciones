@@ -57,10 +57,6 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
     return gradeMap[subjectId]?.[period]?.score ?? null;
   }
 
-  function getAbsences(subjectId: string, period: number): number {
-    return gradeMap[subjectId]?.[period]?.absences ?? 0;
-  }
-
   function getTrimesterAvg(subjectId: string, trimester: { periods: number[] }): number | null {
     const scores = trimester.periods
       .map((p) => getScore(subjectId, p))
@@ -75,13 +71,6 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
     );
     if (avgs.length === 0) return null;
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
-  }
-
-  function getTotalAbsences(subjectId: string): number {
-    return [1, 2, 3, 4, 5, 6, 7, 8].reduce(
-      (sum, p) => sum + getAbsences(subjectId, p),
-      0
-    );
   }
 
   function getGeneralAvg(): number | null {
@@ -105,7 +94,6 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
   function renderSubjectRows(subjectList: Subject[]) {
     return subjectList.map((s) => {
       const final = getSubjectFinal(s.id);
-      const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id} className="hover:bg-gray-50/50">
           <td className="px-2 py-1.5 text-sm font-medium text-gray-900 whitespace-nowrap print:text-[10px] print:px-1 print:py-0.5">
@@ -138,9 +126,6 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             )}`}
           >
             {fmt(final)}
-          </td>
-          <td className="text-center text-sm tabular-nums text-gray-500 border-l border-gray-100 print:text-[10px]">
-            {totalAbs || "—"}
           </td>
         </tr>
       );
@@ -298,12 +283,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 >
                   Prom. Final
                 </th>
-                <th
-                  rowSpan={2}
-                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-gray-100 w-12 py-2 print:text-[9px] print:py-1 print:w-8"
-                >
-                  IA
-                </th>
+
               </tr>
               {/* Fila 2: Periodos individuales + Prom. Trimestral */}
               <tr className="bg-primary-50/60">
@@ -363,7 +343,6 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 >
                   {fmt(generalAvg)}
                 </td>
-                <td className="border-l border-gray-100" />
               </tr>
 
               {/* Separador y materias no curriculares */}
@@ -419,16 +398,13 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   <th className="text-center text-xs font-semibold text-amber-800 uppercase tracking-wider border-b border-amber-200 w-20">
                     Calificación
                   </th>
-                  <th className="text-center text-xs font-semibold text-amber-800 uppercase tracking-wider border-b border-amber-200 w-16">
-                    IA
-                  </th>
+
                 </tr>
               </thead>
               <tbody>
                 {subjects.map((s) => {
                   const julioScore = getScore(s.id, 8);
-                  const julioAbs = getAbsences(s.id, 8);
-                  if (julioScore === null && julioAbs === 0) return null;
+                  if (julioScore === null) return null;
                   return (
                     <tr key={s.id} className="hover:bg-amber-50/30">
                       <td className="px-3 py-1.5 text-sm text-gray-900 border-b border-gray-100">
@@ -444,9 +420,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                       >
                         {fmt(julioScore)}
                       </td>
-                      <td className="text-center text-sm tabular-nums text-gray-500 border-b border-gray-100">
-                        {julioAbs || "—"}
-                      </td>
+
                     </tr>
                   );
                 })}
