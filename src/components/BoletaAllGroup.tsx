@@ -152,10 +152,10 @@ function SingleBoleta({
       </div>
 
       {/* Table */}
-      <table className="w-full border-collapse boleta-table" style={{ fontSize: "8px" }}>
+      <table className="w-full border-collapse boleta-table" style={{ fontSize: "10px" }}>
         <thead>
           <tr className="bg-indigo-50">
-            <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "80px" }}>Asignatura</th>
+            <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "100px" }}>Asignatura</th>
             {TRIMESTERS.map((t) => (
               <th key={t.id} colSpan={t.periods.length + 1} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-gray-200 py-0.5">
                 {t.shortName}

@@ -162,6 +162,8 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
           .card { box-shadow: none !important; border: 1px solid #d1d5db !important; }
           .concentrado-print-header { display: flex !important; }
           .concentrado-print-footer { display: block !important; }
+          .grade-table { font-size: 11px !important; }
+          .grade-table th, .grade-table td { padding: 3px 5px !important; }
         }
       `}} />
 
@@ -235,6 +237,26 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                 );
               })}
             </tbody>
+            <tfoot>
+              <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                <td colSpan={2} className="text-xs text-gray-700 px-2 py-1">TOTAL INCIDENCIAS</td>
+                {subjects.map((s) => {
+                  if (!PENALTY_SUBJECTS.has(s.short_name)) {
+                    return <td key={s.id} className="border-l border-gray-200" />;
+                  }
+                  const total = students.reduce((sum, st) => {
+                    const c = getSubjectCurricular(st.id, s.id);
+                    return sum + (c ?? 0);
+                  }, 0);
+                  return (
+                    <td key={s.id} className="text-center text-xs tabular-nums border-l border-gray-200 text-red-600 font-bold">
+                      {total}
+                    </td>
+                  );
+                })}
+                <td className="border-l border-gray-300" />
+              </tr>
+            </tfoot>
           </table>
         )}
 
@@ -305,6 +327,47 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                 );
               })}
             </tbody>
+            <tfoot>
+              <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                <td colSpan={2} className="text-xs text-gray-700 px-2 py-1">TOTAL INCIDENCIAS</td>
+                {subjects.map((s) => {
+                  if (!PENALTY_SUBJECTS.has(s.short_name)) {
+                    return (
+                      <React.Fragment key={s.id}>
+                        {activeTrimester!.periods.map((p) => (
+                          <td key={p} className="border-l border-gray-200" />
+                        ))}
+                        <td className="border-l border-gray-200" />
+                      </React.Fragment>
+                    );
+                  }
+                  return (
+                    <React.Fragment key={s.id}>
+                      {activeTrimester!.periods.map((p) => {
+                        const periodTotal = students.reduce((sum, st) => sum + (getScore(st.id, s.id, p) ?? 0), 0);
+                        return (
+                          <td key={p} className="text-center text-xs tabular-nums border-l border-gray-100 text-red-600 font-bold">
+                            {periodTotal > 0 ? periodTotal : ""}
+                          </td>
+                        );
+                      })}
+                      {(() => {
+                        const trimTotal = students.reduce((sum, st) => {
+                          const avg = getTrimesterAvg(st.id, s.id, activeTrimester!);
+                          return sum + (avg ?? 0);
+                        }, 0);
+                        return (
+                          <td className="text-center text-xs tabular-nums border-l border-gray-100 text-red-600 font-bold">
+                            {trimTotal > 0 ? Math.round(trimTotal) : ""}
+                          </td>
+                        );
+                      })()}
+                    </React.Fragment>
+                  );
+                })}
+                <td className="border-l border-gray-300" />
+              </tr>
+            </tfoot>
           </table>
         )}
       </div>

@@ -15,6 +15,8 @@ const PERIOD_NAMES: Record<number, string> = {
   5: "Marzo", 6: "Abril", 7: "Mayo", 8: "Junio",
 };
 
+const PENALTY_SHORT_NAMES = new Set(["TAR", "INAS", "INC"]);
+
 export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
   const supabase = createServerSupabaseClient();
   const {
@@ -54,7 +56,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     .from("students")
     .select("id, full_name, list_num")
     .eq("group_id", params.groupId)
-    .eq("is_active", true)
+    .eq("status", "activo")
     .order("list_num");
 
   const studentIds = (students || []).map((s) => s.id);
@@ -193,6 +195,37 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     }
   });
 
+  // Penalty totals row (general sheet)
+  const penaltyFill: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F4F6" } };
+  const penaltyFont: Partial<ExcelJS.Font> = { bold: true, color: { argb: "FFDC2626" }, size: 9 };
+  if (subs.some((s) => PENALTY_SHORT_NAMES.has(s.short_name))) {
+    const pRow = hRow + 1 + studs.length;
+    wsGen.getCell(pRow, 1).value = "";
+    wsGen.getCell(pRow, 2).value = "TOTAL INCIDENCIAS";
+    wsGen.getCell(pRow, 2).font = { bold: true, size: 9 };
+    wsGen.getCell(pRow, 2).fill = penaltyFill;
+    wsGen.getCell(pRow, 1).fill = penaltyFill;
+
+    let pc = 3;
+    for (const s of subs) {
+      const cell = wsGen.getCell(pRow, pc);
+      if (PENALTY_SHORT_NAMES.has(s.short_name)) {
+        const total = studs.reduce((sum, st) => {
+          const f = getSubjectFinal(st.id, s.id);
+          return sum + (f != null ? Math.round(f) : 0);
+        }, 0);
+        cell.value = total > 0 ? total : null;
+        cell.font = penaltyFont;
+      }
+      cell.fill = penaltyFill;
+      cell.alignment = { horizontal: "center" };
+      cell.border = thinBorder;
+      pc++;
+    }
+    wsGen.getCell(pRow, pc).fill = penaltyFill;
+    wsGen.getCell(pRow, pc).border = thinBorder;
+  }
+
   // ═══════════ HOJAS POR TRIMESTRE ═══════════
   for (const trim of TRIMESTERS) {
     const ws = wb.addWorksheet(`${trim.id}° Trimestre`);
@@ -298,6 +331,56 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         ws.getCell(row, cc).border = thinBorder;
       }
     });
+
+    // Penalty totals row for trimester sheet
+    if (subs.some((s) => PENALTY_SHORT_NAMES.has(s.short_name))) {
+      const pRow = r2 + 1 + studs.length;
+      ws.getCell(pRow, 1).value = "";
+      ws.getCell(pRow, 1).fill = penaltyFill;
+      ws.getCell(pRow, 2).value = "TOTAL INCIDENCIAS";
+      ws.getCell(pRow, 2).font = { bold: true, size: 9 };
+      ws.getCell(pRow, 2).fill = penaltyFill;
+
+      let pc = 3;
+      for (const s of subs) {
+        if (PENALTY_SHORT_NAMES.has(s.short_name)) {
+          // Per-period totals
+          for (const p of trim.periods) {
+            const cell = ws.getCell(pRow, pc);
+            const total = studs.reduce((sum, st) => sum + (getScore(st.id, s.id, p) ?? 0), 0);
+            cell.value = total > 0 ? total : null;
+            cell.font = penaltyFont;
+            cell.fill = penaltyFill;
+            cell.alignment = { horizontal: "center" };
+            cell.border = thinBorder;
+            pc++;
+          }
+          // Trimester avg total
+          const cell = ws.getCell(pRow, pc);
+          const trimTotal = studs.reduce((sum, st) => {
+            const avg = getTrimesterAvg(st.id, s.id, trim);
+            return sum + (avg != null ? Math.round(avg) : 0);
+          }, 0);
+          cell.value = trimTotal > 0 ? trimTotal : null;
+          cell.font = penaltyFont;
+          cell.fill = penaltyFill;
+          cell.alignment = { horizontal: "center" };
+          cell.border = thinBorder;
+          pc++;
+        } else {
+          // Empty cells for non-penalty subjects
+          for (let i = 0; i <= trim.periods.length; i++) {
+            const cell = ws.getCell(pRow, pc);
+            cell.fill = penaltyFill;
+            cell.border = thinBorder;
+            pc++;
+          }
+        }
+      }
+      // Prom. Trim. cell
+      ws.getCell(pRow, pc).fill = penaltyFill;
+      ws.getCell(pRow, pc).border = thinBorder;
+    }
   }
 
   // ── Generate buffer ──

@@ -144,8 +144,8 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
           .card { box-shadow: none !important; border: 1px solid #d1d5db !important; }
           .concentrado-f-print-header { display: flex !important; }
           .print-hidden { display: none !important; }
-          .grade-table { font-size: 9px !important; }
-          .grade-table th, .grade-table td { padding: 2px 4px !important; }
+          .grade-table { font-size: 11px !important; }
+          .grade-table th, .grade-table td { padding: 3px 5px !important; }
         }
       `}} />
 

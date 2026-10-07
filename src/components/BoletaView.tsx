@@ -108,7 +108,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id} className="hover:bg-gray-50/50">
-          <td className="px-2 py-1.5 text-sm font-medium text-gray-900 whitespace-nowrap print:text-[12px] print:px-1 print:py-0.5">
+          <td className="px-2 py-1.5 text-sm font-medium text-gray-900 whitespace-nowrap print:text-[14px] print:px-1 print:py-0.5">
             {s.name}
           </td>
           {TRIMESTERS.map((t) => (

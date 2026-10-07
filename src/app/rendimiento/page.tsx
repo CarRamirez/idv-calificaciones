@@ -15,6 +15,7 @@ interface GroupPerformance {
   avgScore: number | null;
   atRiskCount: number;
   failingSubjects: { name: string; count: number }[];
+  penaltyTotals?: { name: string; total: number }[];
 }
 
 const GRADE_COLORS: Record<number, { bg: string; border: string; text: string; header: string; light: string }> = {
@@ -243,6 +244,25 @@ export default function RendimientoPage() {
                           <div key={i} className="flex items-center justify-between text-xs">
                             <span className="text-gray-600">{s.name}</span>
                             <span className="text-red-500 font-semibold">{s.count} rep.</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Penalty totals */}
+                  {g.penaltyTotals && g.penaltyTotals.some((p) => p.total > 0) && (
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                        Incidencias acumuladas
+                      </p>
+                      <div className="flex gap-3">
+                        {g.penaltyTotals.map((p) => (
+                          <div key={p.name} className="flex items-center gap-1.5 text-xs">
+                            <span className="text-gray-500">{p.name}:</span>
+                            <span className={`font-bold ${p.total > 0 ? "text-red-600" : "text-gray-400"}`}>
+                              {p.total}
+                            </span>
                           </div>
                         ))}
                       </div>

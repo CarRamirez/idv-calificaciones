@@ -152,15 +152,40 @@ export async function GET() {
 
   // ══════════════════════════════════════════════
   // 2) PERFORMANCE STATS — averages and at-risk students
+  //    Uses ALL grades (all periods) to compute trimester →
+  //    curricular → general averages, matching concentrado logic.
+  //    Works regardless of whether a period is currently open.
   // ══════════════════════════════════════════════
   const performanceByGroup: any[] = [];
 
-  if (activePeriod && groups && students) {
+  const PERF_TRIMESTERS = [
+    { periods: [1, 2] },
+    { periods: [3, 4] },
+    { periods: [5, 6, 7, 8] },
+  ];
+
+  function getSubjectCurricular(
+    periodScores: Record<number, number>
+  ): number | null {
+    const trimAvgs: number[] = [];
+    for (const t of PERF_TRIMESTERS) {
+      const scores = t.periods
+        .map((p) => periodScores[p])
+        .filter((s): s is number => s != null);
+      if (scores.length > 0) {
+        trimAvgs.push(scores.reduce((a, b) => a + b, 0) / scores.length);
+      }
+    }
+    if (trimAvgs.length === 0) return null;
+    return trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length;
+  }
+
+  if (groups && students) {
+    // Fetch ALL grades across all periods for active students
     const allGrades = await fetchPaginated(supabase, () =>
       supabase
         .from("grades")
-        .select("student_id, subject_id, score")
-        .eq("period", activePeriod.period_number)
+        .select("student_id, subject_id, period, score")
         .not("score", "is", null)
     );
 
@@ -175,10 +200,12 @@ export async function GET() {
     const subjectMap: Record<string, any> = {};
     (subjects || []).forEach((s: any) => { subjectMap[s.id] = s; });
 
-    const gradesByStudent: Record<string, Record<string, number>> = {};
+    // Build nested map: student → subject → period → score
+    const gradesByStudent: Record<string, Record<string, Record<number, number>>> = {};
     allGrades.forEach((g: any) => {
       if (!gradesByStudent[g.student_id]) gradesByStudent[g.student_id] = {};
-      gradesByStudent[g.student_id][g.subject_id] = g.score;
+      if (!gradesByStudent[g.student_id][g.subject_id]) gradesByStudent[g.student_id][g.subject_id] = {};
+      gradesByStudent[g.student_id][g.subject_id][g.period] = g.score;
     });
 
     // Identify penalty subjects by grade for totals
@@ -204,12 +231,16 @@ export async function GET() {
         let sum = 0;
         let cnt = 0;
 
-        Object.entries(sGrades).forEach(([subId, score]) => {
+        // For each counting subject, compute curricular average (trimester → general)
+        Object.entries(sGrades).forEach(([subId, periodScores]) => {
           if (countingSubjects.has(subId)) {
-            sum += score;
-            cnt++;
-            if (score < 6) {
-              subjectFailCounts[subId] = (subjectFailCounts[subId] || 0) + 1;
+            const curricular = getSubjectCurricular(periodScores);
+            if (curricular !== null) {
+              sum += curricular;
+              cnt++;
+              if (curricular < 6) {
+                subjectFailCounts[subId] = (subjectFailCounts[subId] || 0) + 1;
+              }
             }
           }
         });
@@ -230,13 +261,17 @@ export async function GET() {
           count,
         }));
 
-      // Penalty totals for this group (TAR, INAS, INC)
+      // Penalty totals for this group (TAR, INAS, INC) — sum across all periods
       const penaltyTotals: { name: string; total: number }[] = [];
       (penaltySubjectsByGrade[g.grade] || []).forEach((ps) => {
         let total = 0;
         grpStudents.forEach((s: any) => {
-          const score = gradesByStudent[s.id]?.[ps.id];
-          if (score != null) total += score;
+          const periodScores = gradesByStudent[s.id]?.[ps.id];
+          if (periodScores) {
+            Object.values(periodScores).forEach((score) => {
+              if (score != null) total += score as number;
+            });
+          }
         });
         penaltyTotals.push({ name: ps.short_name, total });
       });
