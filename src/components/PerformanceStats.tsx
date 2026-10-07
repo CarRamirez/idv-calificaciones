@@ -11,6 +11,7 @@ interface GroupPerformance {
   avgScore: number | null;
   atRiskCount: number;
   failingSubjects: { name: string; count: number }[];
+  penaltyTotals?: { name: string; total: number }[];
 }
 
 const GRADE_COLORS: Record<number, { bg: string; text: string; ring: string }> = {
@@ -144,6 +145,20 @@ export default function PerformanceStats() {
                       <p key={i} className="text-[10px] text-gray-600 flex items-center justify-between">
                         <span>{s.name}</span>
                         <span className="text-red-500 font-medium">{s.count}</span>
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {g.penaltyTotals && g.penaltyTotals.length > 0 && (
+                  <div className="mt-1.5 space-y-0.5">
+                    <p className="text-[9px] font-semibold text-gray-400 uppercase">
+                      Incidencias (total)
+                    </p>
+                    {g.penaltyTotals.map((pt, i) => (
+                      <p key={i} className="text-[10px] text-gray-600 flex items-center justify-between">
+                        <span>{pt.name === "TAR" ? "Tareas" : pt.name === "INAS" ? "Inasistencias" : "Incumplimientos"}</span>
+                        <span className="text-orange-600 font-medium">{pt.total}</span>
                       </p>
                     ))}
                   </div>

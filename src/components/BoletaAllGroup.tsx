@@ -79,6 +79,13 @@ function SingleBoleta({
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
   }
 
+  function getTotalAbsences(subjectId: string): number {
+    return [1, 2, 3, 4, 5, 6, 7, 8].reduce(
+      (sum, p) => sum + (gradeMap[subjectId]?.[p]?.absences ?? 0),
+      0
+    );
+  }
+
   const generalAvg = (() => {
     const avgs = curricular
       .map((s) => getSubjectFinal(s.id))
@@ -90,6 +97,7 @@ function SingleBoleta({
   function renderRows(list: Subject[]) {
     return list.map((s) => {
       const final = getSubjectFinal(s.id);
+      const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id}>
           <td className="px-1 py-0.5 text-left font-medium text-gray-900 whitespace-nowrap">{s.name}</td>
@@ -106,6 +114,7 @@ function SingleBoleta({
             </React.Fragment>
           ))}
           <td className={`text-center font-bold tabular-nums border-l-2 border-gray-300 ${semaforoClass(final)}`}>{fmt(final)}</td>
+          <td className="text-center tabular-nums text-gray-500 border-l border-gray-100">{totalAbs || "—"}</td>
         </tr>
       );
     });
@@ -119,31 +128,31 @@ function SingleBoleta({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-idv.png" alt="IDV" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-bold text-gray-900 leading-tight" style={{ fontSize: "9px" }}>Instituto Don Vasco</h1>
-            <p className="text-gray-500" style={{ fontSize: "7px" }}>Sección Secundaria</p>
+            <h1 className="font-bold text-gray-900 leading-tight" style={{ fontSize: "11px" }}>Instituto Don Vasco</h1>
+            <p className="text-gray-500" style={{ fontSize: "9px" }}>Sección Secundaria</p>
           </div>
         </div>
         <div className="text-center">
-          <h2 className="font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "8px" }}>Boleta de Calificaciones</h2>
-          <p className="text-gray-500" style={{ fontSize: "7px" }}>Ciclo Escolar 2026-2027</p>
+          <h2 className="font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "10px" }}>Boleta de Calificaciones</h2>
+          <p className="text-gray-500" style={{ fontSize: "9px" }}>Ciclo Escolar 2026-2027</p>
         </div>
         <div className="text-right">
-          <p className="font-bold text-gray-900" style={{ fontSize: "9px" }}>{formatStudentName(student.full_name)}</p>
-          <p className="text-gray-600" style={{ fontSize: "7px" }}>
+          <p className="font-bold text-gray-900" style={{ fontSize: "11px" }}>{formatStudentName(student.full_name)}</p>
+          <p className="text-gray-600" style={{ fontSize: "9px" }}>
             {group.grade}° &ldquo;{group.letter}&rdquo; — N° Lista: {student.list_num}
           </p>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex gap-2 mb-1 justify-center" style={{ fontSize: "6px" }}>
+      <div className="flex gap-2 mb-1 justify-center" style={{ fontSize: "8px" }}>
         <span className="px-1 py-0.5 rounded bg-red-100 text-red-800 border border-red-200">Requiere Apoyo (&lt;7)</span>
         <span className="px-1 py-0.5 rounded bg-yellow-100 text-yellow-800 border border-yellow-200">En Desarrollo (7-7.9)</span>
         <span className="px-1 py-0.5 rounded bg-green-100 text-green-800 border border-green-200">Nivel Esperado (8+)</span>
       </div>
 
       {/* Table */}
-      <table className="w-full border-collapse boleta-table" style={{ fontSize: "6px" }}>
+      <table className="w-full border-collapse boleta-table" style={{ fontSize: "8px" }}>
         <thead>
           <tr className="bg-indigo-50">
             <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "80px" }}>Asignatura</th>
@@ -153,6 +162,7 @@ function SingleBoleta({
               </th>
             ))}
             <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-gray-300 py-0.5" style={{ width: "28px" }}>Final</th>
+            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-gray-100 py-0.5" style={{ width: "22px" }}>IA</th>
           </tr>
           <tr className="bg-indigo-50/60">
             {TRIMESTERS.map((t) => (
@@ -182,11 +192,12 @@ function SingleBoleta({
               );
             })}
             <td className={`text-center font-bold tabular-nums border-l-2 border-gray-300 ${semaforoClass(generalAvg)}`}>{fmt(generalAvg)}</td>
+            <td className="border-l border-gray-100" />
           </tr>
           {noCurricular.length > 0 && (
             <>
               <tr>
-                <td colSpan={100} className="px-1 py-0.5 font-semibold text-gray-400 uppercase bg-gray-50 border-t-2 border-gray-200" style={{ fontSize: "5px" }}>
+                <td colSpan={100} className="px-1 py-0.5 font-semibold text-gray-400 uppercase bg-gray-50 border-t-2 border-gray-200" style={{ fontSize: "7px" }}>
                   No curriculares
                 </td>
               </tr>
@@ -201,13 +212,13 @@ function SingleBoleta({
         <div className="flex justify-between items-end">
           <div className="text-center">
             <div style={{ width: "35mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
-              <p className="font-semibold text-gray-800" style={{ fontSize: "7px" }}>Padre / Madre / Tutor</p>
+              <p className="font-semibold text-gray-800" style={{ fontSize: "9px" }}>Padre / Madre / Tutor</p>
             </div>
           </div>
           <div className="text-center">
             <div style={{ width: "45mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
-              <p className="font-semibold text-gray-800" style={{ fontSize: "7px" }}>Lic. Ana Laura Zúñiga García</p>
-              <p className="text-gray-500" style={{ fontSize: "6px" }}>Directora de Secundaria</p>
+              <p className="font-semibold text-gray-800" style={{ fontSize: "9px" }}>Lic. Ana Laura Zúñiga García</p>
+              <p className="text-gray-500" style={{ fontSize: "8px" }}>Directora de Secundaria</p>
             </div>
           </div>
         </div>

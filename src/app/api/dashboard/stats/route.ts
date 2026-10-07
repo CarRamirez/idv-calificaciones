@@ -181,6 +181,15 @@ export async function GET() {
       gradesByStudent[g.student_id][g.subject_id] = g.score;
     });
 
+    // Identify penalty subjects by grade for totals
+    const penaltySubjectsByGrade: Record<number, { id: string; short_name: string }[]> = {};
+    (subjects || []).forEach((s: any) => {
+      if (["TAR", "INAS", "INC"].includes(s.short_name)) {
+        if (!penaltySubjectsByGrade[s.grade]) penaltySubjectsByGrade[s.grade] = [];
+        penaltySubjectsByGrade[s.grade].push({ id: s.id, short_name: s.short_name });
+      }
+    });
+
     (groups || []).forEach((g: any) => {
       const grpStudents = studentsByGroup[g.id] || [];
       if (grpStudents.length === 0) return;
@@ -221,6 +230,17 @@ export async function GET() {
           count,
         }));
 
+      // Penalty totals for this group (TAR, INAS, INC)
+      const penaltyTotals: { name: string; total: number }[] = [];
+      (penaltySubjectsByGrade[g.grade] || []).forEach((ps) => {
+        let total = 0;
+        grpStudents.forEach((s: any) => {
+          const score = gradesByStudent[s.id]?.[ps.id];
+          if (score != null) total += score;
+        });
+        penaltyTotals.push({ name: ps.short_name, total });
+      });
+
       performanceByGroup.push({
         groupId: g.id,
         grade: g.grade,
@@ -230,6 +250,7 @@ export async function GET() {
         avgScore: avgCount > 0 ? Math.round((totalAvg / avgCount) * 10) / 10 : null,
         atRiskCount,
         failingSubjects,
+        penaltyTotals,
       });
     });
   }

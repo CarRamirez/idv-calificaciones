@@ -65,45 +65,52 @@ export default function PeriodsTimeline() {
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
         {periods.map((p) => {
           const isActive = activePeriod?.period_number === p.period_number;
-          const isPast = !p.effectively_open && !isActive && p.close_date && new Date(p.close_date) < new Date();
-          const isFuture = !p.effectively_open && !isActive && !isPast;
+          // Completed: not currently active, has a close date in the past
+          const isCompleted = !isActive && !p.effectively_open && p.close_date && new Date(p.close_date) < new Date();
+          // In progress (capturing): effectively open but not the "active" period, or is the active one
+          const isInProgress = isActive || (p.effectively_open && !isCompleted);
+          // Disabled / not yet open
+          const isDisabled = !isInProgress && !isCompleted;
 
           return (
             <div
               key={p.period_number}
               className={`rounded-xl p-3 border transition-all ${
-                isActive
-                  ? "bg-primary-50 border-primary-300 ring-2 ring-primary-200 shadow-sm"
-                  : isPast
-                  ? "bg-gray-50 border-gray-200"
-                  : "bg-white border-gray-200 border-dashed"
+                isCompleted
+                  ? "bg-green-50 border-green-300 ring-1 ring-green-200"
+                  : isInProgress
+                  ? "bg-orange-50 border-orange-300 ring-2 ring-orange-200 shadow-sm"
+                  : "bg-gray-50 border-gray-200 border-dashed"
               }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className={`text-xs font-bold ${
-                  isActive ? "text-primary-700" : isPast ? "text-gray-500" : "text-gray-400"
+                  isCompleted ? "text-green-700" : isInProgress ? "text-orange-700" : "text-gray-400"
                 }`}>
                   {p.name}
                 </span>
-                {isActive && (
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  </span>
-                )}
-                {isPast && (
-                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isCompleted && (
+                  <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
-                {isFuture && (
+                {isInProgress && (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                  </span>
+                )}
+                {isDisabled && (
                   <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 )}
               </div>
 
-              {isActive && (
-                <span className="text-[9px] text-green-600 font-medium">Activo</span>
+              {isInProgress && (
+                <span className="text-[9px] text-orange-600 font-medium">En captura</span>
+              )}
+              {isCompleted && (
+                <span className="text-[9px] text-green-600 font-medium">Completado</span>
               )}
 
               <div className="text-[10px] text-gray-400 space-y-0.5 mt-1">

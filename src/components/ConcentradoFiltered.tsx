@@ -109,6 +109,20 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
   }
 
+  // Compute penalty totals for a subject across all students in the group
+  function penaltyTotal(subjectId: string, period: number): number {
+    return studentsForGroup.reduce((sum, st) => {
+      const s = getScore(st.id, subjectId, period);
+      return sum + (s ?? 0);
+    }, 0);
+  }
+  function penaltyTotalTrimester(subjectId: string, periods: number[]): number {
+    return periods.reduce((sum, p) => sum + penaltyTotal(subjectId, p), 0);
+  }
+  function penaltyTotalGeneral(subjectId: string): number {
+    return [1,2,3,4,5,6,7,8].reduce((sum, p) => sum + penaltyTotal(subjectId, p), 0);
+  }
+
   // Title for print header
   const filterTitle = filterMode === "month"
     ? PERIODS.find((p) => p.id === selectedPeriod)?.name ?? ""
@@ -130,6 +144,8 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
           .card { box-shadow: none !important; border: 1px solid #d1d5db !important; }
           .concentrado-f-print-header { display: flex !important; }
           .print-hidden { display: none !important; }
+          .grade-table { font-size: 9px !important; }
+          .grade-table th, .grade-table td { padding: 2px 4px !important; }
         }
       `}} />
 
@@ -347,6 +363,18 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     </tr>
                   ))}
                 </tbody>
+                {/* Penalty totals row */}
+                <tfoot>
+                  <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                    <td className="text-center text-xs text-gray-500">Σ</td>
+                    <td className="text-xs font-semibold text-gray-700">Total grupo</td>
+                    {displaySubjects.map((s) => {
+                      if (!PENALTY_SUBJECTS.has(s.short_name)) return <td key={s.id} className="border-l border-gray-100" />;
+                      const total = penaltyTotal(s.id, selectedPeriod);
+                      return <td key={s.id} className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700">{total}</td>;
+                    })}
+                  </tr>
+                </tfoot>
               </table>
             )}
 
@@ -421,6 +449,34 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     );
                   })}
                 </tbody>
+                {/* Penalty totals row */}
+                <tfoot>
+                  <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                    <td className="text-center text-xs text-gray-500">Σ</td>
+                    <td className="text-xs font-semibold text-gray-700">Total grupo</td>
+                    {displaySubjects.map((s) => {
+                      if (!PENALTY_SUBJECTS.has(s.short_name)) {
+                        return (
+                          <React.Fragment key={s.id}>
+                            {activeTrimester!.periods.map((p) => <td key={p} className="border-l border-gray-100" />)}
+                            <td className="border-l border-gray-100" />
+                          </React.Fragment>
+                        );
+                      }
+                      return (
+                        <React.Fragment key={s.id}>
+                          {activeTrimester!.periods.map((p) => (
+                            <td key={p} className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700">{penaltyTotal(s.id, p)}</td>
+                          ))}
+                          <td className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700 bg-red-50">
+                            {penaltyTotalTrimester(s.id, activeTrimester!.periods)}
+                          </td>
+                        </React.Fragment>
+                      );
+                    })}
+                    <td className="border-l border-gray-200" />
+                  </tr>
+                </tfoot>
               </table>
             )}
 
@@ -462,6 +518,19 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     );
                   })}
                 </tbody>
+                {/* Penalty totals row */}
+                <tfoot>
+                  <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                    <td className="text-center text-xs text-gray-500">Σ</td>
+                    <td className="text-xs font-semibold text-gray-700">Total grupo</td>
+                    {displaySubjects.map((s) => {
+                      if (!PENALTY_SUBJECTS.has(s.short_name)) return <td key={s.id} className="border-l border-gray-100" />;
+                      const total = penaltyTotalGeneral(s.id);
+                      return <td key={s.id} className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700">{total}</td>;
+                    })}
+                    <td className="border-l border-gray-200" />
+                  </tr>
+                </tfoot>
               </table>
             )}
           </div>

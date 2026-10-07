@@ -23,6 +23,11 @@ function isBajasGroup(g: Group): boolean {
   return g.letter === "Bajas";
 }
 
+/** Title Case display: "MICHAUS VELAZQUEZ KEVIN" → "Michaus Velazquez Kevin" */
+function toTitleCase(str: string): string {
+  return str.replace(/\S+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+}
+
 const STATUS_OPTIONS = [
   { value: "activo", label: "Activo", color: "bg-green-100 text-green-700" },
   { value: "inactivo", label: "Inactivo", color: "bg-amber-100 text-amber-700" },
@@ -178,7 +183,7 @@ export default function AdminAlumnosPage() {
       const { error } = await supabase
         .from("students")
         .update({
-          full_name: name.toUpperCase(),
+          full_name: name,
           curp: formCurp.trim().toUpperCase() || null,
           list_num: num,
         })
@@ -188,7 +193,7 @@ export default function AdminAlumnosPage() {
       const { error } = await supabase
         .from("students")
         .insert({
-          full_name: name.toUpperCase(),
+          full_name: name,
           curp: formCurp.trim().toUpperCase() || null,
           list_num: num,
           group_id: selectedGroup,
@@ -199,6 +204,36 @@ export default function AdminAlumnosPage() {
 
     setSaving(false);
     setShowModal(false);
+    // Re-sort alphabetically and reassign list_num
+    await autoSortStudents();
+  }
+
+  /** Sort students alphabetically by full_name and reassign list_num */
+  async function autoSortStudents() {
+    if (!selectedGroup) return;
+    const { data } = await supabase
+      .from("students")
+      .select("id, full_name, list_num")
+      .eq("group_id", selectedGroup)
+      .order("full_name");
+    if (!data || data.length === 0) { loadStudents(); return; }
+
+    // Build batch of updates only where list_num changed
+    const updates: { id: string; list_num: number }[] = [];
+    data.forEach((s, idx) => {
+      const newNum = idx + 1;
+      if (s.list_num !== newNum) updates.push({ id: s.id, list_num: newNum });
+    });
+
+    // Apply updates in parallel (small batch per group)
+    if (updates.length > 0) {
+      await Promise.all(
+        updates.map((u) =>
+          supabase.from("students").update({ list_num: u.list_num }).eq("id", u.id)
+        )
+      );
+    }
+
     loadStudents();
   }
 
@@ -425,7 +460,7 @@ export default function AdminAlumnosPage() {
                             {s.full_name.charAt(0)}
                           </div>
                         )}
-                        {s.full_name}
+                        {toTitleCase(s.full_name)}
                       </div>
                     </td>
                     <td className="hidden sm:table-cell text-xs text-gray-500 font-mono">
