@@ -333,26 +333,16 @@ export default async function DashboardPage() {
         totalExpected += (studentsByGrade[grade] || 0) * (subjectsByGrade[grade] || 0);
       });
 
-      // Grades entered for active period (only curricular subjects, only active students)
-      // Use pagination to avoid Supabase's default 1000-row limit
-      const activeStudentIds = new Set((students || []).map((s: any) => s.id));
-      let gradesEntered = 0;
-      let gradeFrom = 0;
-      const gradePageSize = 1000;
-      while (true) {
-        const { data: gradePage } = await supabase
-          .from("grades")
-          .select("subject_id, student_id")
-          .eq("period", activePeriod.period_number)
-          .not("score", "is", null)
-          .range(gradeFrom, gradeFrom + gradePageSize - 1);
-        if (!gradePage || gradePage.length === 0) break;
-        gradesEntered += gradePage.filter(
-          (g: any) => curricularSubjectIds.has(g.subject_id) && activeStudentIds.has(g.student_id)
-        ).length;
-        if (gradePage.length < gradePageSize) break;
-        gradeFrom += gradePageSize;
-      }
+      // Grades entered for active period (only curricular subjects)
+      const { data: enteredGrades } = await supabase
+        .from("grades")
+        .select("subject_id")
+        .eq("period", activePeriod.period_number)
+        .not("score", "is", null);
+
+      const gradesEntered = (enteredGrades || []).filter(
+        (g: any) => curricularSubjectIds.has(g.subject_id)
+      ).length;
 
       captureProgress = { entered: gradesEntered, total: totalExpected };
     }
@@ -456,6 +446,20 @@ export default async function DashboardPage() {
                 Directorio
               </p>
               <p className="text-[11px] text-gray-400">Contactos del personal</p>
+            </div>
+          </Link>
+          <Link
+            href="/servicios-escolares"
+            className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+              <IconDocument className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors duration-200">
+                Servicios Escolares
+              </p>
+              <p className="text-[11px] text-gray-400">Constancias y documentos</p>
             </div>
           </Link>
           {/* WiFi Docentes */}
