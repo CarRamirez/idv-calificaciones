@@ -448,6 +448,18 @@ export default async function DashboardPage() {
               <p className="text-[11px] text-gray-400">Contactos del personal</p>
             </div>
           </Link>
+          {/* Servicios Escolares */}
+          <Link href="/servicios-escolares" className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors duration-200">Servicios Escolares</p>
+              <p className="text-[11px] text-gray-400">Constancias y documentos</p>
+            </div>
+          </Link>
           {/* WiFi Docentes */}
           <div className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group cursor-default">
             <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
