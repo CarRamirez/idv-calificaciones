@@ -162,8 +162,11 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
           .card { box-shadow: none !important; border: 1px solid #d1d5db !important; }
           .concentrado-print-header { display: flex !important; }
           .concentrado-print-footer { display: block !important; }
-          .grade-table { font-size: 11px !important; }
-          .grade-table th, .grade-table td { padding: 3px 5px !important; }
+          .grade-table { font-size: 13px !important; }
+          .grade-table th, .grade-table td { padding: 4px 6px !important; }
+          .grade-table th { font-weight: 700 !important; font-size: 13px !important; }
+          .grade-table thead th { border-bottom: 2px solid #4338ca !important; }
+          .grade-table tfoot td { font-size: 14px !important; padding: 6px !important; }
         }
       `}} />
 
@@ -171,16 +174,16 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
       <div className="hidden concentrado-print-header items-center justify-between mb-3 pb-2 border-b-2 border-indigo-600">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-idv.png" alt="IDV" className="w-12 h-12 object-contain" />
+          <img src="/logo-idv.png" alt="IDV" className="w-14 h-14 object-contain" />
           <div>
-            <h1 className="text-sm font-bold text-gray-900">Instituto Don Vasco — Secundaria</h1>
-            <p className="text-[10px] text-gray-500">Concentrado de Calificaciones — Ciclo Escolar 2026-2027</p>
+            <h1 className="text-base font-bold text-gray-900">Instituto Don Vasco — Secundaria</h1>
+            <p className="text-sm text-gray-500">Concentrado de Calificaciones — Ciclo Escolar 2026-2027</p>
           </div>
         </div>
         {groupName && (
           <div className="text-right">
-            <p className="text-sm font-bold text-gray-900">{groupName}</p>
-            <p className="text-[10px] text-gray-500">{students.length} alumno{students.length !== 1 ? "s" : ""}</p>
+            <p className="text-base font-bold text-gray-900">{groupName}</p>
+            <p className="text-sm text-gray-500">{students.length} alumno{students.length !== 1 ? "s" : ""}</p>
           </div>
         )}
       </div>
@@ -373,17 +376,12 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
       </div>
 
       {/* Print footer — signature */}
-      <div className="hidden concentrado-print-footer mt-6 px-4">
-        <div className="flex justify-between items-end">
+      <div className="hidden concentrado-print-footer mt-8 px-4">
+        <div className="flex justify-end">
           <div className="text-center">
-            <div className="w-48 border-t border-gray-400 pt-1">
-              <p className="text-[9px] font-semibold text-gray-700">Profesor(a)</p>
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="w-52 border-t border-gray-400 pt-1">
-              <p className="text-[9px] font-semibold text-gray-700">Lic. Ana Laura Zúñiga García</p>
-              <p className="text-[8px] text-gray-500">Directora de Secundaria</p>
+            <div className="w-56 border-t border-gray-400 pt-1">
+              <p className="text-xs font-semibold text-gray-800">Lic. Ana Laura Zúñiga García</p>
+              <p className="text-[10px] text-gray-500">Directora de Secundaria</p>
             </div>
           </div>
         </div>
