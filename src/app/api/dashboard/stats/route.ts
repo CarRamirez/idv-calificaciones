@@ -224,6 +224,7 @@ export async function GET() {
       let totalAvg = 0;
       let avgCount = 0;
       let atRiskCount = 0;
+      const atRiskStudents: { id: string; name: string; avg: number }[] = [];
       const subjectFailCounts: Record<string, number> = {};
 
       grpStudents.forEach((s: any) => {
@@ -249,9 +250,19 @@ export async function GET() {
           const avg = sum / cnt;
           totalAvg += avg;
           avgCount++;
-          if (avg < 6) atRiskCount++;
+          if (avg < 6) {
+            atRiskCount++;
+            atRiskStudents.push({
+              id: s.id,
+              name: s.full_name,
+              avg: Math.round(avg * 10) / 10,
+            });
+          }
         }
       });
+
+      // Sort at-risk students by average ascending (lowest first)
+      atRiskStudents.sort((a, b) => a.avg - b.avg);
 
       const failingSubjects = Object.entries(subjectFailCounts)
         .sort(([, a], [, b]) => b - a)
@@ -284,6 +295,7 @@ export async function GET() {
         studentCount: grpStudents.length,
         avgScore: avgCount > 0 ? Math.round((totalAvg / avgCount) * 10) / 10 : null,
         atRiskCount,
+        atRiskStudents,
         failingSubjects,
         penaltyTotals,
       });

@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+interface AtRiskStudent {
+  id: string;
+  name: string;
+  avg: number;
+}
+
 interface GroupPerformance {
   groupId: string;
   grade: number;
@@ -10,6 +16,7 @@ interface GroupPerformance {
   studentCount: number;
   avgScore: number | null;
   atRiskCount: number;
+  atRiskStudents?: AtRiskStudent[];
   failingSubjects: { name: string; count: number }[];
   penaltyTotals?: { name: string; total: number }[];
 }
@@ -23,6 +30,7 @@ const GRADE_COLORS: Record<number, { bg: string; text: string; ring: string }> =
 export default function PerformanceStats() {
   const [groups, setGroups] = useState<GroupPerformance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedRisk, setExpandedRisk] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch("/api/dashboard/stats")
@@ -128,12 +136,42 @@ export default function PerformanceStats() {
                 </p>
 
                 {g.atRiskCount > 0 && (
-                  <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
-                    {g.atRiskCount} en riesgo
-                  </p>
+                  <div>
+                    <button
+                      onClick={() => {
+                        setExpandedRisk((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(g.groupId)) next.delete(g.groupId);
+                          else next.add(g.groupId);
+                          return next;
+                        });
+                      }}
+                      className="text-[11px] text-red-600 font-medium flex items-center gap-1 hover:text-red-700 transition-colors w-full"
+                    >
+                      <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                      </svg>
+                      <span>{g.atRiskCount} en riesgo</span>
+                      <svg
+                        className={`w-3 h-3 ml-auto transition-transform ${expandedRisk.has(g.groupId) ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {expandedRisk.has(g.groupId) && g.atRiskStudents && g.atRiskStudents.length > 0 && (
+                      <div className="mt-1.5 space-y-1 bg-red-50 rounded-lg p-2">
+                        {g.atRiskStudents.map((s) => (
+                          <div key={s.id} className="flex items-center justify-between text-[10px]">
+                            <span className="text-gray-700 truncate mr-1">{s.name}</span>
+                            <span className="text-red-600 font-bold flex-shrink-0">{s.avg}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {g.failingSubjects.length > 0 && (

@@ -448,20 +448,6 @@ export default async function DashboardPage() {
               <p className="text-[11px] text-gray-400">Contactos del personal</p>
             </div>
           </Link>
-          <Link
-            href="/servicios-escolares"
-            className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-              <IconDocument className="w-5 h-5 text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors duration-200">
-                Servicios Escolares
-              </p>
-              <p className="text-[11px] text-gray-400">Constancias y documentos</p>
-            </div>
-          </Link>
           {/* WiFi Docentes */}
           <div className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group cursor-default">
             <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
@@ -902,7 +888,7 @@ export default async function DashboardPage() {
                         </p>
                         <div className="flex flex-col gap-1">
                           <Link
-                            href={`/concentrado/${g.id}`}
+                            href="/concentrados"
                             className={`text-[11px] font-medium px-1.5 py-1 rounded-md text-center ${colors.badge} hover:opacity-80 transition-opacity`}
                           >
                             Concentrado
