@@ -108,7 +108,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id} className="hover:bg-gray-50/50">
-          <td className="px-2 py-1.5 text-sm font-medium text-gray-900 whitespace-nowrap print:text-[14px] print:px-1 print:py-0.5">
+          <td className="px-3 py-2 text-base font-medium text-gray-900 whitespace-nowrap print:text-[11px] print:px-1 print:py-0.5">
             {s.name}
           </td>
           {TRIMESTERS.map((t) => (
@@ -116,7 +116,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               {t.periods.map((p) => (
                 <td
                   key={p}
-                  className={`text-center text-sm tabular-nums border-l border-gray-100 print:text-[12px] ${semaforoClass(
+                  className={`text-center text-sm tabular-nums border-l border-gray-100 print:text-[10px] ${semaforoClass(
                     getScore(s.id, p)
                   )}`}
                 >
@@ -124,7 +124,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 </td>
               ))}
               <td
-                className={`text-center text-sm font-semibold tabular-nums border-l border-gray-200 print:text-[12px] ${semaforoClass(
+                className={`text-center text-sm font-semibold tabular-nums border-l border-gray-200 print:text-[10px] ${semaforoClass(
                   getTrimesterAvg(s.id, t)
                 )}`}
               >
@@ -133,13 +133,13 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             </React.Fragment>
           ))}
           <td
-            className={`text-center text-sm font-bold tabular-nums border-l-2 border-gray-300 print:text-[12px] ${semaforoClass(
+            className={`text-center text-sm font-bold tabular-nums border-l-2 border-gray-300 print:text-[10px] ${semaforoClass(
               final
             )}`}
           >
             {fmt(final)}
           </td>
-          <td className="text-center text-sm tabular-nums text-gray-500 border-l border-gray-100 print:text-[12px]">
+          <td className="text-center text-sm tabular-nums text-gray-500 border-l border-gray-100 print:text-[10px]">
             {totalAbs || "—"}
           </td>
         </tr>
@@ -279,7 +279,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               <tr className="bg-primary-50">
                 <th
                   rowSpan={2}
-                  className="px-3 py-2 text-left text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 min-w-[140px] print:text-[11px] print:px-1 print:py-1"
+                  className="px-3 py-2 text-left text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 min-w-[180px] print:text-[11px] print:px-1 print:py-1"
                 >
                   Asignatura
                 </th>
@@ -330,7 +330,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
               {/* Fila de promedio general */}
               <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-                <td className="px-3 py-2 text-sm text-gray-900 print:text-[12px] print:px-1 print:py-0.5">
+                <td className="px-3 py-2 text-base text-gray-900 print:text-[11px] print:px-1 print:py-0.5">
                   Promedio General
                 </td>
                 {TRIMESTERS.map((t) => {
@@ -357,7 +357,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   );
                 })}
                 <td
-                  className={`text-center text-sm font-bold tabular-nums border-l-2 border-gray-300 print:text-[12px] ${semaforoClass(
+                  className={`text-center text-sm font-bold tabular-nums border-l-2 border-gray-300 print:text-[10px] ${semaforoClass(
                     generalAvg
                   )}`}
                 >
@@ -372,7 +372,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   <tr>
                     <td
                       colSpan={100}
-                      className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-50 border-t-2 border-gray-200 print:text-[12px] print:px-1 print:py-1"
+                      className="px-3 py-2 text-sm font-semibold text-gray-400 uppercase tracking-wider bg-gray-50 border-t-2 border-gray-200 print:text-[10px] print:px-1 print:py-1"
                     >
                       No curriculares — no abonan al promedio
                     </td>

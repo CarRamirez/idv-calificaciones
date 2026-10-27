@@ -100,7 +100,7 @@ function SingleBoleta({
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id}>
-          <td className="px-1 py-0.5 text-left font-medium text-gray-900 whitespace-nowrap">{s.name}</td>
+          <td className="px-1 py-0.5 text-left font-semibold text-gray-900 whitespace-nowrap" style={{ fontSize: "12px" }}>{s.name}</td>
           {TRIMESTERS.map((t) => (
             <React.Fragment key={t.id}>
               {t.periods.map((p) => (
@@ -133,7 +133,7 @@ function SingleBoleta({
           </div>
         </div>
         <div className="text-center">
-          <h2 className="font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "10px" }}>Boleta de Calificaciones</h2>
+          <h2 className="font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "11px" }}>Boleta de Calificaciones</h2>
           <p className="text-gray-500" style={{ fontSize: "9px" }}>Ciclo Escolar 2026-2027</p>
         </div>
         <div className="text-right">
@@ -152,10 +152,10 @@ function SingleBoleta({
       </div>
 
       {/* Table */}
-      <table className="w-full border-collapse boleta-table" style={{ fontSize: "10px" }}>
+      <table className="w-full border-collapse boleta-table" style={{ fontSize: "11px" }}>
         <thead>
           <tr className="bg-indigo-50">
-            <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "100px" }}>Asignatura</th>
+            <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "120px" }}>Asignatura</th>
             {TRIMESTERS.map((t) => (
               <th key={t.id} colSpan={t.periods.length + 1} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-gray-200 py-0.5">
                 {t.shortName}
@@ -180,7 +180,7 @@ function SingleBoleta({
         <tbody>
           {renderRows(curricular)}
           <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-            <td className="px-1 py-0.5 text-gray-900">Promedio General</td>
+            <td className="px-1 py-0.5 text-gray-900 font-bold" style={{ fontSize: "12px" }}>Promedio General</td>
             {TRIMESTERS.map((t) => {
               const trimAvgs = curricular.map((s) => getTrimesterAvg(s.id, t)).filter((a): a is number => a !== null);
               const trimGenAvg = trimAvgs.length > 0 ? trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length : null;
@@ -197,7 +197,7 @@ function SingleBoleta({
           {noCurricular.length > 0 && (
             <>
               <tr>
-                <td colSpan={100} className="px-1 py-0.5 font-semibold text-gray-400 uppercase bg-gray-50 border-t-2 border-gray-200" style={{ fontSize: "7px" }}>
+                <td colSpan={100} className="px-1 py-0.5 font-semibold text-gray-400 uppercase bg-gray-50 border-t-2 border-gray-200" style={{ fontSize: "9px" }}>
                   No curriculares
                 </td>
               </tr>
