@@ -98,19 +98,22 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("full_name, role")
     .eq("id", user.id)
     .single();
 
   if (!profile) {
+    console.error("Dashboard profile lookup failed", { userId: user.id, email: user.email, error: profileError });
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Perfil no encontrado</h1>
           <p className="text-gray-500 mb-4">Tu cuenta no tiene un perfil asociado. Contacta al administrador.</p>
-          <a href="/login" className="text-indigo-600 hover:underline">Volver al login</a>
+          <p className="text-xs text-gray-300 mt-2">uid: {user.id?.slice(0,8)}… | {user.email}</p>
+          {profileError && <p className="text-xs text-red-300 mt-1">Error: {profileError.message}</p>}
+          <a href="/login" className="mt-4 inline-block text-indigo-600 hover:underline">Volver al login</a>
         </div>
       </div>
     );
