@@ -109,25 +109,25 @@ export default async function CapturaIndexPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header con stats */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">
             Captura de Calificaciones
           </h1>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-slate-500 mb-4">
             Selecciona el grupo y la asignatura para comenzar
           </p>
           <div className="flex gap-3">
             <div className="glass-subtle rounded-xl px-4 py-2 flex items-center gap-2">
               <span className="text-lg">📂</span>
               <div>
-                <p className="text-xs text-gray-500">Grupos</p>
-                <p className="text-sm font-bold text-gray-800">{totalGroups}</p>
+                <p className="text-xs text-slate-500">Grupos</p>
+                <p className="text-sm font-bold text-slate-800">{totalGroups}</p>
               </div>
             </div>
             <div className="glass-subtle rounded-xl px-4 py-2 flex items-center gap-2">
               <span className="text-lg">📋</span>
               <div>
-                <p className="text-xs text-gray-500">Asignaturas</p>
-                <p className="text-sm font-bold text-gray-800">{totalSubjects}</p>
+                <p className="text-xs text-slate-500">Asignaturas</p>
+                <p className="text-sm font-bold text-slate-800">{totalSubjects}</p>
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default async function CapturaIndexPage() {
         {isCompact ? (
           /* ───── Compact layout: one row per group-subject ───── */
           <div className="card overflow-hidden">
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-100">
               {Object.entries(byGroup)
                 .sort(([a], [b]) => a.localeCompare(b))
                 .flatMap(([key, { group, curricular, noCurricular }]) => {
@@ -155,19 +155,19 @@ export default async function CapturaIndexPage() {
                         {getIcon(a.subjects.short_name)}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 group-hover:text-primary-700 transition-colors truncate">
+                        <p className="text-sm font-medium text-slate-800 group-hover:text-primary-700 transition-colors truncate">
                           {a.subjects.name}
                         </p>
                       </div>
-                      <span className="text-xs text-gray-400 font-mono hidden sm:block">
+                      <span className="text-xs text-slate-400 font-mono hidden sm:block">
                         {a.subjects.short_name}
                       </span>
                       {!a.subjects.counts_for_avg && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-400 hidden sm:block">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 hidden sm:block">
                           No curricular
                         </span>
                       )}
-                      <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-slate-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Link>
@@ -189,7 +189,7 @@ export default async function CapturaIndexPage() {
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${accent.badge}`}>
                         {group.grade}° {group.letter}
                       </span>
-                      <div className="flex-1 h-px bg-gradient-to-r from-gray-200/60 to-transparent" />
+                      <div className="flex-1 h-px bg-gradient-to-r from-slate-200/60 to-transparent" />
                     </div>
 
                     {/* Cards de materias curriculares */}
@@ -206,14 +206,14 @@ export default async function CapturaIndexPage() {
                               {getIcon(a.subjects.short_name)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-700 transition-colors truncate">
+                              <p className="text-sm font-semibold text-slate-800 group-hover:text-primary-700 transition-colors truncate">
                                 {a.subjects.name}
                               </p>
-                              <p className="text-xs text-gray-400 font-mono">
+                              <p className="text-xs text-slate-400 font-mono">
                                 {a.subjects.short_name}
                               </p>
                             </div>
-                            <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-slate-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </div>
@@ -224,7 +224,7 @@ export default async function CapturaIndexPage() {
                     {/* Materias no curriculares */}
                     {noCurricular.length > 0 && (
                       <div className="mt-3">
-                        <p className="text-xs text-gray-400 uppercase tracking-wide mb-2 ml-1">
+                        <p className="text-xs text-slate-400 uppercase tracking-wide mb-2 ml-1">
                           No curriculares — no abonan al promedio
                         </p>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
@@ -232,13 +232,13 @@ export default async function CapturaIndexPage() {
                             <Link
                               key={a.id}
                               href={`/captura/${a.groups.id}/${a.subjects.id}`}
-                              className="group glass-subtle rounded-xl px-3 py-2.5 hover:bg-white/60 transition-all flex items-center gap-2 ring-1 ring-gray-200/40"
+                              className="group glass-subtle rounded-xl px-3 py-2.5 hover:bg-white/60 transition-all flex items-center gap-2 ring-1 ring-slate-200/40"
                             >
                               <span className="text-base flex-shrink-0">
                                 {getIcon(a.subjects.short_name)}
                               </span>
                               <div className="min-w-0">
-                                <p className="text-xs font-medium text-gray-600 group-hover:text-gray-800 transition-colors truncate">
+                                <p className="text-xs font-medium text-slate-600 group-hover:text-slate-800 transition-colors truncate">
                                   {a.subjects.name}
                                 </p>
                               </div>
@@ -256,7 +256,7 @@ export default async function CapturaIndexPage() {
         {assignments.length === 0 && (
           <div className="card p-12 text-center">
             <span className="text-4xl mb-3 block">📭</span>
-            <p className="text-gray-500 text-sm">
+            <p className="text-slate-500 text-sm">
               No tienes asignaturas asignadas aún.
             </p>
           </div>

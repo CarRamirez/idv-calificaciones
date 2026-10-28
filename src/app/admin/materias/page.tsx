@@ -180,13 +180,13 @@ export default function AdminMateriasPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Materias</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Materias</h1>
+            <p className="text-sm text-slate-500">
               {subjects.length} materia{subjects.length !== 1 ? "s" : ""} registrada{subjects.length !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">
+            <Link href="/dashboard" className="text-sm text-slate-500 hover:text-primary-600 transition-colors">
               ← Volver
             </Link>
             <button onClick={openNew} className="btn-primary text-sm flex items-center gap-1.5">
@@ -203,7 +203,7 @@ export default function AdminMateriasPage() {
           <button
             onClick={() => setFilterGrade(null)}
             className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
-              !filterGrade ? "bg-primary-100 text-primary-700 font-medium" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              !filterGrade ? "bg-primary-100 text-primary-700 font-medium" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
             Todos ({subjects.length})
@@ -215,7 +215,7 @@ export default function AdminMateriasPage() {
                 key={g}
                 onClick={() => setFilterGrade(g)}
                 className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
-                  filterGrade === g ? "bg-primary-100 text-primary-700 font-medium" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  filterGrade === g ? "bg-primary-100 text-primary-700 font-medium" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 {GRADE_LABELS[g]} ({count})
@@ -233,41 +233,41 @@ export default function AdminMateriasPage() {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([grade, subs]) => (
               <div key={grade} className="mb-6">
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <span className={`inline-flex px-2 py-0.5 rounded-md text-xs border ${GRADE_COLORS[Number(grade)]}`}>
                     {GRADE_LABELS[Number(grade)]}
                   </span>
-                  <span className="text-gray-400 font-normal">{subs.length} materia{subs.length !== 1 ? "s" : ""}</span>
+                  <span className="text-slate-400 font-normal">{subs.length} materia{subs.length !== 1 ? "s" : ""}</span>
                 </h2>
                 <div className="card overflow-hidden">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orden</th>
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Abreviatura</th>
-                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Campo Formativo</th>
-                        <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipo</th>
-                        <th className="text-center px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Curricular</th>
-                        <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Orden</th>
+                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Nombre</th>
+                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Abreviatura</th>
+                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Campo Formativo</th>
+                        <th className="text-center px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
+                        <th className="text-center px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Curricular</th>
+                        <th className="text-right px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {subs.map((s, idx) => (
-                        <tr key={s.id} className={`border-b border-gray-100 hover:bg-gray-50/50 transition-colors ${idx === subs.length - 1 ? "border-b-0" : ""}`}>
-                          <td className="px-4 py-2.5 text-gray-400 tabular-nums text-xs w-16">{s.sort_order}</td>
-                          <td className="px-4 py-2.5 font-medium text-gray-900">{s.name}</td>
+                        <tr key={s.id} className={`border-b border-slate-100 hover:bg-slate-50/50 transition-colors ${idx === subs.length - 1 ? "border-b-0" : ""}`}>
+                          <td className="px-4 py-2.5 text-slate-400 tabular-nums text-xs w-16">{s.sort_order}</td>
+                          <td className="px-4 py-2.5 font-medium text-slate-900">{s.name}</td>
                           <td className="px-4 py-2.5">
-                            <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{s.short_name}</span>
+                            <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{s.short_name}</span>
                           </td>
-                          <td className="px-4 py-2.5 text-xs text-gray-600">
-                            {s.campo_formativo || <span className="text-gray-300 italic">—</span>}
+                          <td className="px-4 py-2.5 text-xs text-slate-600">
+                            {s.campo_formativo || <span className="text-slate-300 italic">—</span>}
                           </td>
                           <td className="px-4 py-2.5 text-center">
                             <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                               s.input_type === 'counter' ? 'bg-cyan-50 text-cyan-700' :
                               s.input_type === 'counter_max' ? 'bg-orange-50 text-orange-700' :
-                              'bg-gray-50 text-gray-600'
+                              'bg-slate-50 text-slate-600'
                             }`}>
                               {s.input_type === 'counter' ? 'Contador' :
                                s.input_type === 'counter_max' ? 'Contador (max 10)' :
@@ -283,7 +283,7 @@ export default function AdminMateriasPage() {
                                 S&iacute;
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                              <span className="inline-flex items-center gap-1 text-xs text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                                 </svg>
@@ -295,7 +295,7 @@ export default function AdminMateriasPage() {
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => openEdit(s)}
-                                className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                                className="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                                 title="Editar"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,7 +312,7 @@ export default function AdminMateriasPage() {
                                   </button>
                                   <button
                                     onClick={() => setDeleting(null)}
-                                    className="text-[11px] px-2 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                                    className="text-[11px] px-2 py-1 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition-colors"
                                   >
                                     No
                                   </button>
@@ -320,7 +320,7 @@ export default function AdminMateriasPage() {
                               ) : (
                                 <button
                                   onClick={() => setDeleting(s.id)}
-                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                   title="Eliminar"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,14 +349,14 @@ export default function AdminMateriasPage() {
       {/* ═══ Modal crear/editar ═══ */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">
               {editing ? "Editar materia" : "Nueva materia"}
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
                 <input
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
@@ -367,7 +367,7 @@ export default function AdminMateriasPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Abreviatura</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Abreviatura</label>
                   <input
                     value={formShort}
                     onChange={(e) => setFormShort(e.target.value.toUpperCase())}
@@ -377,7 +377,7 @@ export default function AdminMateriasPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Grado</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Grado</label>
                   <select
                     value={formGrade}
                     onChange={(e) => setFormGrade(Number(e.target.value))}
@@ -391,7 +391,7 @@ export default function AdminMateriasPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Campo Formativo</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Campo Formativo</label>
                 <select
                   value={formCampo}
                   onChange={(e) => setFormCampo(e.target.value)}
@@ -406,7 +406,7 @@ export default function AdminMateriasPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de dato</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de dato</label>
                 <select
                   value={formInputType}
                   onChange={(e) => setFormInputType(e.target.value)}
@@ -420,7 +420,7 @@ export default function AdminMateriasPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Orden</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Orden</label>
                   <input
                     type="number"
                     value={formOrder}
@@ -435,16 +435,16 @@ export default function AdminMateriasPage() {
                       type="checkbox"
                       checked={formCounts}
                       onChange={(e) => setFormCounts(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-sm text-gray-700">Abona al promedio</span>
+                    <span className="text-sm text-slate-700">Abona al promedio</span>
                   </label>
                 </div>
               </div>
 
               {editing && (
-                <div className="bg-gray-50 rounded-lg px-3 py-2">
-                  <p className="text-[10px] text-gray-400">
+                <div className="bg-slate-50 rounded-lg px-3 py-2">
+                  <p className="text-[10px] text-slate-400">
                     ID: <span className="font-mono select-all">{editing.id}</span>
                   </p>
                 </div>
@@ -458,7 +458,7 @@ export default function AdminMateriasPage() {
             <div className="flex gap-3 mt-5">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
               >
                 Cancelar
               </button>

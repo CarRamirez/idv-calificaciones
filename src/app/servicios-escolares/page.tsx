@@ -104,7 +104,7 @@ export default async function ServiciosEscolaresPage() {
         <div className="mb-4">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-primary-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-primary-600 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -114,8 +114,8 @@ export default async function ServiciosEscolaresPage() {
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Servicios Escolares</h1>
-          <p className="text-sm text-gray-500 mt-1">Generación de constancias y documentos oficiales</p>
+          <h1 className="text-2xl font-bold text-slate-900">Servicios Escolares</h1>
+          <p className="text-sm text-slate-500 mt-1">Generación de constancias y documentos oficiales</p>
         </div>
 
         {/* Banner de en construcción */}
@@ -149,8 +149,8 @@ export default async function ServiciosEscolaresPage() {
                 <div className={`w-14 h-14 rounded-xl ${c.iconBg} ${c.iconText} flex items-center justify-center mb-4`}>
                   {opt.icon}
                 </div>
-                <h2 className="text-base font-bold text-gray-900 mb-1">{opt.title}</h2>
-                <p className="text-sm text-gray-500 leading-relaxed">{opt.description}</p>
+                <h2 className="text-base font-bold text-slate-900 mb-1">{opt.title}</h2>
+                <p className="text-sm text-slate-500 leading-relaxed">{opt.description}</p>
               </div>
             );
           })}

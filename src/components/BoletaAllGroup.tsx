@@ -100,21 +100,21 @@ function SingleBoleta({
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id}>
-          <td className="px-1 py-0.5 text-left font-semibold text-gray-900 whitespace-nowrap" style={{ fontSize: "12px" }}>{s.name}</td>
+          <td className="px-1 py-0.5 text-left font-semibold text-slate-900 whitespace-nowrap" style={{ fontSize: "12px" }}>{s.name}</td>
           {TRIMESTERS.map((t) => (
             <React.Fragment key={t.id}>
               {t.periods.map((p) => (
-                <td key={p} className={`text-center tabular-nums border-l border-gray-100 ${semaforoClass(getScore(s.id, p))}`}>
+                <td key={p} className={`text-center tabular-nums border-l border-slate-100 ${semaforoClass(getScore(s.id, p))}`}>
                   {fmt(getScore(s.id, p))}
                 </td>
               ))}
-              <td className={`text-center font-semibold tabular-nums border-l border-gray-200 ${semaforoClass(getTrimesterAvg(s.id, t))}`}>
+              <td className={`text-center font-semibold tabular-nums border-l border-slate-200 ${semaforoClass(getTrimesterAvg(s.id, t))}`}>
                 {fmt(getTrimesterAvg(s.id, t))}
               </td>
             </React.Fragment>
           ))}
-          <td className={`text-center font-bold tabular-nums border-l-2 border-gray-300 ${semaforoClass(final)}`}>{fmt(final)}</td>
-          <td className="text-center tabular-nums text-gray-500 border-l border-gray-100">{totalAbs || "—"}</td>
+          <td className={`text-center font-bold tabular-nums border-l-2 border-slate-300 ${semaforoClass(final)}`}>{fmt(final)}</td>
+          <td className="text-center tabular-nums text-slate-500 border-l border-slate-100">{totalAbs || "—"}</td>
         </tr>
       );
     });
@@ -128,17 +128,17 @@ function SingleBoleta({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-idv.png" alt="IDV" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-bold text-gray-900 leading-tight" style={{ fontSize: "11px" }}>Instituto Don Vasco</h1>
-            <p className="text-gray-500" style={{ fontSize: "9px" }}>Sección Secundaria</p>
+            <h1 className="font-bold text-slate-900 leading-tight" style={{ fontSize: "11px" }}>Instituto Don Vasco</h1>
+            <p className="text-slate-500" style={{ fontSize: "9px" }}>Sección Secundaria</p>
           </div>
         </div>
         <div className="text-center">
           <h2 className="font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "11px" }}>Boleta de Calificaciones</h2>
-          <p className="text-gray-500" style={{ fontSize: "9px" }}>Ciclo Escolar 2026-2027</p>
+          <p className="text-slate-500" style={{ fontSize: "9px" }}>Ciclo Escolar 2026-2027</p>
         </div>
         <div className="text-right">
-          <p className="font-bold text-gray-900" style={{ fontSize: "11px" }}>{formatStudentName(student.full_name)}</p>
-          <p className="text-gray-600" style={{ fontSize: "9px" }}>
+          <p className="font-bold text-slate-900" style={{ fontSize: "11px" }}>{formatStudentName(student.full_name)}</p>
+          <p className="text-slate-600" style={{ fontSize: "9px" }}>
             {group.grade}° &ldquo;{group.letter}&rdquo; — N° Lista: {student.list_num}
           </p>
         </div>
@@ -157,47 +157,47 @@ function SingleBoleta({
           <tr className="bg-indigo-50">
             <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "120px" }}>Asignatura</th>
             {TRIMESTERS.map((t) => (
-              <th key={t.id} colSpan={t.periods.length + 1} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-gray-200 py-0.5">
+              <th key={t.id} colSpan={t.periods.length + 1} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-slate-200 py-0.5">
                 {t.shortName}
               </th>
             ))}
-            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-gray-300 py-0.5" style={{ width: "28px" }}>Final</th>
-            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-gray-100 py-0.5" style={{ width: "22px" }}>IA</th>
+            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-slate-300 py-0.5" style={{ width: "28px" }}>Final</th>
+            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-slate-100 py-0.5" style={{ width: "22px" }}>IA</th>
           </tr>
           <tr className="bg-indigo-50/60">
             {TRIMESTERS.map((t) => (
               <React.Fragment key={t.id}>
                 {t.periods.map((p) => (
-                  <th key={p} className="text-center font-medium text-indigo-700 border-b border-indigo-200 border-l border-gray-200 py-0.5" style={{ width: "24px" }}>
+                  <th key={p} className="text-center font-medium text-indigo-700 border-b border-indigo-200 border-l border-slate-200 py-0.5" style={{ width: "24px" }}>
                     {PERIOD_NAMES[p]}
                   </th>
                 ))}
-                <th className="text-center font-bold text-indigo-700 border-b border-indigo-200 border-l border-gray-200 py-0.5 bg-indigo-100/50" style={{ width: "24px" }}>Prom.</th>
+                <th className="text-center font-bold text-indigo-700 border-b border-indigo-200 border-l border-slate-200 py-0.5 bg-indigo-100/50" style={{ width: "24px" }}>Prom.</th>
               </React.Fragment>
             ))}
           </tr>
         </thead>
         <tbody>
           {renderRows(curricular)}
-          <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-            <td className="px-1 py-0.5 text-gray-900 font-bold" style={{ fontSize: "12px" }}>Promedio General</td>
+          <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
+            <td className="px-1 py-0.5 text-slate-900 font-bold" style={{ fontSize: "12px" }}>Promedio General</td>
             {TRIMESTERS.map((t) => {
               const trimAvgs = curricular.map((s) => getTrimesterAvg(s.id, t)).filter((a): a is number => a !== null);
               const trimGenAvg = trimAvgs.length > 0 ? trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length : null;
               return (
                 <React.Fragment key={t.id}>
-                  {t.periods.map((p) => (<td key={p} className="border-l border-gray-200" />))}
-                  <td className={`text-center font-bold tabular-nums border-l border-gray-200 ${semaforoClass(trimGenAvg)}`}>{fmt(trimGenAvg)}</td>
+                  {t.periods.map((p) => (<td key={p} className="border-l border-slate-200" />))}
+                  <td className={`text-center font-bold tabular-nums border-l border-slate-200 ${semaforoClass(trimGenAvg)}`}>{fmt(trimGenAvg)}</td>
                 </React.Fragment>
               );
             })}
-            <td className={`text-center font-bold tabular-nums border-l-2 border-gray-300 ${semaforoClass(generalAvg)}`}>{fmt(generalAvg)}</td>
-            <td className="border-l border-gray-100" />
+            <td className={`text-center font-bold tabular-nums border-l-2 border-slate-300 ${semaforoClass(generalAvg)}`}>{fmt(generalAvg)}</td>
+            <td className="border-l border-slate-100" />
           </tr>
           {noCurricular.length > 0 && (
             <>
               <tr>
-                <td colSpan={100} className="px-1 py-0.5 font-semibold text-gray-400 uppercase bg-gray-50 border-t-2 border-gray-200" style={{ fontSize: "9px" }}>
+                <td colSpan={100} className="px-1 py-0.5 font-semibold text-slate-400 uppercase bg-slate-50 border-t-2 border-slate-200" style={{ fontSize: "9px" }}>
                   No curriculares
                 </td>
               </tr>
@@ -212,13 +212,13 @@ function SingleBoleta({
         <div className="flex justify-between items-end">
           <div className="text-center">
             <div style={{ width: "35mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
-              <p className="font-semibold text-gray-800" style={{ fontSize: "9px" }}>Padre / Madre / Tutor</p>
+              <p className="font-semibold text-slate-800" style={{ fontSize: "9px" }}>Padre / Madre / Tutor</p>
             </div>
           </div>
           <div className="text-center">
             <div style={{ width: "45mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
-              <p className="font-semibold text-gray-800" style={{ fontSize: "9px" }}>Lic. Ana Laura Zúñiga García</p>
-              <p className="text-gray-500" style={{ fontSize: "8px" }}>Directora de Secundaria</p>
+              <p className="font-semibold text-slate-800" style={{ fontSize: "9px" }}>Lic. Ana Laura Zúñiga García</p>
+              <p className="text-slate-500" style={{ fontSize: "8px" }}>Directora de Secundaria</p>
             </div>
           </div>
         </div>
@@ -279,13 +279,13 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
                 <span className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold tabular-nums">
                   {s.list_num}
                 </span>
-                <span className="text-sm font-medium text-gray-900 group-hover:text-primary-700">
+                <span className="text-sm font-medium text-slate-900 group-hover:text-primary-700">
                   {formatStudentName(s.full_name)}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-400">Boleta {i + 1} de {students.length}</span>
-                <svg className="w-4 h-4 text-gray-300 group-hover:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="text-xs text-slate-400">Boleta {i + 1} de {students.length}</span>
+                <svg className="w-4 h-4 text-slate-300 group-hover:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>

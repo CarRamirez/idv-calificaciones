@@ -248,7 +248,7 @@ export default function AdminRolesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -263,20 +263,20 @@ export default function AdminRolesPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Roles y Permisos</h1>
-            <p className="text-sm text-gray-500">Gestiona roles y asigna permisos por módulo</p>
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Roles y Permisos</h1>
+            <p className="text-sm text-slate-500">Gestiona roles y asigna permisos por módulo</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg w-fit">
+        <div className="flex gap-1 mb-4 bg-slate-100 p-1 rounded-lg w-fit">
           <button
             onClick={() => setActiveTab("roles")}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === "roles"
                 ? "bg-white text-primary-700 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
             Roles ({roles.length})
@@ -286,7 +286,7 @@ export default function AdminRolesPage() {
             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === "users"
                 ? "bg-white text-primary-700 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
             Usuarios ({users.length})
@@ -305,18 +305,18 @@ export default function AdminRolesPage() {
                 <div key={r.id} className="card p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h3 className="text-sm font-bold text-gray-900">{r.display_name}</h3>
-                      <p className="text-xs text-gray-400 font-mono">{r.name}</p>
+                      <h3 className="text-sm font-bold text-slate-900">{r.display_name}</h3>
+                      <p className="text-xs text-slate-400 font-mono">{r.name}</p>
                     </div>
                     {isBuiltIn(r.name) && (
-                      <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
                         Sistema
                       </span>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-1 mb-3">
                     {r.permissions.length === 0 ? (
-                      <span className="text-xs text-gray-400 italic">Sin permisos asignados</span>
+                      <span className="text-xs text-slate-400 italic">Sin permisos asignados</span>
                     ) : (
                       r.permissions.map((p) => (
                         <span
@@ -347,7 +347,7 @@ export default function AdminRolesPage() {
                             </button>
                             <button
                               onClick={() => setDeletingRole(null)}
-                              className="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
+                              className="px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 rounded"
                             >
                               Cancelar
                             </button>
@@ -374,25 +374,25 @@ export default function AdminRolesPage() {
           <div className="card overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Nombre</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Correo</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Rol</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Acciones</th>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="text-left px-4 py-3 font-medium text-slate-600">Nombre</th>
+                  <th className="text-left px-4 py-3 font-medium text-slate-600">Correo</th>
+                  <th className="text-left px-4 py-3 font-medium text-slate-600">Rol</th>
+                  <th className="text-right px-4 py-3 font-medium text-slate-600">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => {
                   const roleObj = roles.find((r) => r.name === u.role);
                   return (
-                    <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50">
                       <td className="px-4 py-3">
-                        <span className="font-medium text-gray-900">{u.full_name}</span>
+                        <span className="font-medium text-slate-900">{u.full_name}</span>
                         {u.label && (
-                          <span className="ml-2 text-xs text-gray-400">{u.label}</span>
+                          <span className="ml-2 text-xs text-slate-400">{u.label}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-600 font-mono text-xs">{u.email}</td>
+                      <td className="px-4 py-3 text-slate-600 font-mono text-xs">{u.email}</td>
                       <td className="px-4 py-3">
                         <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-primary-50 text-primary-700">
                           {roleObj?.display_name || u.role}
@@ -402,7 +402,7 @@ export default function AdminRolesPage() {
                         {(profile?.role === "admin" || u.role !== "admin") && (
                           <button
                             onClick={() => openEditUser(u)}
-                            className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                            className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded"
                           >
                             Editar
                           </button>
@@ -430,7 +430,7 @@ export default function AdminRolesPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">
                 {editingRole ? `Editar: ${editingRole.display_name}` : "Nuevo rol"}
               </h2>
 
@@ -442,7 +442,7 @@ export default function AdminRolesPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Nombre visible
                   </label>
                   <input
@@ -450,13 +450,13 @@ export default function AdminRolesPage() {
                     value={formDisplayName}
                     onChange={(e) => setFormDisplayName(e.target.value)}
                     placeholder="Ej. Directora, Secretaria, Prefectura"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
 
                 {!editingRole && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
                       Slug (identificador interno)
                     </label>
                     <input
@@ -464,16 +464,16 @@ export default function AdminRolesPage() {
                       value={formSlug}
                       onChange={(e) => setFormSlug(e.target.value.toLowerCase().replace(/\s+/g, "_"))}
                       placeholder="directora"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
                     />
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                       Se genera automáticamente si lo dejas vacío
                     </p>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Permisos por módulo
                   </label>
                   <div className="space-y-1.5 max-h-64 overflow-y-auto">
@@ -483,7 +483,7 @@ export default function AdminRolesPage() {
                         className={`flex items-center gap-3 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
                           formPerms[m.slug]
                             ? "border-primary-300 bg-primary-50"
-                            : "border-gray-200 bg-white"
+                            : "border-slate-200 bg-white"
                         }`}
                         onClick={() =>
                           setFormPerms((prev) => ({ ...prev, [m.slug]: !prev[m.slug] }))
@@ -495,11 +495,11 @@ export default function AdminRolesPage() {
                           onChange={() =>
                             setFormPerms((prev) => ({ ...prev, [m.slug]: !prev[m.slug] }))
                           }
-                          className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                         />
                         <div>
-                          <span className="text-sm font-medium text-gray-800">{m.label}</span>
-                          <p className="text-xs text-gray-400">{m.desc}</p>
+                          <span className="text-sm font-medium text-slate-800">{m.label}</span>
+                          <p className="text-xs text-slate-400">{m.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -519,7 +519,7 @@ export default function AdminRolesPage() {
                     <button
                       type="button"
                       onClick={() => setFormPerms({})}
-                      className="text-xs text-gray-500 hover:underline"
+                      className="text-xs text-slate-500 hover:underline"
                     >
                       Quitar todos
                     </button>
@@ -528,7 +528,7 @@ export default function AdminRolesPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
+            <div className="flex justify-end gap-2 px-6 py-4 bg-slate-50 rounded-b-xl">
               <button onClick={() => setShowRoleModal(false)} className="btn-secondary" disabled={saving}>
                 Cancelar
               </button>
@@ -546,54 +546,54 @@ export default function AdminRolesPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Editar usuario</h2>
+              <h2 className="text-lg font-bold text-slate-900 mb-4">Editar usuario</h2>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nombre completo *</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Nombre completo *</label>
                   <input
                     type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electrónico</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Correo electrónico</label>
                   <input
                     type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Etiqueta</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Etiqueta</label>
                   <input
                     type="text" value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Ej: Tecnologías - Sistemas IT"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nueva contraseña</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Nueva contraseña</label>
                   <div className="relative">
                     <input
                       type={editShowPass ? "text" : "password"} value={editPass}
                       onChange={(e) => setEditPass(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 pr-16"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 pr-16"
                       placeholder="Dejar vacío para no cambiar"
                     />
                     <button
                       type="button"
                       onClick={() => setEditShowPass(!editShowPass)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm"
                     >
                       {editShowPass ? "Ocultar" : "Ver"}
                     </button>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">Mínimo 6 caracteres. Solo se actualiza si escribes una nueva.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Mínimo 6 caracteres. Solo se actualiza si escribes una nueva.</p>
                 </div>
               </div>
               {editError && <p className="text-xs text-red-600 mt-2">{editError}</p>}
             </div>
-            <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
+            <div className="flex justify-end gap-2 px-6 py-4 bg-slate-50 rounded-b-xl">
               <button onClick={() => setEditUser(null)} className="btn-secondary" disabled={editSaving}>
                 Cancelar
               </button>
@@ -610,8 +610,8 @@ export default function AdminRolesPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
             <div className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">Cambiar rol</h2>
-              <p className="text-sm text-gray-500 mb-4">{editingUser.full_name}</p>
+              <h2 className="text-lg font-bold text-slate-900 mb-1">Cambiar rol</h2>
+              <p className="text-sm text-slate-500 mb-4">{editingUser.full_name}</p>
 
               <div className="space-y-2">
                 {roles.map((r) => (
@@ -620,7 +620,7 @@ export default function AdminRolesPage() {
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
                       assignRole === r.name
                         ? "border-primary-300 bg-primary-50"
-                        : "border-gray-200 bg-white hover:border-gray-300"
+                        : "border-slate-200 bg-white hover:border-slate-300"
                     }`}
                     onClick={() => setAssignRole(r.name)}
                   >
@@ -632,8 +632,8 @@ export default function AdminRolesPage() {
                       className="w-4 h-4 text-primary-600 focus:ring-primary-500"
                     />
                     <div>
-                      <span className="text-sm font-medium text-gray-800">{r.display_name}</span>
-                      <p className="text-xs text-gray-400">
+                      <span className="text-sm font-medium text-slate-800">{r.display_name}</span>
+                      <p className="text-xs text-slate-400">
                         {r.permissions.length} permiso{r.permissions.length !== 1 ? "s" : ""}
                       </p>
                     </div>
@@ -642,7 +642,7 @@ export default function AdminRolesPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
+            <div className="flex justify-end gap-2 px-6 py-4 bg-slate-50 rounded-b-xl">
               <button onClick={() => setShowUserModal(false)} className="btn-secondary" disabled={saving}>
                 Cancelar
               </button>

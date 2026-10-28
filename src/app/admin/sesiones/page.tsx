@@ -94,9 +94,9 @@ export default async function SesionesPage() {
       case "teacher":
         return "bg-blue-100 text-blue-700";
       case "viewer":
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700";
       default:
-        return "bg-gray-100 text-gray-500";
+        return "bg-slate-100 text-slate-500";
     }
   }
 
@@ -137,10 +137,10 @@ export default async function SesionesPage() {
       <main className="page-content max-w-6xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
               Registro de Sesiones
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-500">
               Historial de inicios de sesión de todos los usuarios
             </p>
           </div>
@@ -150,7 +150,7 @@ export default async function SesionesPage() {
         </div>
 
         {/* Resumen por usuario */}
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
           Resumen por usuario
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
@@ -158,7 +158,7 @@ export default async function SesionesPage() {
             <div key={u.email} className="card p-4">
               <div className="flex items-start justify-between mb-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-slate-900 truncate">
                     {u.email}
                   </p>
                 </div>
@@ -172,27 +172,27 @@ export default async function SesionesPage() {
               </div>
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <div>
-                  <p className="text-xs text-gray-400">Conexiones</p>
+                  <p className="text-xs text-slate-400">Conexiones</p>
                   <p className="text-lg font-bold text-primary-600">
                     {u.total_logins}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">Última IP</p>
-                  <p className="text-xs font-mono text-gray-600 mt-1">
+                  <p className="text-xs text-slate-400">Última IP</p>
+                  <p className="text-xs font-mono text-slate-600 mt-1">
                     {u.last_ip}
                   </p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-400">Último acceso</p>
-                  <p className="text-xs text-gray-600 mt-0.5">
+                  <p className="text-xs text-slate-400">Último acceso</p>
+                  <p className="text-xs text-slate-600 mt-0.5">
                     {formatDate(u.last_login)}
                   </p>
                 </div>
                 {u.last_location !== "—" && (
                   <div className="col-span-2">
-                    <p className="text-xs text-gray-400">Ubicación</p>
-                    <p className="text-xs text-gray-600 mt-0.5">
+                    <p className="text-xs text-slate-400">Ubicación</p>
+                    <p className="text-xs text-slate-600 mt-0.5">
                       {u.last_location}
                     </p>
                   </div>
@@ -201,50 +201,50 @@ export default async function SesionesPage() {
             </div>
           ))}
           {userStats.length === 0 && (
-            <div className="col-span-full card p-8 text-center text-gray-500 text-sm">
+            <div className="col-span-full card p-8 text-center text-slate-500 text-sm">
               No hay registros de sesiones aún. Los logs se generan a partir del próximo inicio de sesión.
             </div>
           )}
         </div>
 
         {/* Tabla detallada de logs */}
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
           Últimos 100 inicios de sesión
         </h2>
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
-                <th className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+              <tr className="border-b border-slate-200 text-left">
+                <th className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase">
                   Fecha / Hora
                 </th>
-                <th className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase">
                   Usuario
                 </th>
-                <th className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase">
                   Rol
                 </th>
-                <th className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase">
                   IP
                 </th>
-                <th className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase">
                   Ubicación
                 </th>
-                <th className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase">
                   Dispositivo
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-100">
               {allLogs.map((log) => {
                 const locationParts = [log.city, log.region, log.country].filter(Boolean);
                 const location = locationParts.length > 0 ? locationParts.join(", ") : "—";
                 return (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap tabular-nums">
+                  <tr key={log.id} className="hover:bg-slate-50">
+                    <td className="px-3 py-2 text-xs text-slate-600 whitespace-nowrap tabular-nums">
                       {formatDate(log.logged_in_at)}
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-900 font-medium">
+                    <td className="px-3 py-2 text-xs text-slate-900 font-medium">
                       {log.email}
                     </td>
                     <td className="px-3 py-2">
@@ -256,13 +256,13 @@ export default async function SesionesPage() {
                         {getRoleLabel(log.role)}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-xs font-mono text-gray-500">
+                    <td className="px-3 py-2 text-xs font-mono text-slate-500">
                       {log.ip_address}
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-500">
+                    <td className="px-3 py-2 text-xs text-slate-500">
                       {location}
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-500">
+                    <td className="px-3 py-2 text-xs text-slate-500">
                       {parseBrowser(log.user_agent)} / {parseDevice(log.user_agent)}
                     </td>
                   </tr>
@@ -270,7 +270,7 @@ export default async function SesionesPage() {
               })}
               {allLogs.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-3 py-8 text-center text-slate-400">
                     Sin registros aún.
                   </td>
                 </tr>

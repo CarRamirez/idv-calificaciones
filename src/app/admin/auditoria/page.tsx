@@ -174,8 +174,8 @@ export default function AuditoriaPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Log de Auditoría</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-bold text-slate-900">Log de Auditoría</h1>
+            <p className="text-sm text-slate-500">
               Registro de cambios en calificaciones
               {data && ` — ${data.total.toLocaleString()} registros`}
             </p>
@@ -193,7 +193,7 @@ export default function AuditoriaPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {/* Teacher */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Profesor</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Profesor</label>
               <select
                 value={teacherFilter}
                 onChange={(e) => setTeacherFilter(e.target.value)}
@@ -210,7 +210,7 @@ export default function AuditoriaPage() {
 
             {/* Period */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Periodo</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Periodo</label>
               <select
                 value={periodFilter}
                 onChange={(e) => setPeriodFilter(e.target.value)}
@@ -227,7 +227,7 @@ export default function AuditoriaPage() {
 
             {/* Action */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Tipo</label>
               <select
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value)}
@@ -242,7 +242,7 @@ export default function AuditoriaPage() {
 
             {/* Date From */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Desde</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Desde</label>
               <input
                 type="date"
                 value={dateFrom}
@@ -253,7 +253,7 @@ export default function AuditoriaPage() {
 
             {/* Date To */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Hasta</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Hasta</label>
               <input
                 type="date"
                 value={dateTo}
@@ -264,7 +264,7 @@ export default function AuditoriaPage() {
 
             {/* Search */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+              <label className="block text-xs font-medium text-slate-500 mb-1">Buscar</label>
               <input
                 type="text"
                 placeholder="Alumno o materia..."
@@ -297,27 +297,27 @@ export default function AuditoriaPage() {
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Fecha / Hora</th>
-                <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Profesor</th>
-                <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Alumno</th>
-                <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Grupo</th>
-                <th className="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Materia</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase">Periodo</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase">Tipo</th>
-                <th className="px-3 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase">Cambio</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-3 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Fecha / Hora</th>
+                <th className="px-3 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Profesor</th>
+                <th className="px-3 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Alumno</th>
+                <th className="px-3 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Grupo</th>
+                <th className="px-3 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase">Materia</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase">Periodo</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase">Tipo</th>
+                <th className="px-3 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase">Cambio</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-3 py-12 text-center text-gray-400">
+                  <td colSpan={8} className="px-3 py-12 text-center text-slate-400">
                     Cargando registros...
                   </td>
                 </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-3 py-12 text-center text-gray-400">
+                  <td colSpan={8} className="px-3 py-12 text-center text-slate-400">
                     No se encontraron registros
                   </td>
                 </tr>
@@ -325,7 +325,7 @@ export default function AuditoriaPage() {
                 filteredItems.map((entry) => {
                   const actionInfo = ACTION_LABELS[entry.action] || {
                     label: entry.action,
-                    color: "bg-gray-100 text-gray-800",
+                    color: "bg-slate-100 text-slate-800",
                   };
                   const scoreChanged =
                     entry.old_score !== entry.new_score;
@@ -333,27 +333,27 @@ export default function AuditoriaPage() {
                     entry.old_absences !== entry.new_absences;
 
                   return (
-                    <tr key={entry.id} className="hover:bg-gray-50/50">
+                    <tr key={entry.id} className="hover:bg-slate-50/50">
                       <td className="px-3 py-2 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{formatDate(entry.changed_at)}</div>
-                        <div className="text-xs text-gray-400">{formatTime(entry.changed_at)}</div>
+                        <div className="text-sm text-slate-900">{formatDate(entry.changed_at)}</div>
+                        <div className="text-xs text-slate-400">{formatTime(entry.changed_at)}</div>
                       </td>
-                      <td className="px-3 py-2 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-slate-700">
                         {entry.profiles?.full_name || "—"}
                       </td>
-                      <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                      <td className="px-3 py-2 text-sm font-medium text-slate-900">
                         {entry.students ? formatStudentName(entry.students.full_name) : "—"}
                       </td>
-                      <td className="px-3 py-2 text-sm text-gray-600">
+                      <td className="px-3 py-2 text-sm text-slate-600">
                         {entry.students?.groups
                           ? `${entry.students.groups.grade}° "${entry.students.groups.letter}"`
                           : "—"}
                       </td>
-                      <td className="px-3 py-2 text-sm text-gray-600">
+                      <td className="px-3 py-2 text-sm text-slate-600">
                         {entry.subjects?.short_name || entry.subjects?.name || "—"}
                       </td>
                       <td className="px-3 py-2 text-center">
-                        <span className="text-xs font-medium text-gray-600">
+                        <span className="text-xs font-medium text-slate-600">
                           {PERIOD_NAMES[entry.period] || entry.period}
                         </span>
                       </td>
@@ -404,7 +404,7 @@ export default function AuditoriaPage() {
         {/* Pagination */}
         {data && data.totalPages > 1 && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-slate-400">
               Página {data.page} de {data.totalPages}
             </p>
             <div className="flex gap-2">

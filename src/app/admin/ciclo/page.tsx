@@ -150,7 +150,7 @@ export default function AdminCicloPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -166,8 +166,8 @@ export default function AdminCicloPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Grupos</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Grupos</h1>
+            <p className="text-sm text-slate-500">
               {groups.length} grupo{groups.length !== 1 ? "s" : ""} registrado{groups.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function AdminCicloPage() {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
               filterGrade === null
                 ? "bg-primary-600 text-white"
-                : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+                : "bg-white border border-slate-300 text-slate-600 hover:bg-slate-50"
             }`}
           >
             Todos
@@ -200,7 +200,7 @@ export default function AdminCicloPage() {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 filterGrade === g
                   ? "bg-primary-600 text-white"
-                  : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+                  : "bg-white border border-slate-300 text-slate-600 hover:bg-slate-50"
               }`}
             >
               {GRADE_LABELS[g]}
@@ -212,25 +212,25 @@ export default function AdminCicloPage() {
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Grupo</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Grado</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Correo de padres</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Acciones</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Grupo</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Grado</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Correo de padres</th>
+                <th className="text-right px-4 py-3 font-medium text-slate-600">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-400">
+                  <td colSpan={4} className="text-center py-8 text-slate-400">
                     No hay grupos registrados
                   </td>
                 </tr>
               ) : (
                 filtered.map((g) => (
-                  <tr key={g.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <tr key={g.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
-                      <span className="text-base font-bold text-gray-900">
+                      <span className="text-base font-bold text-slate-900">
                         {g.grade}°{g.letter}
                       </span>
                     </td>
@@ -241,9 +241,9 @@ export default function AdminCicloPage() {
                     </td>
                     <td className="px-4 py-3">
                       {g.parent_email ? (
-                        <span className="text-sm text-gray-700 font-mono">{g.parent_email}</span>
+                        <span className="text-sm text-slate-700 font-mono">{g.parent_email}</span>
                       ) : (
-                        <span className="text-xs text-gray-400 italic">Sin correo</span>
+                        <span className="text-xs text-slate-400 italic">Sin correo</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -264,7 +264,7 @@ export default function AdminCicloPage() {
                             </button>
                             <button
                               onClick={() => setDeleting(null)}
-                              className="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
+                              className="px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 rounded"
                             >
                               Cancelar
                             </button>
@@ -292,7 +292,7 @@ export default function AdminCicloPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">
                 {editing ? `Editar ${editing.grade}°${editing.letter}` : "Nuevo grupo"}
               </h2>
 
@@ -304,11 +304,11 @@ export default function AdminCicloPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Grado</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Grado</label>
                   <select
                     value={formGrade}
                     onChange={(e) => setFormGrade(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value={1}>1er Grado</option>
                     <option value={2}>2do Grado</option>
@@ -317,19 +317,19 @@ export default function AdminCicloPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Letra</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Letra</label>
                   <input
                     type="text"
                     value={formLetter}
                     onChange={(e) => setFormLetter(e.target.value.toUpperCase())}
                     placeholder="A"
                     maxLength={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 uppercase"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 uppercase"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
                     Correo de padres de familia
                   </label>
                   <input
@@ -337,16 +337,16 @@ export default function AdminCicloPage() {
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
                     placeholder="secgrupo1a@institutodonvasco.edu.mx"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     Opcional. Se usa para enviar notificaciones de tareas.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 rounded-b-xl">
+            <div className="flex justify-end gap-2 px-6 py-4 bg-slate-50 rounded-b-xl">
               <button
                 onClick={() => setShowModal(false)}
                 className="btn-secondary"

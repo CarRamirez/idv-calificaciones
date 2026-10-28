@@ -14,14 +14,14 @@ const ROLE_COLORS: Record<string, string> = {
   admin: "bg-primary-100 text-primary-700",
   directora_anita: "bg-emerald-100 text-emerald-700",
   teacher: "bg-violet-100 text-violet-700",
-  viewer: "bg-gray-100 text-gray-600",
+  viewer: "bg-slate-100 text-slate-600",
 };
 
 const AVATAR_GRADIENTS: Record<string, string> = {
   admin: "from-primary-400 to-primary-600",
   directora_anita: "from-emerald-400 to-emerald-600",
   teacher: "from-violet-400 to-violet-600",
-  viewer: "from-gray-400 to-gray-500",
+  viewer: "from-slate-400 to-slate-500",
 };
 
 type User = {
@@ -74,22 +74,22 @@ export default function DirectorioPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar userName={profile?.full_name || ""} userRole={profile?.role || ""} />
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-2xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
             Directorio
           </h1>
-          <p className="text-sm text-gray-400 mt-1">Información de contacto de profesores y personal</p>
+          <p className="text-sm text-slate-400 mt-1">Información de contacto de profesores y personal</p>
         </div>
 
         {/* Filters */}
         <div className="card p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
               </svg>
               <input
@@ -114,7 +114,7 @@ export default function DirectorioPage() {
         </div>
 
         {/* Results count */}
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-slate-400 mb-4">
           {filtered.length} {filtered.length === 1 ? "usuario" : "usuarios"}
         </p>
 
@@ -122,14 +122,14 @@ export default function DirectorioPage() {
         {loading ? (
           <div className="text-center py-16">
             <div className="inline-block w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-            <p className="text-sm text-gray-400 mt-3">Cargando directorio...</p>
+            <p className="text-sm text-slate-400 mt-3">Cargando directorio...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="card p-12 text-center">
-            <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
             </svg>
-            <p className="text-sm text-gray-500">No se encontraron usuarios</p>
+            <p className="text-sm text-slate-500">No se encontraron usuarios</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -140,7 +140,7 @@ export default function DirectorioPage() {
                 .slice(0, 2)
                 .join("")
                 .toUpperCase();
-              const gradient = AVATAR_GRADIENTS[u.role] || "from-gray-400 to-gray-500";
+              const gradient = AVATAR_GRADIENTS[u.role] || "from-slate-400 to-slate-500";
               const whatsappUrl = u.celular
                 ? `https://wa.me/52${u.celular.replace(/\D/g, "")}`
                 : null;
@@ -153,8 +153,8 @@ export default function DirectorioPage() {
                       <span className="text-white text-sm font-bold">{initials}</span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{u.full_name}</p>
-                      <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5 ${ROLE_COLORS[u.role] || "bg-gray-100 text-gray-600"}`}>
+                      <p className="text-sm font-semibold text-slate-800 truncate">{u.full_name}</p>
+                      <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-0.5 ${ROLE_COLORS[u.role] || "bg-slate-100 text-slate-600"}`}>
                         {ROLE_LABELS[u.role] || u.role}
                       </span>
                     </div>
@@ -170,7 +170,7 @@ export default function DirectorioPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3" />
                           </svg>
                         </div>
-                        <span className="text-xs text-gray-600">{formatPhone(u.celular)}</span>
+                        <span className="text-xs text-slate-600">{formatPhone(u.celular)}</span>
                       </div>
                     )}
 
@@ -182,7 +182,7 @@ export default function DirectorioPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                           </svg>
                         </div>
-                        <a href={`mailto:${u.correo_personal}`} className="text-xs text-gray-600 hover:text-primary-600 truncate transition-colors">
+                        <a href={`mailto:${u.correo_personal}`} className="text-xs text-slate-600 hover:text-primary-600 truncate transition-colors">
                           {u.correo_personal}
                         </a>
                       </div>
@@ -196,7 +196,7 @@ export default function DirectorioPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
                           </svg>
                         </div>
-                        <span className="text-xs text-gray-600">{formatPhone(u.telefono_emergencia)}</span>
+                        <span className="text-xs text-slate-600">{formatPhone(u.telefono_emergencia)}</span>
                       </div>
                     )}
 
@@ -208,10 +208,10 @@ export default function DirectorioPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
                           </svg>
                         </div>
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-slate-600">
                           <p className="font-medium">{u.nombre_emergencia}</p>
                           {u.relacion_emergencia && (
-                            <p className="text-gray-400">{u.relacion_emergencia}</p>
+                            <p className="text-slate-400">{u.relacion_emergencia}</p>
                           )}
                         </div>
                       </div>
@@ -219,13 +219,13 @@ export default function DirectorioPage() {
 
                     {/* No data */}
                     {!u.celular && !u.correo_personal && !u.telefono_emergencia && !u.nombre_emergencia && (
-                      <p className="text-xs text-gray-300 italic">Sin datos de contacto</p>
+                      <p className="text-xs text-slate-300 italic">Sin datos de contacto</p>
                     )}
                   </div>
 
                   {/* WhatsApp button at bottom */}
                   {whatsappUrl && (
-                    <div className="mt-4 pt-3 border-t border-gray-100">
+                    <div className="mt-4 pt-3 border-t border-slate-100">
                       <a
                         href={whatsappUrl}
                         target="_blank"

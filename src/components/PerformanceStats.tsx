@@ -45,10 +45,10 @@ export default function PerformanceStats() {
   if (loading) {
     return (
       <div className="card p-4 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-56 mb-3" />
+        <div className="h-4 bg-slate-200 rounded w-56 mb-3" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-gray-100 rounded-lg" />
+            <div key={i} className="h-24 bg-slate-100 rounded-lg" />
           ))}
         </div>
       </div>
@@ -71,8 +71,8 @@ export default function PerformanceStats() {
     <div className="space-y-4">
       {/* Summary header */}
       <div className="card p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
           </svg>
           Rendimiento por grupo
@@ -84,7 +84,7 @@ export default function PerformanceStats() {
               <span className={`text-2xl font-extrabold ${overallAvg >= 7 ? "text-green-600" : overallAvg >= 6 ? "text-amber-600" : "text-red-600"}`}>
                 {overallAvg}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-slate-400">
                 promedio<br/>general
               </span>
             </div>
@@ -92,14 +92,14 @@ export default function PerformanceStats() {
           {totalAtRisk > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-2xl font-extrabold text-red-500">{totalAtRisk}</span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-slate-400">
                 alumnos<br/>en riesgo
               </span>
             </div>
           )}
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-extrabold text-gray-400">{totalStudents}</span>
-            <span className="text-xs text-gray-400">
+            <span className="text-2xl font-extrabold text-slate-400">{totalStudents}</span>
+            <span className="text-xs text-slate-400">
               alumnos<br/>activos
             </span>
           </div>
@@ -110,7 +110,7 @@ export default function PerformanceStats() {
           {groups.map((g) => {
             const colors = GRADE_COLORS[g.grade] || GRADE_COLORS[1];
             const scoreColor = g.avgScore === null
-              ? "text-gray-400"
+              ? "text-slate-400"
               : g.avgScore >= 7
               ? "text-green-600"
               : g.avgScore >= 6
@@ -131,7 +131,7 @@ export default function PerformanceStats() {
                   </span>
                 </div>
 
-                <p className="text-[11px] text-gray-500 mb-1">
+                <p className="text-[11px] text-slate-500 mb-1">
                   {g.studentCount} alumnos
                 </p>
 
@@ -165,7 +165,7 @@ export default function PerformanceStats() {
                       <div className="mt-1.5 space-y-1 bg-red-50 rounded-lg p-2">
                         {g.atRiskStudents.map((s) => (
                           <div key={s.id} className="flex items-center justify-between text-[10px]">
-                            <span className="text-gray-700 truncate mr-1">{s.name}</span>
+                            <span className="text-slate-700 truncate mr-1">{s.name}</span>
                             <span className="text-red-600 font-bold flex-shrink-0">{s.avg}</span>
                           </div>
                         ))}
@@ -176,11 +176,11 @@ export default function PerformanceStats() {
 
                 {g.failingSubjects.length > 0 && (
                   <div className="mt-1.5 space-y-0.5">
-                    <p className="text-[9px] font-semibold text-gray-400 uppercase">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase">
                       Más reprobadas
                     </p>
                     {g.failingSubjects.map((s, i) => (
-                      <p key={i} className="text-[10px] text-gray-600 flex items-center justify-between">
+                      <p key={i} className="text-[10px] text-slate-600 flex items-center justify-between">
                         <span>{s.name}</span>
                         <span className="text-red-500 font-medium">{s.count}</span>
                       </p>
@@ -190,11 +190,11 @@ export default function PerformanceStats() {
 
                 {g.penaltyTotals && g.penaltyTotals.length > 0 && (
                   <div className="mt-1.5 space-y-0.5">
-                    <p className="text-[9px] font-semibold text-gray-400 uppercase">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase">
                       Incidencias (total)
                     </p>
                     {g.penaltyTotals.map((pt, i) => (
-                      <p key={i} className="text-[10px] text-gray-600 flex items-center justify-between">
+                      <p key={i} className="text-[10px] text-slate-600 flex items-center justify-between">
                         <span>{pt.name === "TAR" ? "Tareas" : pt.name === "INAS" ? "Inasistencias" : "Incumplimientos"}</span>
                         <span className="text-orange-600 font-medium">{pt.total}</span>
                       </p>

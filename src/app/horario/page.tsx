@@ -122,13 +122,13 @@ const SUBJECT_COLORS: Record<string, { bg: string; text: string }> = {
   VIDA:     { bg: "bg-emerald-100", text: "text-emerald-800" },
   VALORES:  { bg: "bg-indigo-100", text: "text-indigo-800" },
   DEPORTES: { bg: "bg-yellow-100", text: "text-yellow-800" },
-  BRENDA:   { bg: "bg-gray-200", text: "text-gray-700" },
-  GINA:     { bg: "bg-gray-200", text: "text-gray-700" },
-  BETO:     { bg: "bg-gray-200", text: "text-gray-700" },
-  ANGEL:    { bg: "bg-gray-200", text: "text-gray-700" },
+  BRENDA:   { bg: "bg-slate-200", text: "text-slate-700" },
+  GINA:     { bg: "bg-slate-200", text: "text-slate-700" },
+  BETO:     { bg: "bg-slate-200", text: "text-slate-700" },
+  ANGEL:    { bg: "bg-slate-200", text: "text-slate-700" },
 };
 
-const DEFAULT_COLOR = { bg: "bg-gray-100", text: "text-gray-700" };
+const DEFAULT_COLOR = { bg: "bg-slate-100", text: "text-slate-700" };
 
 /* ──────────────────── DAY COLORS (for week view) ──────────────────── */
 
@@ -252,7 +252,7 @@ export default function HorarioPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
       </div>
     );
@@ -268,26 +268,26 @@ export default function HorarioPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/dashboard")}
-              className="p-2 rounded-lg hover:bg-white/80 text-gray-500 hover:text-primary-600 transition-colors"
+              className="p-2 rounded-lg hover:bg-white/80 text-slate-500 hover:text-primary-600 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Horario Escolar</h1>
-              <p className="text-sm text-gray-500">Ciclo escolar 2026-2027 — Instituto Don Vasco</p>
+              <h1 className="text-xl font-bold text-slate-900">Horario Escolar</h1>
+              <p className="text-sm text-slate-500">Ciclo escolar 2026-2027 — Instituto Don Vasco</p>
             </div>
           </div>
 
           {/* View toggle */}
-          <div className="flex items-center bg-white/60 border border-gray-200 rounded-xl p-1">
+          <div className="flex items-center bg-white/60 border border-slate-200 rounded-xl p-1">
             <button
               onClick={() => setViewMode("day")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 viewMode === "day"
                   ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-500 hover:text-primary-600"
+                  : "text-slate-500 hover:text-primary-600"
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,7 +300,7 @@ export default function HorarioPage() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 viewMode === "week"
                   ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-500 hover:text-primary-600"
+                  : "text-slate-500 hover:text-primary-600"
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +325,7 @@ export default function HorarioPage() {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
                       isSelected
                         ? "bg-primary-600 text-white shadow-md"
-                        : "bg-white/60 text-gray-600 hover:bg-white hover:text-primary-600 border border-gray-200"
+                        : "bg-white/60 text-slate-600 hover:bg-white hover:text-primary-600 border border-slate-200"
                     }`}
                   >
                     {day}
@@ -370,16 +370,16 @@ export default function HorarioPage() {
                       return (
                         <tr
                           key={idx}
-                          className={`border-b border-gray-100 transition-colors ${
+                          className={`border-b border-slate-100 transition-colors ${
                             idx === activeSlotIdx && selectedDay === todayName
                               ? "bg-indigo-50 ring-2 ring-inset ring-indigo-400"
-                              : "hover:bg-gray-50/50"
+                              : "hover:bg-slate-50/50"
                           }`}
                         >
                           <td className={`px-3 py-2 text-xs font-medium whitespace-nowrap ${
                             idx === activeSlotIdx && selectedDay === todayName
                               ? "text-indigo-700 font-bold"
-                              : "text-gray-500"
+                              : "text-slate-500"
                           }`}>
                             {idx === activeSlotIdx && selectedDay === todayName && (
                               <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse mr-1 align-middle" />
@@ -391,7 +391,7 @@ export default function HorarioPage() {
                             if (!cell || !cell.subject) {
                               return (
                                 <td key={gi} className="px-1 py-1.5 text-center">
-                                  <span className="text-gray-300">—</span>
+                                  <span className="text-slate-300">—</span>
                                 </td>
                               );
                             }
@@ -422,13 +422,13 @@ export default function HorarioPage() {
           <>
             {/* Group filter */}
             <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Grupo:</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Grupo:</span>
               <button
                 onClick={() => setSelectedGroup("all")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                   selectedGroup === "all"
                     ? "bg-primary-600 text-white shadow-sm"
-                    : "bg-white/60 text-gray-600 hover:bg-white hover:text-primary-600 border border-gray-200"
+                    : "bg-white/60 text-slate-600 hover:bg-white hover:text-primary-600 border border-slate-200"
                 }`}
               >
                 Todos
@@ -440,7 +440,7 @@ export default function HorarioPage() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                     selectedGroup === g
                       ? "bg-primary-600 text-white shadow-sm"
-                      : "bg-white/60 text-gray-600 hover:bg-white hover:text-primary-600 border border-gray-200"
+                      : "bg-white/60 text-slate-600 hover:bg-white hover:text-primary-600 border border-slate-200"
                   }`}
                 >
                   {g}
@@ -453,8 +453,8 @@ export default function HorarioPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse" style={{ minWidth: selectedGroup === "all" ? "1200px" : "600px" }}>
                   <thead>
-                    <tr className="bg-gray-800 text-white">
-                      <th className="px-2 py-2.5 text-left text-xs font-semibold uppercase tracking-wide w-20 sticky left-0 bg-gray-800 z-10">
+                    <tr className="bg-slate-800 text-white">
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold uppercase tracking-wide w-20 sticky left-0 bg-slate-800 z-10">
                         Horario
                       </th>
                       {DAYS.map((day) => {
@@ -479,11 +479,11 @@ export default function HorarioPage() {
                     </tr>
                     {/* Group sub-headers when showing all groups */}
                     {selectedGroup === "all" && (
-                      <tr className="bg-gray-100">
-                        <th className="sticky left-0 bg-gray-100 z-10" />
+                      <tr className="bg-slate-100">
+                        <th className="sticky left-0 bg-slate-100 z-10" />
                         {DAYS.map((day) =>
                           filteredGroups.map((g) => (
-                            <th key={`${day}-${g}`} className="px-1 py-1.5 text-center text-[10px] font-semibold text-gray-600 uppercase">
+                            <th key={`${day}-${g}`} className="px-1 py-1.5 text-center text-[10px] font-semibold text-slate-600 uppercase">
                               {g}
                             </th>
                           ))
@@ -512,23 +512,23 @@ export default function HorarioPage() {
                       return (
                         <tr
                           key={idx}
-                          className={`border-b border-gray-100 transition-colors ${
+                          className={`border-b border-slate-100 transition-colors ${
                             idx === activeSlotIdx
                               ? "bg-indigo-50/70 ring-1 ring-inset ring-indigo-300"
-                              : "hover:bg-gray-50/30"
+                              : "hover:bg-slate-50/30"
                           }`}
                         >
                           <td className={`px-2 py-1.5 text-[10px] font-medium whitespace-nowrap sticky left-0 z-10 ${
                             idx === activeSlotIdx
                               ? "bg-indigo-50 text-indigo-700 font-bold"
-                              : "bg-white text-gray-500"
+                              : "bg-white text-slate-500"
                           }`}>
                             {idx === activeSlotIdx && (
                               <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse mr-0.5 align-middle" />
                             )}
                             {slot.start}
                             <br />
-                            <span className="text-gray-400">{slot.end}</span>
+                            <span className="text-slate-400">{slot.end}</span>
                           </td>
                           {DAYS.map((day) => {
                             const daySchedule = SCHEDULE[day] || [];
@@ -541,7 +541,7 @@ export default function HorarioPage() {
                               if (!cell || !cell.subject) {
                                 return (
                                   <td key={`${day}-${g}`} className={`px-0.5 py-1 text-center ${dayBg}`}>
-                                    <span className="text-gray-300 text-[10px]">—</span>
+                                    <span className="text-slate-300 text-[10px]">—</span>
                                   </td>
                                 );
                               }
@@ -570,7 +570,7 @@ export default function HorarioPage() {
 
         {/* Legend */}
         <div className="mt-5 card p-4">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">Materias</p>
+          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-3">Materias</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(SUBJECT_COLORS)
               .filter(([key]) => !["GINA", "BETO", "ANGEL"].includes(key))

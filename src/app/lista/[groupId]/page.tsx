@@ -49,10 +49,10 @@ export default async function ListaPage({ params }: Props) {
       <main className="page-content animate-fade-in">
         <div className="flex items-center justify-between mb-4 print:hidden">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-slate-900">
               Lista de Alumnos — {group.grade}° {group.letter}
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-500">
               {(students || []).length} alumno{(students || []).length !== 1 ? "s" : ""} activos
             </p>
           </div>

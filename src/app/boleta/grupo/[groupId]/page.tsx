@@ -73,10 +73,10 @@ export default async function BoletaGroupPage({ params }: Props) {
       <main className="page-content animate-fade-in">
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-slate-900">
               Boletas — {group.grade}° &ldquo;{group.letter}&rdquo;
             </h1>
-            <p className="text-sm text-gray-500">{safeStudents.length} alumnos</p>
+            <p className="text-sm text-slate-500">{safeStudents.length} alumnos</p>
           </div>
           <Link href="/boleta" className="btn-secondary text-sm">← Volver</Link>
         </div>

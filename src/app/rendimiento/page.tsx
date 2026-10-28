@@ -61,8 +61,8 @@ export default function RendimientoPage() {
 
   if (loading || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-sm text-gray-500">Cargando rendimiento...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-sm text-slate-500">Cargando rendimiento...</div>
       </div>
     );
   }
@@ -94,10 +94,10 @@ export default function RendimientoPage() {
       <main className="page-content animate-fade-in">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
               Rendimiento por Grupo
             </h1>
-            <p className="text-sm text-gray-500">Promedios, alumnos en riesgo y materias más reprobadas</p>
+            <p className="text-sm text-slate-500">Promedios, alumnos en riesgo y materias más reprobadas</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Inicio</Link>
         </div>
@@ -105,29 +105,29 @@ export default function RendimientoPage() {
         {/* Summary cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="card !p-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Promedio general</p>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-1">Promedio general</p>
             <p className={`text-3xl font-extrabold ${
-              overallAvg === null ? "text-gray-300" : overallAvg >= 7 ? "text-green-600" : overallAvg >= 6 ? "text-amber-600" : "text-red-600"
+              overallAvg === null ? "text-slate-300" : overallAvg >= 7 ? "text-green-600" : overallAvg >= 6 ? "text-amber-600" : "text-red-600"
             }`}>
               {overallAvg ?? "—"}
             </p>
           </div>
           <div className="card !p-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Alumnos activos</p>
-            <p className="text-3xl font-extrabold text-gray-700">{totalStudents}</p>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-1">Alumnos activos</p>
+            <p className="text-3xl font-extrabold text-slate-700">{totalStudents}</p>
           </div>
           <div className="card !p-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">En riesgo (&lt;6)</p>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-1">En riesgo (&lt;6)</p>
             <p className={`text-3xl font-extrabold ${totalAtRisk > 0 ? "text-red-600" : "text-green-600"}`}>
               {totalAtRisk}
             </p>
             {totalStudents > 0 && (
-              <p className="text-[10px] text-gray-400">{Math.round((totalAtRisk / totalStudents) * 100)}% del total</p>
+              <p className="text-[10px] text-slate-400">{Math.round((totalAtRisk / totalStudents) * 100)}% del total</p>
             )}
           </div>
           <div className="card !p-4">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">Grupos</p>
-            <p className="text-3xl font-extrabold text-gray-700">{filteredGroups.length}</p>
+            <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-1">Grupos</p>
+            <p className="text-3xl font-extrabold text-slate-700">{filteredGroups.length}</p>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export default function RendimientoPage() {
           <button
             onClick={() => setFilterGrade(null)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filterGrade === null ? "bg-gray-800 text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+              filterGrade === null ? "bg-slate-800 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >
             Todos
@@ -146,7 +146,7 @@ export default function RendimientoPage() {
               key={g}
               onClick={() => setFilterGrade(filterGrade === g ? null : g)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                filterGrade === g ? "bg-gray-800 text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                filterGrade === g ? "bg-slate-800 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
               }`}
             >
               {g}° grado
@@ -157,20 +157,20 @@ export default function RendimientoPage() {
         {/* Top failing subjects */}
         {topFailingSubjects.length > 0 && (
           <div className="card p-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Materias con más reprobados</h3>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">Materias con más reprobados</h3>
             <div className="space-y-2">
               {topFailingSubjects.map(([name, count], i) => {
                 const maxCount = topFailingSubjects[0][1] as number;
                 const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
                 return (
                   <div key={name} className="flex items-center gap-3">
-                    <span className="text-xs font-mono text-gray-400 w-5 text-right">{i + 1}</span>
+                    <span className="text-xs font-mono text-slate-400 w-5 text-right">{i + 1}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-sm font-medium text-gray-700">{name}</span>
+                        <span className="text-sm font-medium text-slate-700">{name}</span>
                         <span className="text-xs font-bold text-red-600">{count} reprobados</span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
+                      <div className="w-full bg-slate-100 rounded-full h-1.5">
                         <div className="h-1.5 rounded-full bg-red-400 transition-all" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
@@ -186,7 +186,7 @@ export default function RendimientoPage() {
           {filteredGroups.map((g) => {
             const colors = GRADE_COLORS[g.grade] || GRADE_COLORS[1];
             const scoreColor = g.avgScore === null
-              ? "text-gray-400"
+              ? "text-slate-400"
               : g.avgScore >= 7
               ? "text-green-600"
               : g.avgScore >= 6
@@ -210,7 +210,7 @@ export default function RendimientoPage() {
                 <div className="p-4 space-y-3">
                   {/* At risk */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">En riesgo</span>
+                    <span className="text-xs text-slate-500">En riesgo</span>
                     <div className="flex items-center gap-2">
                       <span className={`text-sm font-bold ${g.atRiskCount > 0 ? "text-red-600" : "text-green-600"}`}>
                         {g.atRiskCount}
@@ -223,7 +223,7 @@ export default function RendimientoPage() {
 
                   {/* Risk bar */}
                   {g.studentCount > 0 && (
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-slate-100 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all ${
                           atRiskPct === 0 ? "bg-green-400" : atRiskPct < 20 ? "bg-amber-400" : "bg-red-400"
@@ -236,13 +236,13 @@ export default function RendimientoPage() {
                   {/* Failing subjects */}
                   {g.failingSubjects.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
                         Materias más reprobadas
                       </p>
                       <div className="space-y-1">
                         {g.failingSubjects.map((s, i) => (
                           <div key={i} className="flex items-center justify-between text-xs">
-                            <span className="text-gray-600">{s.name}</span>
+                            <span className="text-slate-600">{s.name}</span>
                             <span className="text-red-500 font-semibold">{s.count} rep.</span>
                           </div>
                         ))}
@@ -253,14 +253,14 @@ export default function RendimientoPage() {
                   {/* Penalty totals */}
                   {g.penaltyTotals && g.penaltyTotals.some((p) => p.total > 0) && (
                     <div>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
                         Incidencias acumuladas
                       </p>
                       <div className="flex gap-3">
                         {g.penaltyTotals.map((p) => (
                           <div key={p.name} className="flex items-center gap-1.5 text-xs">
-                            <span className="text-gray-500">{p.name}:</span>
-                            <span className={`font-bold ${p.total > 0 ? "text-red-600" : "text-gray-400"}`}>
+                            <span className="text-slate-500">{p.name}:</span>
+                            <span className={`font-bold ${p.total > 0 ? "text-red-600" : "text-slate-400"}`}>
                               {p.total}
                             </span>
                           </div>
@@ -279,7 +279,7 @@ export default function RendimientoPage() {
                     </Link>
                     <Link
                       href={`/boleta/grupo/${g.groupId}`}
-                      className="flex-1 text-center text-[11px] font-medium px-2 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                      className="flex-1 text-center text-[11px] font-medium px-2 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                     >
                       Boletas
                     </Link>
@@ -292,7 +292,7 @@ export default function RendimientoPage() {
 
         {filteredGroups.length === 0 && (
           <div className="card p-12 text-center">
-            <p className="text-gray-400 text-sm">No hay datos de rendimiento disponibles</p>
+            <p className="text-slate-400 text-sm">No hay datos de rendimiento disponibles</p>
           </div>
         )}
       </main>

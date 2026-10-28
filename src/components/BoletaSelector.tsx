@@ -56,7 +56,7 @@ export default function BoletaSelector({ groups }: Props) {
     <div className="space-y-6">
       {/* Selector de grupo */}
       <div className="card p-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-3">
+        <label className="block text-sm font-semibold text-slate-700 mb-3">
           1. Selecciona el grupo
         </label>
         <div className="space-y-3">
@@ -64,7 +64,7 @@ export default function BoletaSelector({ groups }: Props) {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([grade, grps]) => (
               <div key={grade}>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">
                   {grade}° Grado
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -75,7 +75,7 @@ export default function BoletaSelector({ groups }: Props) {
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         selectedGroup === g.id
                           ? "bg-primary-600 text-white shadow-sm"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
                       {g.grade}° {g.letter}
@@ -90,14 +90,14 @@ export default function BoletaSelector({ groups }: Props) {
       {/* Lista de alumnos */}
       {selectedGroup && (
         <div className="card p-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <label className="block text-sm font-semibold text-slate-700 mb-3">
             2. Selecciona el alumno
           </label>
 
           {/* Buscador */}
           <div className="relative mb-4">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -132,15 +132,15 @@ export default function BoletaSelector({ groups }: Props) {
           </div>
 
           {loading ? (
-            <div className="text-center py-8 text-gray-400 text-sm">
+            <div className="text-center py-8 text-slate-400 text-sm">
               Cargando alumnos...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-gray-400 text-sm">
+            <div className="text-center py-8 text-slate-400 text-sm">
               {search ? "No se encontraron alumnos" : "No hay alumnos en este grupo"}
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+            <div className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
               {filtered.map((s) => (
                 <button
                   key={s.id}
@@ -151,12 +151,12 @@ export default function BoletaSelector({ groups }: Props) {
                     <span className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold tabular-nums">
                       {s.list_num}
                     </span>
-                    <span className="text-sm font-medium text-gray-900 group-hover:text-primary-700">
+                    <span className="text-sm font-medium text-slate-900 group-hover:text-primary-700">
                       {formatStudentName(s.full_name)}
                     </span>
                   </div>
                   <svg
-                    className="w-4 h-4 text-gray-300 group-hover:text-primary-500"
+                    className="w-4 h-4 text-slate-300 group-hover:text-primary-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

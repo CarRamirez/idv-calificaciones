@@ -107,8 +107,8 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
       const final = getSubjectFinal(s.id);
       const totalAbs = getTotalAbsences(s.id);
       return (
-        <tr key={s.id} className="hover:bg-gray-50/50">
-          <td className="px-3 py-2 text-base font-medium text-gray-900 whitespace-nowrap print:text-[11px] print:px-1 print:py-0.5">
+        <tr key={s.id} className="hover:bg-slate-50/50">
+          <td className="px-3 py-2 text-base font-medium text-slate-900 whitespace-nowrap print:text-[11px] print:px-1 print:py-0.5">
             {s.name}
           </td>
           {TRIMESTERS.map((t) => (
@@ -116,7 +116,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               {t.periods.map((p) => (
                 <td
                   key={p}
-                  className={`text-center text-sm tabular-nums border-l border-gray-100 print:text-[10px] ${semaforoClass(
+                  className={`text-center text-sm tabular-nums border-l border-slate-100 print:text-[10px] ${semaforoClass(
                     getScore(s.id, p)
                   )}`}
                 >
@@ -124,7 +124,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 </td>
               ))}
               <td
-                className={`text-center text-sm font-semibold tabular-nums border-l border-gray-200 print:text-[10px] ${semaforoClass(
+                className={`text-center text-sm font-semibold tabular-nums border-l border-slate-200 print:text-[10px] ${semaforoClass(
                   getTrimesterAvg(s.id, t)
                 )}`}
               >
@@ -133,13 +133,13 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             </React.Fragment>
           ))}
           <td
-            className={`text-center text-sm font-bold tabular-nums border-l-2 border-gray-300 print:text-[10px] ${semaforoClass(
+            className={`text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
               final
             )}`}
           >
             {fmt(final)}
           </td>
-          <td className="text-center text-sm tabular-nums text-gray-500 border-l border-gray-100 print:text-[10px]">
+          <td className="text-center text-sm tabular-nums text-slate-500 border-l border-slate-100 print:text-[10px]">
             {totalAbs || "—"}
           </td>
         </tr>
@@ -248,17 +248,17 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-idv.png" alt="Instituto Don Vasco" className="w-14 h-14 object-contain" />
             <div>
-              <h1 className="text-sm font-bold text-gray-900 leading-tight">Instituto Don Vasco</h1>
-              <p className="text-[10px] text-gray-500">Sección Secundaria</p>
+              <h1 className="text-sm font-bold text-slate-900 leading-tight">Instituto Don Vasco</h1>
+              <p className="text-[10px] text-slate-500">Sección Secundaria</p>
             </div>
           </div>
           <div className="text-center">
             <h2 className="hidden boleta-print-title text-xs font-semibold text-indigo-700 uppercase tracking-wide">Boleta de Calificaciones</h2>
-            <p className="text-[10px] text-gray-500 mt-0.5">Ciclo Escolar 2026-2027</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Ciclo Escolar 2026-2027</p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-gray-900">{formatStudentName(student.full_name)}</p>
-            <p className="text-[10px] text-gray-600">
+            <p className="text-sm font-bold text-slate-900">{formatStudentName(student.full_name)}</p>
+            <p className="text-[10px] text-slate-600">
               {group.grade}° &ldquo;{group.letter}&rdquo; — N° Lista: {student.list_num}
             </p>
           </div>
@@ -287,20 +287,20 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   <th
                     key={t.id}
                     colSpan={t.periods.length + 1}
-                    className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-gray-200 py-2 print:text-[11px] print:py-1"
+                    className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-slate-200 py-2 print:text-[11px] print:py-1"
                   >
                     {t.shortName}
                   </th>
                 ))}
                 <th
                   rowSpan={2}
-                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l-2 border-gray-300 w-16 py-2 print:text-[11px] print:py-1 print:w-12"
+                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l-2 border-slate-300 w-16 py-2 print:text-[11px] print:py-1 print:w-12"
                 >
                   Prom. Final
                 </th>
                 <th
                   rowSpan={2}
-                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-gray-100 w-12 py-2 print:text-[11px] print:py-1 print:w-10"
+                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-slate-100 w-12 py-2 print:text-[11px] print:py-1 print:w-10"
                 >
                   IA
                 </th>
@@ -312,12 +312,12 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                     {t.periods.map((p) => (
                       <th
                         key={p}
-                        className="text-center text-[11px] font-medium text-primary-700 border-b border-primary-200 border-l border-gray-200 py-1.5 w-14 print:text-[12px] print:py-0.5 print:w-10"
+                        className="text-center text-[11px] font-medium text-primary-700 border-b border-primary-200 border-l border-slate-200 py-1.5 w-14 print:text-[12px] print:py-0.5 print:w-10"
                       >
                         {PERIOD_NAMES[p]}
                       </th>
                     ))}
-                    <th className="text-center text-[11px] font-bold text-primary-700 border-b border-primary-200 border-l border-gray-200 py-1.5 w-14 bg-primary-100/50 print:text-[12px] print:py-0.5 print:w-10">
+                    <th className="text-center text-[11px] font-bold text-primary-700 border-b border-primary-200 border-l border-slate-200 py-1.5 w-14 bg-primary-100/50 print:text-[12px] print:py-0.5 print:w-10">
                       Prom.
                     </th>
                   </React.Fragment>
@@ -329,8 +329,8 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               {renderSubjectRows(curricular)}
 
               {/* Fila de promedio general */}
-              <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-                <td className="px-3 py-2 text-base text-gray-900 print:text-[11px] print:px-1 print:py-0.5">
+              <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
+                <td className="px-3 py-2 text-base text-slate-900 print:text-[11px] print:px-1 print:py-0.5">
                   Promedio General
                 </td>
                 {TRIMESTERS.map((t) => {
@@ -344,10 +344,10 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   return (
                     <React.Fragment key={t.id}>
                       {t.periods.map((p) => (
-                        <td key={p} className="border-l border-gray-200" />
+                        <td key={p} className="border-l border-slate-200" />
                       ))}
                       <td
-                        className={`text-center text-sm font-bold tabular-nums border-l border-gray-200 print:text-[12px] ${semaforoClass(
+                        className={`text-center text-sm font-bold tabular-nums border-l border-slate-200 print:text-[12px] ${semaforoClass(
                           trimGenAvg
                         )}`}
                       >
@@ -357,13 +357,13 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   );
                 })}
                 <td
-                  className={`text-center text-sm font-bold tabular-nums border-l-2 border-gray-300 print:text-[10px] ${semaforoClass(
+                  className={`text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
                     generalAvg
                   )}`}
                 >
                   {fmt(generalAvg)}
                 </td>
-                <td className="border-l border-gray-100" />
+                <td className="border-l border-slate-100" />
               </tr>
 
               {/* Separador y materias no curriculares */}
@@ -372,7 +372,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   <tr>
                     <td
                       colSpan={100}
-                      className="px-3 py-2 text-sm font-semibold text-gray-400 uppercase tracking-wider bg-gray-50 border-t-2 border-gray-200 print:text-[10px] print:px-1 print:py-1"
+                      className="px-3 py-2 text-sm font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 border-t-2 border-slate-200 print:text-[10px] print:px-1 print:py-1"
                     >
                       No curriculares — no abonan al promedio
                     </td>
@@ -388,14 +388,14 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
         <div className="hidden boleta-signature mt-10 px-6">
           <div className="flex justify-between items-end">
             <div className="text-center">
-              <div className="w-48 border-t border-gray-400 pt-1">
-                <p className="text-[10px] font-semibold text-gray-800">Padre / Madre / Tutor</p>
+              <div className="w-48 border-t border-slate-400 pt-1">
+                <p className="text-[10px] font-semibold text-slate-800">Padre / Madre / Tutor</p>
               </div>
             </div>
             <div className="text-center">
-              <div className="w-56 border-t border-gray-400 pt-1">
-                <p className="text-[10px] font-semibold text-gray-800">Lic. Ana Laura Zúñiga García</p>
-                <p className="text-[9px] text-gray-500">Directora de Secundaria</p>
+              <div className="w-56 border-t border-slate-400 pt-1">
+                <p className="text-[10px] font-semibold text-slate-800">Lic. Ana Laura Zúñiga García</p>
+                <p className="text-[9px] text-slate-500">Directora de Secundaria</p>
               </div>
             </div>
           </div>
@@ -406,7 +406,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
         {/* Julio (Final) */}
         <div className="mt-6 print:hidden">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">
+          <h3 className="text-sm font-semibold text-slate-700 mb-2">
             Julio (Final) — Referencia
           </h3>
           <div className="card overflow-x-auto">
@@ -431,20 +431,20 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   if (julioScore === null && julioAbs === 0) return null;
                   return (
                     <tr key={s.id} className="hover:bg-amber-50/30">
-                      <td className="px-3 py-1.5 text-sm text-gray-900 border-b border-gray-100">
+                      <td className="px-3 py-1.5 text-sm text-slate-900 border-b border-slate-100">
                         {s.name}
                         {!s.counts_for_avg && (
-                          <span className="ml-1.5 text-[10px] text-gray-400 italic">N/C</span>
+                          <span className="ml-1.5 text-[10px] text-slate-400 italic">N/C</span>
                         )}
                       </td>
                       <td
-                        className={`text-center text-sm tabular-nums border-b border-gray-100 ${semaforoClass(
+                        className={`text-center text-sm tabular-nums border-b border-slate-100 ${semaforoClass(
                           julioScore
                         )}`}
                       >
                         {fmt(julioScore)}
                       </td>
-                      <td className="text-center text-sm tabular-nums text-gray-500 border-b border-gray-100">
+                      <td className="text-center text-sm tabular-nums text-slate-500 border-b border-slate-100">
                         {julioAbs || "—"}
                       </td>
                     </tr>
@@ -453,7 +453,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-400 mt-2 print:hidden">
+          <p className="text-xs text-slate-400 mt-2 print:hidden">
             Julio (Final) se muestra como referencia — no se incluye en el promedio final.
           </p>
         </div>

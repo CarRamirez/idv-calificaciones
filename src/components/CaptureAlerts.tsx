@@ -92,11 +92,11 @@ export default function CaptureAlerts() {
   if (loading) {
     return (
       <div className="card p-4 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-48 mb-3" />
+        <div className="h-4 bg-slate-200 rounded w-48 mb-3" />
         <div className="space-y-2">
-          <div className="h-10 bg-gray-100 rounded" />
-          <div className="h-10 bg-gray-100 rounded" />
-          <div className="h-10 bg-gray-100 rounded" />
+          <div className="h-10 bg-slate-100 rounded" />
+          <div className="h-10 bg-slate-100 rounded" />
+          <div className="h-10 bg-slate-100 rounded" />
         </div>
       </div>
     );
@@ -191,12 +191,12 @@ export default function CaptureAlerts() {
                 <span> · Sin correo: {sendResult.noEmail.join(", ")}</span>
               )}
             </div>
-            <button onClick={() => setSendResult(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+            <button onClick={() => setSendResult(null)} className="text-slate-400 hover:text-slate-600">✕</button>
           </div>
         </div>
       )}
 
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-slate-100">
         {visibleAlerts.map((a) => (
           <div key={a.teacherId} className="px-4 py-3">
             <div className="flex items-start gap-2">
@@ -207,7 +207,7 @@ export default function CaptureAlerts() {
                     type="checkbox"
                     checked={selectedTeachers.has(a.teacherId)}
                     onChange={() => toggleTeacher(a.teacherId)}
-                    className="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                    className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
                   />
                 </label>
               )}
@@ -222,7 +222,7 @@ export default function CaptureAlerts() {
                       <span className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold shrink-0">
                         {a.teacherName.charAt(0)}
                       </span>
-                      <span className="text-sm font-medium text-gray-800 truncate">
+                      <span className="text-sm font-medium text-slate-800 truncate">
                         {a.teacherName}
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export default function CaptureAlerts() {
                             sendReminders([a.teacherId]);
                           }}
                           disabled={sending}
-                          className="p-1 text-gray-400 hover:text-amber-600 transition-colors"
+                          className="p-1 text-slate-400 hover:text-amber-600 transition-colors"
                           title="Enviar recordatorio individual"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,14 +249,14 @@ export default function CaptureAlerts() {
                         {a.pct}%
                       </span>
                       <svg
-                        className={`w-4 h-4 text-gray-400 transition-transform ${expanded === a.teacherId ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 text-slate-400 transition-transform ${expanded === a.teacherId ? "rotate-180" : ""}`}
                         fill="none" stroke="currentColor" viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div className="w-full bg-slate-200 rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full transition-all ${
                         a.pct === 100 ? "bg-green-500" : a.pct < 30 ? "bg-red-500" : a.pct < 70 ? "bg-amber-500" : "bg-green-500"
@@ -264,18 +264,18 @@ export default function CaptureAlerts() {
                       style={{ width: `${Math.min(a.pct, 100)}%` }}
                     />
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-slate-400 mt-1">
                     {a.totalCaptured} de {a.totalExpected} calificaciones
                   </p>
                 </button>
 
                 {expanded === a.teacherId && a.pendingDetails.length > 0 && (
                   <div className="mt-2 pl-9 space-y-1">
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                       Pendientes:
                     </p>
                     {a.pendingDetails.map((d, i) => (
-                      <p key={i} className="text-xs text-gray-600 flex items-center gap-1.5">
+                      <p key={i} className="text-xs text-slate-600 flex items-center gap-1.5">
                         <span className="w-1 h-1 rounded-full bg-amber-400" />
                         {d}
                       </p>

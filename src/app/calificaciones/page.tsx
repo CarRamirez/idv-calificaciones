@@ -159,8 +159,8 @@ export default async function CalificacionesPage() {
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Calificaciones</h1>
-          <p className="text-sm text-gray-500 mt-1">Selecciona la sección que deseas consultar</p>
+          <h1 className="text-2xl font-bold text-slate-900">Calificaciones</h1>
+          <p className="text-sm text-slate-500 mt-1">Selecciona la sección que deseas consultar</p>
         </div>
 
         <div className={`grid grid-cols-1 ${visibleOptions.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-6`}>
@@ -175,8 +175,8 @@ export default async function CalificacionesPage() {
                 <div className={`w-14 h-14 rounded-xl ${c.iconBg} ${c.iconText} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
                   {opt.icon}
                 </div>
-                <h2 className="text-base font-bold text-gray-900 mb-1">{opt.title}</h2>
-                <p className="text-sm text-gray-500 leading-relaxed">{opt.description}</p>
+                <h2 className="text-base font-bold text-slate-900 mb-1">{opt.title}</h2>
+                <p className="text-sm text-slate-500 leading-relaxed">{opt.description}</p>
               </Link>
             );
           })}

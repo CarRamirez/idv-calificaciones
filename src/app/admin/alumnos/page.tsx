@@ -344,8 +344,8 @@ export default function AdminAlumnosPage() {
 
   if (loading || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-sm text-gray-500">Cargando...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-sm text-slate-500">Cargando...</div>
       </div>
     );
   }
@@ -357,10 +357,10 @@ export default function AdminAlumnosPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
               Alumnos
             </h1>
-            <p className="text-sm text-gray-500">Gestión de alumnos por grupo</p>
+            <p className="text-sm text-slate-500">Gestión de alumnos por grupo</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
         </div>
@@ -374,7 +374,7 @@ export default function AdminAlumnosPage() {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 selectedGroup === g.id
                   ? "bg-primary-600 text-white"
-                  : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
+                  : "bg-white text-slate-600 border border-slate-300 hover:bg-slate-50"
               }`}
             >
               {g.grade}° {g.letter}
@@ -383,7 +383,7 @@ export default function AdminAlumnosPage() {
           {/* Separator + Bajas groups */}
           {groups.some((g) => isBajasGroup(g)) && (
             <>
-              <span className="text-gray-300 self-center">|</span>
+              <span className="text-slate-300 self-center">|</span>
               {groups.filter((g) => isBajasGroup(g)).map((g) => (
                 <button
                   key={g.id}
@@ -440,7 +440,7 @@ export default function AdminAlumnosPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-400 text-sm">
+                  <td colSpan={5} className="text-center py-8 text-slate-400 text-sm">
                     {students.length === 0
                       ? `No hay alumnos en ${groupLabel}. Agrega el primero.`
                       : "Sin resultados para el filtro aplicado."}
@@ -456,14 +456,14 @@ export default function AdminAlumnosPage() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={s.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
                         ) : (
-                          <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
                             {s.full_name.charAt(0)}
                           </div>
                         )}
                         {toTitleCase(s.full_name)}
                       </div>
                     </td>
-                    <td className="hidden sm:table-cell text-xs text-gray-500 font-mono">
+                    <td className="hidden sm:table-cell text-xs text-slate-500 font-mono">
                       {s.curp || "—"}
                     </td>
                     <td className="text-center">
@@ -472,7 +472,7 @@ export default function AdminAlumnosPage() {
                         onChange={(e) => handleStatusChange(s.id, e.target.value)}
                         disabled={changingStatus === s.id}
                         className={`text-xs px-2 py-1 rounded-lg border-0 font-medium cursor-pointer ${
-                          STATUS_OPTIONS.find((o) => o.value === s.status)?.color || "bg-gray-100 text-gray-700"
+                          STATUS_OPTIONS.find((o) => o.value === s.status)?.color || "bg-slate-100 text-slate-700"
                         }`}
                       >
                         {STATUS_OPTIONS.map((opt) => (
@@ -513,7 +513,7 @@ export default function AdminAlumnosPage() {
             </tbody>
           </table>
           {students.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500 text-right flex flex-wrap gap-3 justify-end">
+            <div className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 text-right flex flex-wrap gap-3 justify-end">
               <span className="text-green-600 font-medium">{countByStatus.activo} activos</span>
               {countByStatus.inactivo > 0 && <span className="text-amber-600">{countByStatus.inactivo} inactivos</span>}
               {countByStatus.baja > 0 && <span className="text-red-600">{countByStatus.baja} bajas</span>}
@@ -526,7 +526,7 @@ export default function AdminAlumnosPage() {
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-4">
+              <h2 className="text-base font-bold text-slate-900 mb-4">
                 {editStudent ? "Editar alumno" : `Nuevo alumno — ${groupLabel}`}
               </h2>
 
@@ -546,7 +546,7 @@ export default function AdminAlumnosPage() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">
                     Nombre completo *
                   </label>
                   <input
@@ -560,7 +560,7 @@ export default function AdminAlumnosPage() {
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">CURP</label>
+                    <label className="text-xs font-medium text-slate-700 mb-1 block">CURP</label>
                     <input
                       type="text"
                       value={formCurp}
@@ -571,7 +571,7 @@ export default function AdminAlumnosPage() {
                     />
                   </div>
                   <div className="w-24">
-                    <label className="text-xs font-medium text-gray-700 mb-1 block">N° Lista</label>
+                    <label className="text-xs font-medium text-slate-700 mb-1 block">N° Lista</label>
                     <input
                       type="number"
                       value={formListNum}
@@ -603,10 +603,10 @@ export default function AdminAlumnosPage() {
         {showGroupModal && groupChangeStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-2">
+              <h2 className="text-base font-bold text-slate-900 mb-2">
                 {pendingReactivateStatus ? "Reactivar alumno — Seleccionar grupo" : "Cambiar de grupo"}
               </h2>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-slate-600 mb-4">
                 {pendingReactivateStatus
                   ? <>Selecciona el grupo destino para <span className="font-semibold">{groupChangeStudent.full_name}</span>:</>
                   : <>Mover a <span className="font-semibold">{groupChangeStudent.full_name}</span> de{" "}
@@ -622,7 +622,7 @@ export default function AdminAlumnosPage() {
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       targetGroup === g.id
                         ? "bg-violet-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
                   >
                     {g.grade}° {g.letter}
@@ -630,7 +630,7 @@ export default function AdminAlumnosPage() {
                 ))}
               </div>
 
-              <p className="text-xs text-gray-400 mb-4">
+              <p className="text-xs text-slate-400 mb-4">
                 Se asignará el siguiente número de lista disponible en el grupo destino. Las calificaciones existentes se conservan.
               </p>
 
@@ -662,8 +662,8 @@ export default function AdminAlumnosPage() {
         {deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-2">¿Eliminar alumno?</h2>
-              <p className="text-sm text-gray-600 mb-5">
+              <h2 className="text-base font-bold text-slate-900 mb-2">¿Eliminar alumno?</h2>
+              <p className="text-sm text-slate-600 mb-5">
                 Se eliminarán también sus calificaciones registradas. Esta acción no se puede deshacer.
               </p>
               <div className="flex justify-end gap-2">

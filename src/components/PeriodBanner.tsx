@@ -91,7 +91,7 @@ export default function PeriodBanner({ periodName, openDate, closeDate, compact 
           {isExpired ? (
             <span className="text-red-600 ml-2">— Periodo cerrado</span>
           ) : remaining && remaining.total > 0 ? (
-            <span className={`ml-2 ${isUrgent ? "text-amber-600" : "text-gray-500"}`}>
+            <span className={`ml-2 ${isUrgent ? "text-amber-600" : "text-slate-500"}`}>
               — Cierra en{" "}
               {remaining.days > 0 && `${remaining.days}d `}
               {remaining.hours > 0 && `${remaining.hours}h `}
@@ -106,7 +106,7 @@ export default function PeriodBanner({ periodName, openDate, closeDate, compact 
   // Full banner for dashboard
   return (
     <div
-      className={`mb-6 glass rounded-2xl overflow-hidden border ${
+      className={`mb-6 glass rounded-xl overflow-hidden border ${
         isExpired
           ? "!border-red-200/60"
           : isUrgent
@@ -148,18 +148,18 @@ export default function PeriodBanner({ periodName, openDate, closeDate, compact 
             <p className={`text-sm font-bold ${isExpired ? "text-red-700" : isUrgent ? "text-amber-700" : "text-emerald-700"}`}>
               {isExpired ? "Periodo cerrado" : "Periodo abierto para captura"}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-600">
               <span className="font-semibold">{periodName}</span>
               {openDate && closeDate && (
-                <span className="text-gray-400">
+                <span className="text-slate-400">
                   {" "}· {formatDateMX(openDate)} → {formatDateMX(closeDate)}
                 </span>
               )}
               {openDate && !closeDate && (
-                <span className="text-gray-400"> · Desde {formatDateMX(openDate)}</span>
+                <span className="text-slate-400"> · Desde {formatDateMX(openDate)}</span>
               )}
               {!openDate && closeDate && (
-                <span className="text-gray-400"> · Hasta {formatDateMX(closeDate)}</span>
+                <span className="text-slate-400"> · Hasta {formatDateMX(closeDate)}</span>
               )}
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function PeriodBanner({ periodName, openDate, closeDate, compact 
         {/* Right: countdown */}
         {remaining && remaining.total > 0 && (
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <span className={`text-xs font-medium ${isUrgent ? "text-amber-600" : "text-gray-400"}`}>
+            <span className={`text-xs font-medium ${isUrgent ? "text-amber-600" : "text-slate-400"}`}>
               Cierra en
             </span>
             <div className="flex gap-1.5">
@@ -176,35 +176,35 @@ export default function PeriodBanner({ periodName, openDate, closeDate, compact 
                 <div className={`rounded-lg px-2.5 py-1.5 text-center min-w-[3rem] ${
                   isUrgent ? "bg-amber-100/80" : "bg-white/80"
                 }`}>
-                  <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-gray-800"}`}>
+                  <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-slate-800"}`}>
                     {remaining.days}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">días</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">días</p>
                 </div>
               )}
               <div className={`rounded-lg px-2.5 py-1.5 text-center min-w-[3rem] ${
                 isUrgent ? "bg-amber-100/80" : "bg-white/80"
               }`}>
-                <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-gray-800"}`}>
+                <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-slate-800"}`}>
                   {String(remaining.hours).padStart(2, "0")}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">hrs</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">hrs</p>
               </div>
               <div className={`rounded-lg px-2.5 py-1.5 text-center min-w-[3rem] ${
                 isUrgent ? "bg-amber-100/80" : "bg-white/80"
               }`}>
-                <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-gray-800"}`}>
+                <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-slate-800"}`}>
                   {String(remaining.minutes).padStart(2, "0")}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">min</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">min</p>
               </div>
               <div className={`rounded-lg px-2.5 py-1.5 text-center min-w-[3rem] ${
                 isUrgent ? "bg-amber-100/80" : "bg-white/80"
               }`}>
-                <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-gray-800"}`}>
+                <p className={`text-lg font-extrabold leading-none ${isUrgent ? "text-amber-700" : "text-slate-800"}`}>
                   {String(remaining.seconds).padStart(2, "0")}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">seg</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">seg</p>
               </div>
             </div>
           </div>

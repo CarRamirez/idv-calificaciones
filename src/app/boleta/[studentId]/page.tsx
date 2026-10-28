@@ -140,17 +140,17 @@ export default async function BoletaDetailPage({ params }: Props) {
         {/* Header */}
         <div className="flex items-start justify-between mb-4 gap-4 print:hidden">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{student.full_name}</h1>
+            <h1 className="text-xl font-bold text-slate-900">{student.full_name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-700">
                 {group.grade}° {group.letter}
               </span>
-              <span className="text-sm text-gray-500">N° Lista: {student.list_num}</span>
+              <span className="text-sm text-slate-500">N° Lista: {student.list_num}</span>
               {student.curp && (
-                <span className="text-xs text-gray-400 font-mono">{student.curp}</span>
+                <span className="text-xs text-slate-400 font-mono">{student.curp}</span>
               )}
             </div>
-            <p className="text-sm text-gray-400 mt-0.5">Ciclo Escolar 2026-2027</p>
+            <p className="text-sm text-slate-400 mt-0.5">Ciclo Escolar 2026-2027</p>
           </div>
           <Link href="/boleta" className="btn-secondary text-sm flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@ export default async function BoletaDetailPage({ params }: Props) {
             {prevStudent ? (
               <Link
                 href={`/boleta/${prevStudent.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                 title={prevStudent.full_name}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +176,7 @@ export default async function BoletaDetailPage({ params }: Props) {
                 <span className="hidden sm:inline">Anterior</span>
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-300 bg-slate-50 border border-slate-200 rounded-lg cursor-not-allowed">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
@@ -184,14 +184,14 @@ export default async function BoletaDetailPage({ params }: Props) {
               </span>
             )}
 
-            <span className="text-xs text-gray-400 tabular-nums">
+            <span className="text-xs text-slate-400 tabular-nums">
               {currentIndex + 1} / {classmates.length}
             </span>
 
             {nextStudent ? (
               <Link
                 href={`/boleta/${nextStudent.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                 title={nextStudent.full_name}
               >
                 <span className="hidden sm:inline">Siguiente</span>
@@ -200,7 +200,7 @@ export default async function BoletaDetailPage({ params }: Props) {
                 </svg>
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-300 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-300 bg-slate-50 border border-slate-200 rounded-lg cursor-not-allowed">
                 <span className="hidden sm:inline">Siguiente</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -212,7 +212,7 @@ export default async function BoletaDetailPage({ params }: Props) {
           {/* Selector de grupo */}
           {allGroups.length > 1 && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs text-gray-400 font-medium">Grupo:</span>
+              <span className="text-xs text-slate-400 font-medium">Grupo:</span>
               {allGroups.map((g) => {
                 const isActive = g.id === group.id;
                 const firstId = groupFirstStudent[g.id];
@@ -228,7 +228,7 @@ export default async function BoletaDetailPage({ params }: Props) {
                   <Link
                     key={g.id}
                     href={`/boleta/${firstId}`}
-                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                   >
                     {g.grade}°{g.letter}
                   </Link>

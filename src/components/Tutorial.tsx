@@ -159,9 +159,9 @@ export default function Tutorial({ isOpen, onClose, userRole }: Props) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in p-4">
-      <div className="bg-white rounded-3xl shadow-float max-w-lg w-full overflow-hidden animate-scale-in">
+      <div className="bg-white rounded-xl shadow-float max-w-lg w-full overflow-hidden animate-scale-in">
         {/* Progress bar */}
-        <div className="h-1.5 bg-gray-100 w-full">
+        <div className="h-1.5 bg-slate-100 w-full">
           <div
             className={`h-full ${color.progress} transition-all duration-500 ease-out rounded-r-full`}
             style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
@@ -171,14 +171,14 @@ export default function Tutorial({ isOpen, onClose, userRole }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tutorial</span>
-            <span className="text-[10px] text-gray-300">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tutorial</span>
+            <span className="text-[10px] text-slate-300">
               {currentStep + 1} / {totalSteps}
             </span>
           </div>
           <button
             onClick={handleClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -189,24 +189,24 @@ export default function Tutorial({ isOpen, onClose, userRole }: Props) {
         {/* Content */}
         <div className="px-6 pb-6">
           {/* Icon */}
-          <div className={`w-16 h-16 rounded-2xl ${color.bg} flex items-center justify-center mb-4 ring-4 ${color.ring} ring-opacity-30`}>
+          <div className={`w-16 h-16 rounded-xl ${color.bg} flex items-center justify-center mb-4 ring-4 ${color.ring} ring-opacity-30`}>
             <span className={color.icon}>{step.icon}</span>
           </div>
 
           {/* Title */}
           <h3
-            className="text-lg font-extrabold text-gray-900 mb-2"
+            className="text-lg font-extrabold text-slate-900 mb-2"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {step.title}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 leading-relaxed mb-4">{step.description}</p>
+          <p className="text-sm text-slate-600 leading-relaxed mb-4">{step.description}</p>
 
           {/* Tip */}
           {step.tip && (
-            <div className="flex items-start gap-2.5 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-100 mb-4">
+            <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 border border-amber-100 mb-4">
               <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
               </svg>
@@ -224,8 +224,8 @@ export default function Tutorial({ isOpen, onClose, userRole }: Props) {
                   i === currentStep
                     ? `w-6 h-2 ${color.progress}`
                     : i < currentStep
-                    ? "w-2 h-2 bg-gray-300"
-                    : "w-2 h-2 bg-gray-200"
+                    ? "w-2 h-2 bg-slate-300"
+                    : "w-2 h-2 bg-slate-200"
                 }`}
               />
             ))}

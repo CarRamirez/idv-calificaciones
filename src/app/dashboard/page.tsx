@@ -98,22 +98,19 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, role")
     .eq("id", user.id)
     .single();
 
   if (!profile) {
-    console.error("Dashboard profile lookup failed", { userId: user.id, email: user.email, error: profileError });
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Perfil no encontrado</h1>
-          <p className="text-gray-500 mb-4">Tu cuenta no tiene un perfil asociado. Contacta al administrador.</p>
-          <p className="text-xs text-gray-300 mt-2">uid: {user.id?.slice(0,8)}… | {user.email}</p>
-          {profileError && <p className="text-xs text-red-300 mt-1">Error: {profileError.message}</p>}
-          <a href="/login" className="mt-4 inline-block text-indigo-600 hover:underline">Volver al login</a>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Perfil no encontrado</h1>
+          <p className="text-slate-500 mb-4">Tu cuenta no tiene un perfil asociado. Contacta al administrador.</p>
+          <a href="/login" className="text-indigo-600 hover:underline">Volver al login</a>
         </div>
       </div>
     );
@@ -416,10 +413,10 @@ export default async function DashboardPage() {
         {/* Header con periodo activo */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
               Bienvenido, {effectiveProfile.full_name.split(" ")[0]}
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-slate-400">
               Ciclo escolar 2026-2027
             </p>
           </div>
@@ -441,10 +438,10 @@ export default async function DashboardPage() {
               <IconCalendar className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800 group-hover:text-primary-600 transition-colors duration-200">
+              <p className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors duration-200">
                 Horario Escolar
               </p>
-              <p className="text-[11px] text-gray-400">Ver horario semanal de clases</p>
+              <p className="text-[11px] text-slate-400">Ver horario semanal de clases</p>
             </div>
           </Link>
           <Link
@@ -455,10 +452,10 @@ export default async function DashboardPage() {
               <IconUsers className="w-5 h-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800 group-hover:text-orange-600 transition-colors duration-200">
+              <p className="text-sm font-semibold text-slate-800 group-hover:text-orange-600 transition-colors duration-200">
                 Directorio
               </p>
-              <p className="text-[11px] text-gray-400">Contactos del personal</p>
+              <p className="text-[11px] text-slate-400">Contactos del personal</p>
             </div>
           </Link>
           {/* Servicios Escolares */}
@@ -469,8 +466,8 @@ export default async function DashboardPage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors duration-200">Servicios Escolares</p>
-              <p className="text-[11px] text-gray-400">Constancias y documentos</p>
+              <p className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors duration-200">Servicios Escolares</p>
+              <p className="text-[11px] text-slate-400">Constancias y documentos</p>
             </div>
           </Link>
           {/* WiFi Docentes */}
@@ -481,8 +478,8 @@ export default async function DashboardPage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-800">WiFi Docentes</p>
-              <p className="text-[11px] text-gray-400 font-mono">_IDV-DOCENTES · DVasco2026</p>
+              <p className="text-sm font-semibold text-slate-800">WiFi Docentes</p>
+              <p className="text-[11px] text-slate-400 font-mono">_IDV-DOCENTES · DVasco2026</p>
             </div>
           </div>
         </div>
@@ -506,8 +503,8 @@ export default async function DashboardPage() {
                     {teacherAssignments.length}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Asignaturas</p>
-                <p className="text-xs text-gray-400">asignadas</p>
+                <p className="text-sm font-semibold text-slate-700">Asignaturas</p>
+                <p className="text-xs text-slate-400">asignadas</p>
               </div>
               <div className="stat-card stat-card-violet p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -518,8 +515,8 @@ export default async function DashboardPage() {
                     {teacherGroupIds.length}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Grupos</p>
-                <p className="text-xs text-gray-400">a mi cargo</p>
+                <p className="text-sm font-semibold text-slate-700">Grupos</p>
+                <p className="text-xs text-slate-400">a mi cargo</p>
               </div>
               <div className="stat-card stat-card-accent p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -530,8 +527,8 @@ export default async function DashboardPage() {
                     {Object.values(teacherStudentCounts).reduce((a, b) => a + b, 0)}
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Alumnos</p>
-                <p className="text-xs text-gray-400">en mis grupos</p>
+                <p className="text-sm font-semibold text-slate-700">Alumnos</p>
+                <p className="text-xs text-slate-400">en mis grupos</p>
               </div>
             </div>
 
@@ -547,14 +544,14 @@ export default async function DashboardPage() {
               <div className="card p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h3 className="text-sm font-bold text-gray-800">Mi avance de captura</h3>
-                    <p className="text-xs text-gray-400">{activePeriod.name} — {teacherCaptureEntered} de {teacherCaptureTotal} calificaciones</p>
+                    <h3 className="text-sm font-bold text-slate-800">Mi avance de captura</h3>
+                    <p className="text-xs text-slate-400">{activePeriod.name} — {teacherCaptureEntered} de {teacherCaptureTotal} calificaciones</p>
                   </div>
                   <span className="text-2xl font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: teacherCaptureEntered >= teacherCaptureTotal ? "#16a34a" : teacherCaptureEntered / teacherCaptureTotal > 0.5 ? "#d97706" : "#dc2626" }}>
                     {teacherCaptureTotal > 0 ? Math.round((teacherCaptureEntered / teacherCaptureTotal) * 100) : 0}%
                   </span>
                 </div>
-                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
@@ -572,7 +569,7 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
               Mis grupos
             </h2>
             {Object.keys(teacherByGroup).length === 0 ? (
@@ -607,7 +604,7 @@ export default async function DashboardPage() {
                         </div>
 
                         <div className="px-4 py-3 space-y-1">
-                          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
                             Materias — clic para calificar
                           </p>
                           {subjects.map((s: any) => {
@@ -621,18 +618,18 @@ export default async function DashboardPage() {
                                 className="block px-2 py-1.5 -mx-2 rounded-lg hover:bg-primary-50 group/subj transition-colors"
                               >
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="text-gray-700 group-hover/subj:text-primary-700 transition-colors">{s.name}</span>
+                                  <span className="text-slate-700 group-hover/subj:text-primary-700 transition-colors">{s.name}</span>
                                   <div className="flex items-center gap-1.5">
                                     {prog && (
-                                      <span className={`text-[10px] tabular-nums font-medium ${done ? "text-green-600" : "text-gray-400"}`}>
+                                      <span className={`text-[10px] tabular-nums font-medium ${done ? "text-green-600" : "text-slate-400"}`}>
                                         {prog.entered}/{prog.total}
                                       </span>
                                     )}
-                                    <IconPencil className="w-3 h-3 text-gray-300 group-hover/subj:text-primary-500 transition-colors" />
+                                    <IconPencil className="w-3 h-3 text-slate-300 group-hover/subj:text-primary-500 transition-colors" />
                                   </div>
                                 </div>
                                 {prog && prog.total > 0 && (
-                                  <div className="w-full h-1 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                                  <div className="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
                                     <div
                                       className="h-full rounded-full"
                                       style={{
@@ -659,13 +656,13 @@ export default async function DashboardPage() {
                         <div className="px-4 pb-4 flex gap-2">
                           <Link
                             href={`/lista/${gId}`}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-gray-600 text-[11px] font-medium rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-slate-600 text-[11px] font-medium rounded-md bg-slate-100 hover:bg-slate-200 transition-colors"
                           >
                             Lista
                           </Link>
                           <Link
                             href={`/boleta/grupo/${gId}`}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-gray-600 text-[11px] font-medium rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-slate-600 text-[11px] font-medium rounded-md bg-slate-100 hover:bg-slate-200 transition-colors"
                           >
                             Boletas
                           </Link>
@@ -696,10 +693,10 @@ export default async function DashboardPage() {
                       {totalStudents}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Alumnos
                   </p>
-                  <p className="text-xs text-gray-400">activos</p>
+                  <p className="text-xs text-slate-400">activos</p>
                 </Link>
                 <Link
                   href="/admin/profesores"
@@ -713,10 +710,10 @@ export default async function DashboardPage() {
                       {totalTeachers}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Profesores
                   </p>
-                  <p className="text-xs text-gray-400">registrados</p>
+                  <p className="text-xs text-slate-400">registrados</p>
                 </Link>
                 <Link
                   href="/admin/ciclo"
@@ -730,10 +727,10 @@ export default async function DashboardPage() {
                       {groups.length}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Grupos
                   </p>
-                  <p className="text-xs text-gray-400">ciclo actual</p>
+                  <p className="text-xs text-slate-400">ciclo actual</p>
                 </Link>
                 <Link
                   href="/admin/materias"
@@ -747,10 +744,10 @@ export default async function DashboardPage() {
                       {totalSubjects}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Materias
                   </p>
-                  <p className="text-xs text-gray-400">registradas</p>
+                  <p className="text-xs text-slate-400">registradas</p>
                 </Link>
                 <Link
                   href="/captura"
@@ -762,10 +759,10 @@ export default async function DashboardPage() {
                     </div>
                     <span className="text-lg font-bold text-coral-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Captura
                   </p>
-                  <p className="text-xs text-gray-400">ir a calificar</p>
+                  <p className="text-xs text-slate-400">ir a calificar</p>
                 </Link>
                 <Link
                   href="/tareas"
@@ -777,10 +774,10 @@ export default async function DashboardPage() {
                     </div>
                     <span className="text-lg font-bold text-violet-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Tareas
                   </p>
-                  <p className="text-xs text-gray-400">notificar padres</p>
+                  <p className="text-xs text-slate-400">notificar padres</p>
                 </Link>
                 <Link
                   href="/admin/auditoria"
@@ -792,10 +789,10 @@ export default async function DashboardPage() {
                     </div>
                     <span className="text-lg font-bold text-slate-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Auditoría
                   </p>
-                  <p className="text-xs text-gray-400">log de cambios</p>
+                  <p className="text-xs text-slate-400">log de cambios</p>
                 </Link>
                 <Link
                   href="/concentrados"
@@ -807,10 +804,10 @@ export default async function DashboardPage() {
                     </div>
                     <span className="text-lg font-bold text-teal-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Concentrados
                   </p>
-                  <p className="text-xs text-gray-400">filtrar y descargar</p>
+                  <p className="text-xs text-slate-400">filtrar y descargar</p>
                 </Link>
                 <Link
                   href="/avance"
@@ -824,10 +821,10 @@ export default async function DashboardPage() {
                     </div>
                     <span className="text-lg font-bold text-emerald-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Avance
                   </p>
-                  <p className="text-xs text-gray-400">captura por profesor</p>
+                  <p className="text-xs text-slate-400">captura por profesor</p>
                 </Link>
                 <Link
                   href="/rendimiento"
@@ -841,10 +838,10 @@ export default async function DashboardPage() {
                     </div>
                     <span className="text-lg font-bold text-rose-600">→</span>
                   </div>
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-primary-600 transition-colors duration-200">
+                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
                     Rendimiento
                   </p>
-                  <p className="text-xs text-gray-400">por grupo detallado</p>
+                  <p className="text-xs text-slate-400">por grupo detallado</p>
                 </Link>
               </div>
             )}
@@ -854,14 +851,14 @@ export default async function DashboardPage() {
               <div className="card p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <IconCalendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <IconCalendar className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm font-medium text-slate-700">
                       Progreso de captura — {activePeriod.name}
                     </span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">{progressPct}%</span>
+                  <span className="text-sm font-bold text-slate-900">{progressPct}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="w-full bg-slate-200 rounded-full h-2.5">
                   <div
                     className={`h-2.5 rounded-full transition-all ${
                       progressPct >= 80
@@ -873,7 +870,7 @@ export default async function DashboardPage() {
                     style={{ width: `${Math.min(progressPct, 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-400 mt-1.5">
+                <p className="text-xs text-slate-400 mt-1.5">
                   {captureProgress.entered.toLocaleString()} de {captureProgress.total.toLocaleString()} calificaciones registradas
                 </p>
               </div>
@@ -890,7 +887,7 @@ export default async function DashboardPage() {
 
             {/* ── Group cards ── */}
             <div>
-              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
                 Concentrado por grupo
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -908,7 +905,7 @@ export default async function DashboardPage() {
                         </p>
                       </div>
                       <div className="p-3 text-center">
-                        <p className="text-xs text-gray-500 mb-2">
+                        <p className="text-xs text-slate-500 mb-2">
                           {count} alumno{count !== 1 ? "s" : ""}
                         </p>
                         <div className="flex flex-col gap-1">
@@ -920,13 +917,13 @@ export default async function DashboardPage() {
                           </Link>
                           <Link
                             href={`/boleta/${g.id}`}
-                            className="text-[11px] font-medium px-1.5 py-1 rounded-md text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                            className="text-[11px] font-medium px-1.5 py-1 rounded-md text-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                           >
                             Boleta
                           </Link>
                           <Link
                             href={`/lista/${g.id}`}
-                            className="text-[11px] font-medium px-1.5 py-1 rounded-md text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                            className="text-[11px] font-medium px-1.5 py-1 rounded-md text-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                           >
                             Lista
                           </Link>
@@ -941,8 +938,8 @@ export default async function DashboardPage() {
             {/* ── Recent activity ── */}
             {recentActivity.length > 0 && (
               <div className="card p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Actividad reciente
@@ -954,18 +951,18 @@ export default async function DashboardPage() {
                         <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-[10px] font-bold">
                           {a.teacher.charAt(0)}
                         </span>
-                        <span className="text-gray-700">
+                        <span className="text-slate-700">
                           <span className="font-medium">{a.teacher}</span>
                           {" capturó "}
                           <span className="font-medium">{a.group}</span>
                           {" "}
-                          <span className="text-gray-500">{a.subject}</span>
+                          <span className="text-slate-500">{a.subject}</span>
                           {a.count > 1 && (
-                            <span className="text-gray-400"> ({a.count} cal.)</span>
+                            <span className="text-slate-400"> ({a.count} cal.)</span>
                           )}
                         </span>
                       </div>
-                      <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                      <span className="text-xs text-slate-400 whitespace-nowrap ml-2">
                         {timeAgo(a.updated_at)}
                       </span>
                     </div>

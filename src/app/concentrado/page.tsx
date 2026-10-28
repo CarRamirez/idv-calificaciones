@@ -75,10 +75,10 @@ export default async function ConcentradoIndexPage() {
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
       <main className="page-content max-w-3xl animate-fade-in">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
             Concentrado de Calificaciones
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Selecciona el grupo para consultar el concentrado
           </p>
         </div>

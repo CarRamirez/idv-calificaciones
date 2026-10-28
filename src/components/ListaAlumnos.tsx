@@ -50,23 +50,23 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
       </div>
 
       {/* Print header */}
-      <div className="hidden lista-print-header items-center justify-between mb-3 pb-2 border-b-2 border-gray-800">
+      <div className="hidden lista-print-header items-center justify-between mb-3 pb-2 border-b-2 border-slate-800">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-idv.png" alt="IDV" className="w-12 h-12 object-contain" />
           <div>
-            <h1 className="text-sm font-bold text-gray-900">Instituto Don Vasco — Secundaria</h1>
-            <p className="text-[10px] text-gray-600">Ciclo Escolar 2026-2027</p>
+            <h1 className="text-sm font-bold text-slate-900">Instituto Don Vasco — Secundaria</h1>
+            <p className="text-[10px] text-slate-600">Ciclo Escolar 2026-2027</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-base font-bold text-gray-900">Grado: {groupName}</p>
-          <p className="text-[10px] text-gray-500">{students.length} alumno{students.length !== 1 ? "s" : ""}</p>
+          <p className="text-base font-bold text-slate-900">Grado: {groupName}</p>
+          <p className="text-[10px] text-slate-500">{students.length} alumno{students.length !== 1 ? "s" : ""}</p>
         </div>
       </div>
 
       {/* Info line for print */}
-      <div className="hidden print:flex justify-between mb-2 text-[10px] text-gray-600">
+      <div className="hidden print:flex justify-between mb-2 text-[10px] text-slate-600">
         <p>Asignatura: {subjectName || "____________________"}</p>
         <p>Profesor(a): {teacherName || "____________________"}</p>
       </div>
@@ -86,11 +86,11 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
           </thead>
           <tbody>
             {students.map((s) => (
-              <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50/50">
-                <td className="px-3 py-2 text-center text-sm font-medium text-gray-500 tabular-nums">
+              <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                <td className="px-3 py-2 text-center text-sm font-medium text-slate-500 tabular-nums">
                   {s.list_num}
                 </td>
-                <td className="px-3 py-2 text-sm font-medium text-gray-900">
+                <td className="px-3 py-2 text-sm font-medium text-slate-900">
                   {formatStudentName(s.full_name)}
                 </td>
               </tr>
@@ -104,14 +104,14 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
         <table className="w-full border-collapse" style={{ fontSize: "9px" }}>
           <thead>
             <tr>
-              <th className="col-num border border-gray-800 bg-gray-100 text-center font-bold p-1">
+              <th className="col-num border border-slate-800 bg-slate-100 text-center font-bold p-1">
                 N°
               </th>
-              <th className="col-name border border-gray-800 bg-gray-100 text-left font-bold p-1 pl-2">
+              <th className="col-name border border-slate-800 bg-slate-100 text-left font-bold p-1 pl-2">
                 NOMBRE DEL ALUMNO
               </th>
               {cols.map((n) => (
-                <th key={n} className="col-mark border border-gray-800 bg-gray-100 text-center font-semibold p-0" style={{ fontSize: "7px" }}>
+                <th key={n} className="col-mark border border-slate-800 bg-slate-100 text-center font-semibold p-0" style={{ fontSize: "7px" }}>
                   {n}
                 </th>
               ))}
@@ -120,26 +120,26 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
           <tbody>
             {students.map((s) => (
               <tr key={s.id}>
-                <td className="col-num border border-gray-600 text-center font-semibold p-1 tabular-nums">
+                <td className="col-num border border-slate-600 text-center font-semibold p-1 tabular-nums">
                   {s.list_num}
                 </td>
-                <td className="col-name border border-gray-600 p-1 pl-2 font-medium whitespace-nowrap overflow-hidden" style={{ textOverflow: "ellipsis" }}>
+                <td className="col-name border border-slate-600 p-1 pl-2 font-medium whitespace-nowrap overflow-hidden" style={{ textOverflow: "ellipsis" }}>
                   {formatStudentName(s.full_name)}
                 </td>
                 {cols.map((n) => (
-                  <td key={n} className="col-mark border border-gray-400 p-0">&nbsp;</td>
+                  <td key={n} className="col-mark border border-slate-400 p-0">&nbsp;</td>
                 ))}
               </tr>
             ))}
             {/* Empty rows to fill page */}
             {Array.from({ length: Math.max(0, 35 - students.length) }, (_, i) => (
               <tr key={`empty-${i}`}>
-                <td className="col-num border border-gray-600 text-center p-1 tabular-nums text-gray-400">
+                <td className="col-num border border-slate-600 text-center p-1 tabular-nums text-slate-400">
                   {students.length + i + 1}
                 </td>
-                <td className="col-name border border-gray-600 p-1">&nbsp;</td>
+                <td className="col-name border border-slate-600 p-1">&nbsp;</td>
                 {cols.map((n) => (
-                  <td key={n} className="col-mark border border-gray-400 p-0">&nbsp;</td>
+                  <td key={n} className="col-mark border border-slate-400 p-0">&nbsp;</td>
                 ))}
               </tr>
             ))}
@@ -148,7 +148,7 @@ export default function ListaAlumnos({ students, groupName, subjectName, teacher
       </div>
 
       {/* Footer note */}
-      <p className="text-xs text-gray-400 mt-3 print:hidden">
+      <p className="text-xs text-slate-400 mt-3 print:hidden">
         La lista se imprime en formato horizontal con 30 columnas para registro de asistencia, tareas u observaciones.
       </p>
     </div>

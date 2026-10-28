@@ -86,11 +86,11 @@ const config: Config = {
         "4xl": "2rem",
       },
       boxShadow: {
-        glow: "0 0 20px rgba(92, 124, 250, 0.15)",
-        "glow-lg": "0 0 40px rgba(92, 124, 250, 0.2)",
-        soft: "0 2px 15px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06)",
-        card: "0 4px 24px rgba(0, 0, 0, 0.06)",
-        float: "0 8px 30px rgba(0, 0, 0, 0.08)",
+        soft: "0 2px 8px -2px rgb(15 23 42 / 0.08), 0 1px 2px rgb(15 23 42 / 0.04)",
+        card: "0 1px 2px rgb(15 23 42 / 0.05), 0 2px 8px -4px rgb(15 23 42 / 0.06)",
+        float: "0 12px 32px -8px rgb(15 23 42 / 0.25)",
+        glow: "0 0 0 3px rgba(92, 124, 250, 0.25)",
+        "glow-lg": "0 0 0 4px rgba(92, 124, 250, 0.2)",
       },
       animation: {
         "fade-in": "fadeIn 0.4s ease-out",

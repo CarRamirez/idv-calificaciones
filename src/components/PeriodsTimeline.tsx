@@ -40,10 +40,10 @@ export default function PeriodsTimeline() {
   if (loading) {
     return (
       <div className="card p-4 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-40 mb-3" />
+        <div className="h-4 bg-slate-200 rounded w-40 mb-3" />
         <div className="flex gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-gray-100 rounded-lg flex-1" />
+            <div key={i} className="h-16 bg-slate-100 rounded-lg flex-1" />
           ))}
         </div>
       </div>
@@ -54,8 +54,8 @@ export default function PeriodsTimeline() {
 
   return (
     <div className="card p-4">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
         </svg>
         Periodos de evaluación
@@ -80,12 +80,12 @@ export default function PeriodsTimeline() {
                   ? "bg-green-50 border-green-300 ring-1 ring-green-200"
                   : isInProgress
                   ? "bg-orange-50 border-orange-300 ring-2 ring-orange-200 shadow-sm"
-                  : "bg-gray-50 border-gray-200 border-dashed"
+                  : "bg-slate-50 border-slate-200 border-dashed"
               }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className={`text-xs font-bold ${
-                  isCompleted ? "text-green-700" : isInProgress ? "text-orange-700" : "text-gray-400"
+                  isCompleted ? "text-green-700" : isInProgress ? "text-orange-700" : "text-slate-400"
                 }`}>
                   {p.name}
                 </span>
@@ -100,7 +100,7 @@ export default function PeriodsTimeline() {
                   </span>
                 )}
                 {isDisabled && (
-                  <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 )}
@@ -113,12 +113,12 @@ export default function PeriodsTimeline() {
                 <span className="text-[9px] text-green-600 font-medium">Completado</span>
               )}
 
-              <div className="text-[10px] text-gray-400 space-y-0.5 mt-1">
+              <div className="text-[10px] text-slate-400 space-y-0.5 mt-1">
                 {p.open_date && (
                   <p>{formatDate(p.open_date)}</p>
                 )}
                 {p.close_date && (
-                  <p className="text-gray-500">{formatDate(p.close_date)}</p>
+                  <p className="text-slate-500">{formatDate(p.close_date)}</p>
                 )}
                 {!p.open_date && !p.close_date && (
                   <p className="italic">Sin fechas</p>

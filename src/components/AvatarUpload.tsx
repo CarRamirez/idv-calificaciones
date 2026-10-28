@@ -78,12 +78,12 @@ export default function AvatarUpload({ currentUrl, entityType, entityId, size = 
             alt="Avatar"
             width={size}
             height={size}
-            className="rounded-full object-cover border-2 border-gray-200 group-hover:border-primary-400 transition-colors"
+            className="rounded-full object-cover border-2 border-slate-200 group-hover:border-primary-400 transition-colors"
             style={{ width: size, height: size }}
           />
         ) : (
           <div
-            className="rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-lg font-bold group-hover:bg-primary-100 group-hover:text-primary-600 transition-colors"
+            className="rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-lg font-bold group-hover:bg-primary-100 group-hover:text-primary-600 transition-colors"
             style={{ width: size, height: size }}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

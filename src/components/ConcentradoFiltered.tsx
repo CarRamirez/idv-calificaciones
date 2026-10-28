@@ -157,14 +157,14 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Group selector */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Grupo</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Grupo</label>
             <select
               value={selectedGroupId}
               onChange={(e) => {
                 setSelectedGroupId(e.target.value);
                 setSelectedSubjectId("all");
               }}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="">— Seleccionar grupo —</option>
               {groups.map((g) => (
@@ -175,12 +175,12 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
 
           {/* Subject selector */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Materia</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Materia</label>
             <select
               value={selectedSubjectId}
               onChange={(e) => setSelectedSubjectId(e.target.value)}
               disabled={!selectedGroupId}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
             >
               <option value="all">Todas las materias</option>
               {subjectsForGroup.map((s) => (
@@ -191,7 +191,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
 
           {/* Filter mode */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Vista</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Vista</label>
             <div className="flex gap-1">
               {([
                 { key: "month" as FilterMode, label: "Mes" },
@@ -204,7 +204,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                   className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     filterMode === opt.key
                       ? "bg-primary-600 text-white shadow-sm"
-                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                      : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                   }`}
                 >
                   {opt.label}
@@ -215,14 +215,14 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
 
           {/* Period/Trimester sub-selector */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
               {filterMode === "month" ? "Periodo" : filterMode === "trimester" ? "Trimestre" : "—"}
             </label>
             {filterMode === "month" && (
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(Number(e.target.value))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 {PERIODS.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -233,7 +233,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
               <select
                 value={selectedTrimester}
                 onChange={(e) => setSelectedTrimester(Number(e.target.value))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 {TRIMESTERS.map((t) => (
                   <option key={t.id} value={t.id}>{t.name}</option>
@@ -241,7 +241,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
               </select>
             )}
             {filterMode === "general" && (
-              <div className="px-3 py-2 text-sm text-gray-400 italic">Todos los periodos</div>
+              <div className="px-3 py-2 text-sm text-slate-400 italic">Todos los periodos</div>
             )}
           </div>
         </div>
@@ -250,10 +250,10 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
       {/* No group selected */}
       {!selectedGroupId && (
         <div className="empty-state py-16 text-center">
-          <svg className="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           </svg>
-          <p className="text-gray-500 font-medium">Selecciona un grupo para ver el concentrado</p>
+          <p className="text-slate-500 font-medium">Selecciona un grupo para ver el concentrado</p>
         </div>
       )}
 
@@ -302,15 +302,15 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-idv.png" alt="IDV" className="w-14 h-14 object-contain" />
               <div>
-                <h1 className="text-base font-bold text-gray-900">Instituto Don Vasco — Secundaria</h1>
-                <p className="text-sm text-gray-500">Concentrado de Calificaciones — Ciclo Escolar 2026-2027</p>
+                <h1 className="text-base font-bold text-slate-900">Instituto Don Vasco — Secundaria</h1>
+                <p className="text-sm text-slate-500">Concentrado de Calificaciones — Ciclo Escolar 2026-2027</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-base font-bold text-gray-900">
+              <p className="text-base font-bold text-slate-900">
                 {selectedGroup?.grade}° &ldquo;{selectedGroup?.letter}&rdquo;
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500">
                 {filterTitle} — {subjectTitle}
               </p>
             </div>
@@ -321,7 +321,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
             <span className="px-2 py-1 rounded bg-red-100 text-red-800">5-6.9</span>
             <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-800">7-7.9</span>
             <span className="px-2 py-1 rounded bg-green-100 text-green-800">8-10</span>
-            <span className="text-gray-300">|</span>
+            <span className="text-slate-300">|</span>
             <span className="px-2 py-1 rounded bg-red-100 text-red-800">≥3 incump.</span>
             <span className="px-2 py-1 rounded bg-amber-100 text-amber-800">1-2 incump.</span>
           </div>
@@ -335,9 +335,9 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     <th className="w-10">N°</th>
                     <th className="min-w-[180px]">Nombre</th>
                     {displaySubjects.map((s) => (
-                      <th key={s.id} className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
+                      <th key={s.id} className={`text-center text-xs border-l border-slate-200 ${!s.counts_for_avg ? "bg-slate-50 text-slate-400 italic" : ""}`}>
                         {s.short_name}
-                        {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
+                        {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-slate-400">N/C</span>}
                       </th>
                     ))}
                   </tr>
@@ -345,19 +345,19 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                 <tbody>
                   {studentsForGroup.map((student) => (
                     <tr key={student.id}>
-                      <td className="text-center text-gray-500 tabular-nums text-xs">{student.list_num}</td>
-                      <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
+                      <td className="text-center text-slate-500 tabular-nums text-xs">{student.list_num}</td>
+                      <td className="text-xs font-medium text-slate-900">{formatStudentName(student.full_name)}</td>
                       {displaySubjects.map((s) => {
                         const score = getScore(student.id, s.id, selectedPeriod);
                         const comment = getComment(student.id, s.id, selectedPeriod);
                         return (
-                          <td key={s.id} className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(score) : semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
+                          <td key={s.id} className={`text-center text-xs tabular-nums border-l border-slate-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(score) : semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
                             {fmt(score)}
                             {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
                             {comment && (
-                              <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
+                              <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-slate-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
                                 {comment}
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
                               </div>
                             )}
                           </td>
@@ -368,13 +368,13 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                 </tbody>
                 {/* Penalty totals row */}
                 <tfoot>
-                  <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-                    <td className="text-center text-xs text-gray-500">Σ</td>
-                    <td className="text-xs font-semibold text-gray-700">Total grupo</td>
+                  <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
+                    <td className="text-center text-xs text-slate-500">Σ</td>
+                    <td className="text-xs font-semibold text-slate-700">Total grupo</td>
                     {displaySubjects.map((s) => {
-                      if (!PENALTY_SUBJECTS.has(s.short_name)) return <td key={s.id} className="border-l border-gray-100" />;
+                      if (!PENALTY_SUBJECTS.has(s.short_name)) return <td key={s.id} className="border-l border-slate-100" />;
                       const total = penaltyTotal(s.id, selectedPeriod);
-                      return <td key={s.id} className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700">{total}</td>;
+                      return <td key={s.id} className="text-center text-xs tabular-nums font-bold border-l border-slate-100 text-red-700">{total}</td>;
                     })}
                   </tr>
                 </tfoot>
@@ -392,21 +392,21 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                       <th
                         key={s.id}
                         colSpan={activeTrimester.periods.length + 1}
-                        className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}
+                        className={`text-center text-xs border-l border-slate-200 ${!s.counts_for_avg ? "bg-slate-50 text-slate-400 italic" : ""}`}
                       >
                         {s.short_name}
-                        {!s.counts_for_avg && <span className="ml-1 text-[10px] font-normal not-italic text-gray-400">(N/C)</span>}
+                        {!s.counts_for_avg && <span className="ml-1 text-[10px] font-normal not-italic text-slate-400">(N/C)</span>}
                       </th>
                     ))}
-                    <th rowSpan={2} className="w-16 text-center border-l border-gray-300 bg-gray-100">Prom. Trim.</th>
+                    <th rowSpan={2} className="w-16 text-center border-l border-slate-300 bg-slate-100">Prom. Trim.</th>
                   </tr>
                   <tr>
                     {displaySubjects.map((s) => (
                       <React.Fragment key={s.id}>
                         {activeTrimester.periods.map((p) => (
-                          <th key={p} className="text-center text-xs w-12 border-l border-gray-200">{PERIODS.find((pp) => pp.id === p)?.short ?? ""}</th>
+                          <th key={p} className="text-center text-xs w-12 border-l border-slate-200">{PERIODS.find((pp) => pp.id === p)?.short ?? ""}</th>
                         ))}
-                        <th className="text-center text-xs w-12 border-l border-gray-200 bg-primary-50/50 font-bold">Prom.</th>
+                        <th className="text-center text-xs w-12 border-l border-slate-200 bg-primary-50/50 font-bold">Prom.</th>
                       </React.Fragment>
                     ))}
                   </tr>
@@ -421,8 +421,8 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     const trimGenAvg = curAvgs.length > 0 ? curAvgs.reduce((a, b) => a + b, 0) / curAvgs.length : null;
                     return (
                       <tr key={student.id}>
-                        <td className="text-center text-gray-500 tabular-nums text-xs">{student.list_num}</td>
-                        <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
+                        <td className="text-center text-slate-500 tabular-nums text-xs">{student.list_num}</td>
+                        <td className="text-xs font-medium text-slate-900">{formatStudentName(student.full_name)}</td>
                         {displaySubjects.map((s) => {
                           const trimAvg = getTrimesterAvg(student.id, s.id, activeTrimester.periods);
                           return (
@@ -431,53 +431,53 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                                 const score = getScore(student.id, s.id, p);
                                 const comment = getComment(student.id, s.id, p);
                                 return (
-                                  <td key={p} className={`text-center text-xs tabular-nums border-l border-gray-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
+                                  <td key={p} className={`text-center text-xs tabular-nums border-l border-slate-100 ${semaforoClass(score)} ${comment ? "relative group/c cursor-help" : ""}`}>
                                     {fmt(score)}
                                     {comment && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full print:hidden" />}
                                     {comment && (
-                                      <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-gray-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
+                                      <div className="absolute z-50 hidden group-hover/c:block bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[11px] text-left font-normal text-white bg-slate-800 rounded shadow-lg whitespace-pre-wrap max-w-[200px] print:hidden">
                                         {comment}
-                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
                                       </div>
                                     )}
                                   </td>
                                 );
                               })}
-                              <td className={`text-center text-xs tabular-nums border-l border-gray-100 font-semibold ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(trimAvg) : semaforoClass(trimAvg)}`}>{fmt(trimAvg)}</td>
+                              <td className={`text-center text-xs tabular-nums border-l border-slate-100 font-semibold ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(trimAvg) : semaforoClass(trimAvg)}`}>{fmt(trimAvg)}</td>
                             </React.Fragment>
                           );
                         })}
-                        <td className={`text-center text-xs font-bold tabular-nums border-l border-gray-200 ${semaforoClass(trimGenAvg)}`}>{fmt(trimGenAvg)}</td>
+                        <td className={`text-center text-xs font-bold tabular-nums border-l border-slate-200 ${semaforoClass(trimGenAvg)}`}>{fmt(trimGenAvg)}</td>
                       </tr>
                     );
                   })}
                 </tbody>
                 {/* Penalty totals row */}
                 <tfoot>
-                  <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-                    <td className="text-center text-xs text-gray-500">Σ</td>
-                    <td className="text-xs font-semibold text-gray-700">Total grupo</td>
+                  <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
+                    <td className="text-center text-xs text-slate-500">Σ</td>
+                    <td className="text-xs font-semibold text-slate-700">Total grupo</td>
                     {displaySubjects.map((s) => {
                       if (!PENALTY_SUBJECTS.has(s.short_name)) {
                         return (
                           <React.Fragment key={s.id}>
-                            {activeTrimester!.periods.map((p) => <td key={p} className="border-l border-gray-100" />)}
-                            <td className="border-l border-gray-100" />
+                            {activeTrimester!.periods.map((p) => <td key={p} className="border-l border-slate-100" />)}
+                            <td className="border-l border-slate-100" />
                           </React.Fragment>
                         );
                       }
                       return (
                         <React.Fragment key={s.id}>
                           {activeTrimester!.periods.map((p) => (
-                            <td key={p} className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700">{penaltyTotal(s.id, p)}</td>
+                            <td key={p} className="text-center text-xs tabular-nums font-bold border-l border-slate-100 text-red-700">{penaltyTotal(s.id, p)}</td>
                           ))}
-                          <td className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700 bg-red-50">
+                          <td className="text-center text-xs tabular-nums font-bold border-l border-slate-100 text-red-700 bg-red-50">
                             {penaltyTotalTrimester(s.id, activeTrimester!.periods)}
                           </td>
                         </React.Fragment>
                       );
                     })}
-                    <td className="border-l border-gray-200" />
+                    <td className="border-l border-slate-200" />
                   </tr>
                 </tfoot>
               </table>
@@ -491,12 +491,12 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     <th className="w-10">N°</th>
                     <th className="min-w-[180px]">Nombre</th>
                     {displaySubjects.map((s) => (
-                      <th key={s.id} className={`text-center text-xs border-l border-gray-200 ${!s.counts_for_avg ? "bg-gray-50 text-gray-400 italic" : ""}`}>
+                      <th key={s.id} className={`text-center text-xs border-l border-slate-200 ${!s.counts_for_avg ? "bg-slate-50 text-slate-400 italic" : ""}`}>
                         {s.short_name}
-                        {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-gray-400">N/C</span>}
+                        {!s.counts_for_avg && <span className="block text-[10px] font-normal not-italic text-slate-400">N/C</span>}
                       </th>
                     ))}
-                    <th className="w-16 text-center border-l border-gray-300 bg-gray-100">Prom. Gral.</th>
+                    <th className="w-16 text-center border-l border-slate-300 bg-slate-100">Prom. Gral.</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -508,30 +508,30 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
                     const genAvg = curAvgs.length > 0 ? curAvgs.reduce((a, b) => a + b, 0) / curAvgs.length : null;
                     return (
                       <tr key={student.id}>
-                        <td className="text-center text-gray-500 tabular-nums text-xs">{student.list_num}</td>
-                        <td className="text-xs font-medium text-gray-900">{formatStudentName(student.full_name)}</td>
+                        <td className="text-center text-slate-500 tabular-nums text-xs">{student.list_num}</td>
+                        <td className="text-xs font-medium text-slate-900">{formatStudentName(student.full_name)}</td>
                         {displaySubjects.map((s) => {
                           const final = getSubjectFinal(student.id, s.id);
                           return (
-                            <td key={s.id} className={`text-center text-xs tabular-nums border-l border-gray-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(final) : semaforoClass(final)}`}>{fmt(final)}</td>
+                            <td key={s.id} className={`text-center text-xs tabular-nums border-l border-slate-100 ${PENALTY_SUBJECTS.has(s.short_name) ? penaltyClass(final) : semaforoClass(final)}`}>{fmt(final)}</td>
                           );
                         })}
-                        <td className={`text-center text-xs font-bold tabular-nums border-l border-gray-200 ${semaforoClass(genAvg)}`}>{fmt(genAvg)}</td>
+                        <td className={`text-center text-xs font-bold tabular-nums border-l border-slate-200 ${semaforoClass(genAvg)}`}>{fmt(genAvg)}</td>
                       </tr>
                     );
                   })}
                 </tbody>
                 {/* Penalty totals row */}
                 <tfoot>
-                  <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-                    <td className="text-center text-xs text-gray-500">Σ</td>
-                    <td className="text-xs font-semibold text-gray-700">Total grupo</td>
+                  <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
+                    <td className="text-center text-xs text-slate-500">Σ</td>
+                    <td className="text-xs font-semibold text-slate-700">Total grupo</td>
                     {displaySubjects.map((s) => {
-                      if (!PENALTY_SUBJECTS.has(s.short_name)) return <td key={s.id} className="border-l border-gray-100" />;
+                      if (!PENALTY_SUBJECTS.has(s.short_name)) return <td key={s.id} className="border-l border-slate-100" />;
                       const total = penaltyTotalGeneral(s.id);
-                      return <td key={s.id} className="text-center text-xs tabular-nums font-bold border-l border-gray-100 text-red-700">{total}</td>;
+                      return <td key={s.id} className="text-center text-xs tabular-nums font-bold border-l border-slate-100 text-red-700">{total}</td>;
                     })}
-                    <td className="border-l border-gray-200" />
+                    <td className="border-l border-slate-200" />
                   </tr>
                 </tfoot>
               </table>
@@ -542,9 +542,9 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
           <div className="hidden concentrado-f-print-header mt-8 px-4">
             <div className="flex justify-end">
               <div className="text-center">
-                <div className="w-56 border-t border-gray-400 pt-1">
-                  <p className="text-xs font-semibold text-gray-800">Lic. Ana Laura Zúñiga García</p>
-                  <p className="text-[10px] text-gray-500">Directora de Secundaria</p>
+                <div className="w-56 border-t border-slate-400 pt-1">
+                  <p className="text-xs font-semibold text-slate-800">Lic. Ana Laura Zúñiga García</p>
+                  <p className="text-[10px] text-slate-500">Directora de Secundaria</p>
                 </div>
               </div>
             </div>

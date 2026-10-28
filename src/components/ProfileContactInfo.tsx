@@ -110,7 +110,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
   return (
     <div className="card p-5 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
           Datos de contacto
         </h2>
         {canEdit && !editing && (
@@ -126,7 +126,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
       {editing ? (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Celular</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Celular</label>
             <input
               type="tel"
               value={celular}
@@ -136,7 +136,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Teléfono de emergencia</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Teléfono de emergencia</label>
             <input
               type="tel"
               value={telefonoEmergencia}
@@ -146,7 +146,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Correo personal</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Correo personal</label>
             <input
               type="email"
               value={correoPersonal}
@@ -156,7 +156,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Contacto de emergencia</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Contacto de emergencia</label>
             <input
               type="text"
               value={nombreEmergencia}
@@ -166,7 +166,7 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Relación</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Relación</label>
             <input
               type="text"
               value={relacionEmergencia}
@@ -201,8 +201,8 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-xs text-gray-400">Celular</p>
-                <p className="text-sm font-medium text-gray-800">{formatPhone(celular)}</p>
+                <p className="text-xs text-slate-400">Celular</p>
+                <p className="text-sm font-medium text-slate-800">{formatPhone(celular)}</p>
               </div>
               {whatsappUrl && (
                 <a
@@ -229,8 +229,8 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Tel. emergencia</p>
-                <p className="text-sm font-medium text-gray-800">{formatPhone(telefonoEmergencia)}</p>
+                <p className="text-xs text-slate-400">Tel. emergencia</p>
+                <p className="text-sm font-medium text-slate-800">{formatPhone(telefonoEmergencia)}</p>
               </div>
             </div>
           )}
@@ -243,8 +243,8 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Correo personal</p>
-                <p className="text-sm font-medium text-gray-800">{correoPersonal}</p>
+                <p className="text-xs text-slate-400">Correo personal</p>
+                <p className="text-sm font-medium text-slate-800">{correoPersonal}</p>
               </div>
             </div>
           )}
@@ -257,17 +257,17 @@ export default function ProfileContactInfo({ profileId, isStudent, canEdit }: Pr
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-400">Contacto de emergencia</p>
-                <p className="text-sm font-medium text-gray-800">{nombreEmergencia}</p>
+                <p className="text-xs text-slate-400">Contacto de emergencia</p>
+                <p className="text-sm font-medium text-slate-800">{nombreEmergencia}</p>
                 {relacionEmergencia && (
-                  <p className="text-xs text-gray-400">{relacionEmergencia}</p>
+                  <p className="text-xs text-slate-400">{relacionEmergencia}</p>
                 )}
               </div>
             </div>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-400 text-center py-2">
+        <p className="text-sm text-slate-400 text-center py-2">
           Sin datos de contacto registrados
           {canEdit && (
             <>

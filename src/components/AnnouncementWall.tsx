@@ -11,13 +11,13 @@ type Announcement = {
 };
 
 const CATEGORIES = [
-  { value: "general", label: "General", color: "bg-gray-100 text-gray-700" },
+  { value: "general", label: "General", color: "bg-slate-100 text-slate-700" },
   { value: "academico", label: "Académico", color: "bg-blue-100 text-blue-700" },
   { value: "administrativo", label: "Administrativo", color: "bg-amber-100 text-amber-700" },
 ];
 
 function getCategoryStyle(cat: string) {
-  return CATEGORIES.find((c) => c.value === cat)?.color || "bg-gray-100 text-gray-700";
+  return CATEGORIES.find((c) => c.value === cat)?.color || "bg-slate-100 text-slate-700";
 }
 
 function getCategoryLabel(cat: string) {
@@ -110,9 +110,9 @@ export default function AnnouncementWall() {
   return (
     <div className="card flex flex-col h-full max-h-[calc(100vh-8rem)] overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0">
+      <div className="px-4 py-3 border-b border-slate-100 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <svg className="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
             </svg>
@@ -147,7 +147,7 @@ export default function AnnouncementWall() {
             className={`text-[11px] px-2 py-0.5 rounded-full transition-colors ${
               filter === "todos"
                 ? "bg-primary-100 text-primary-700 font-medium"
-                : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                : "bg-slate-50 text-slate-500 hover:bg-slate-100"
             }`}
           >
             Todos
@@ -159,7 +159,7 @@ export default function AnnouncementWall() {
               className={`text-[11px] px-2 py-0.5 rounded-full transition-colors ${
                 filter === c.value
                   ? `${c.color} font-medium`
-                  : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                  : "bg-slate-50 text-slate-500 hover:bg-slate-100"
               }`}
             >
               {c.label}
@@ -170,12 +170,12 @@ export default function AnnouncementWall() {
 
       {/* New announcement form */}
       {showForm && (
-        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
+        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Escribe un aviso..."
-            className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300"
+            className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300"
             rows={3}
             maxLength={500}
           />
@@ -183,7 +183,7 @@ export default function AnnouncementWall() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-300"
+              className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary-300"
             >
               {CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -192,7 +192,7 @@ export default function AnnouncementWall() {
               ))}
             </select>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-gray-400">{content.length}/500</span>
+              <span className="text-[10px] text-slate-400">{content.length}/500</span>
               <button
                 onClick={handlePost}
                 disabled={posting || !content.trim()}
@@ -213,10 +213,10 @@ export default function AnnouncementWall() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-8">
-            <svg className="w-10 h-10 mx-auto text-gray-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-10 h-10 mx-auto text-slate-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
             </svg>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-slate-400">
               {filter === "todos" ? "No hay avisos aún" : "Sin avisos en esta categoría"}
             </p>
           </div>
@@ -224,7 +224,7 @@ export default function AnnouncementWall() {
           filtered.map((ann) => (
             <div
               key={ann.id}
-              className="group relative bg-white border border-gray-100 rounded-lg px-3 py-2.5 hover:border-gray-200 transition-colors"
+              className="group relative bg-white border border-slate-100 rounded-lg px-3 py-2.5 hover:border-slate-200 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -232,18 +232,18 @@ export default function AnnouncementWall() {
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${getCategoryStyle(ann.category)}`}>
                       {getCategoryLabel(ann.category)}
                     </span>
-                    <span className="text-[10px] text-gray-400">{timeAgo(ann.created_at)}</span>
+                    <span className="text-[10px] text-slate-400">{timeAgo(ann.created_at)}</span>
                   </div>
-                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line break-words">
+                  <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-line break-words">
                     {ann.content}
                   </p>
-                  <p className="text-[11px] text-gray-400 mt-1.5">
+                  <p className="text-[11px] text-slate-400 mt-1.5">
                     {ann.author_name.split(" ").slice(0, 2).join(" ")}
                   </p>
                 </div>
                 <button
                   onClick={() => handleDelete(ann.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-500 transition-all flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 transition-all flex-shrink-0"
                   title="Eliminar aviso"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,8 +257,8 @@ export default function AnnouncementWall() {
       </div>
 
       {/* Footer count */}
-      <div className="px-4 py-2 border-t border-gray-100 flex-shrink-0">
-        <p className="text-[10px] text-gray-400 text-center">
+      <div className="px-4 py-2 border-t border-slate-100 flex-shrink-0">
+        <p className="text-[10px] text-slate-400 text-center">
           {filtered.length} aviso{filtered.length !== 1 ? "s" : ""}
           {filter !== "todos" ? ` en ${getCategoryLabel(filter).toLowerCase()}` : ""}
         </p>

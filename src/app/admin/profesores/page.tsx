@@ -346,8 +346,8 @@ export default function AdminProfesoresPage() {
 
   if (loading || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-sm text-gray-500">Cargando...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-sm text-slate-500">Cargando...</div>
       </div>
     );
   }
@@ -358,7 +358,7 @@ export default function AdminProfesoresPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-          <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>Profesores</h1>
+          <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Profesores</h1>
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowNew(true)} className="btn-primary text-sm">
               + Nuevo profesor
@@ -402,9 +402,9 @@ export default function AdminProfesoresPage() {
 
         {/* Teachers list */}
         {teachers.length === 0 ? (
-          <div className="card p-8 text-center text-gray-400 text-sm">
+          <div className="card p-8 text-center text-slate-400 text-sm">
             <p>No hay profesores registrados.</p>
-            <p className="mt-2">Usa el boton <strong>+ Nuevo profesor</strong> o carga un archivo CSV con columnas: <code className="bg-gray-100 px-1 rounded">nombre, correo, contrasena, perfil, etiqueta</code></p>
+            <p className="mt-2">Usa el boton <strong>+ Nuevo profesor</strong> o carga un archivo CSV con columnas: <code className="bg-slate-100 px-1 rounded">nombre, correo, contrasena, perfil, etiqueta</code></p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -415,7 +415,7 @@ export default function AdminProfesoresPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <h3 className="font-bold text-gray-900 text-sm">{t.full_name}</h3>
+                        <h3 className="font-bold text-slate-900 text-sm">{t.full_name}</h3>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                           t.role === "admin"
                             ? "bg-purple-100 text-purple-700"
@@ -428,12 +428,12 @@ export default function AdminProfesoresPage() {
                           {t.role === "admin" ? "Admin" : t.role === "directora_anita" ? "Dirección" : t.role === "teacher" ? "Profesor" : t.role}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400">{t.email || "Sin correo"}</p>
+                      <p className="text-xs text-slate-400">{t.email || "Sin correo"}</p>
                       {t.label && (
-                        <p className="text-xs text-gray-500 italic mt-0.5">{t.label}</p>
+                        <p className="text-xs text-slate-500 italic mt-0.5">{t.label}</p>
                       )}
                       {ta.length === 0 ? (
-                        <p className="text-xs text-gray-400 mt-1">Sin materias asignadas</p>
+                        <p className="text-xs text-slate-400 mt-1">Sin materias asignadas</p>
                       ) : (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {ta.map((a) => (
@@ -457,7 +457,7 @@ export default function AdminProfesoresPage() {
                     <div className="flex gap-2 shrink-0 ml-4">
                       <button
                         onClick={() => openEditTeacher(t)}
-                        className="text-xs text-gray-600 hover:text-gray-800"
+                        className="text-xs text-slate-600 hover:text-slate-800"
                       >
                         Editar
                       </button>
@@ -489,24 +489,24 @@ export default function AdminProfesoresPage() {
         {showNew && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-4">Nuevo profesor</h2>
+              <h2 className="text-base font-bold text-slate-900 mb-4">Nuevo profesor</h2>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nombre completo *</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Nombre completo *</label>
                   <input
                     type="text" value={newName} onChange={(e) => setNewName(e.target.value)}
                     className="input-field" placeholder="Nombre del profesor" autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electronico *</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Correo electronico *</label>
                   <input
                     type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
                     className="input-field" placeholder="profesor@ejemplo.com"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Contrasena *</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Contrasena *</label>
                   <div className="relative">
                     <input
                       type={showPass ? "text" : "password"} value={newPass} onChange={(e) => setNewPass(e.target.value)}
@@ -515,14 +515,14 @@ export default function AdminProfesoresPage() {
                     <button
                       type="button"
                       onClick={() => setShowPass(!showPass)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm"
                     >
                       {showPass ? "Ocultar" : "Ver"}
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Perfil *</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Perfil *</label>
                   <select
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value)}
@@ -536,12 +536,12 @@ export default function AdminProfesoresPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Etiqueta</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Etiqueta</label>
                   <input
                     type="text" value={newLabel} onChange={(e) => setNewLabel(e.target.value)}
                     className="input-field" placeholder="Ej: Tecnologías - Sistemas IT"
                   />
-                  <p className="text-[11px] text-gray-400 mt-1">Opcional. Descripción breve del área o función.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Opcional. Descripción breve del área o función.</p>
                 </div>
               </div>
               {newError && <p className="text-xs text-red-600 mt-2">{newError}</p>}
@@ -559,41 +559,41 @@ export default function AdminProfesoresPage() {
         {showBulk && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 p-6 max-h-[80vh] flex flex-col">
-              <h2 className="text-base font-bold text-gray-900 mb-1">Carga masiva de profesores</h2>
-              <p className="text-sm text-gray-500 mb-4">
+              <h2 className="text-base font-bold text-slate-900 mb-1">Carga masiva de profesores</h2>
+              <p className="text-sm text-slate-500 mb-4">
                 {csvPreview.length} profesor{csvPreview.length !== 1 ? "es" : ""} encontrado{csvPreview.length !== 1 ? "s" : ""} en el archivo
               </p>
 
               {/* Preview table */}
-              <div className="overflow-auto flex-1 border border-gray-200 rounded-lg mb-4">
+              <div className="overflow-auto flex-1 border border-slate-200 rounded-lg mb-4">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 sticky top-0">
+                  <thead className="bg-slate-50 sticky top-0">
                     <tr>
-                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">#</th>
-                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Nombre</th>
-                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Correo</th>
-                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Contrasena</th>
-                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Perfil</th>
-                      <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Etiqueta</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">#</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">Nombre</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">Correo</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">Contrasena</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">Perfil</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">Etiqueta</th>
                       {bulkResults && (
-                        <th className="text-left px-3 py-2 text-xs font-medium text-gray-500">Estado</th>
+                        <th className="text-left px-3 py-2 text-xs font-medium text-slate-500">Estado</th>
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-100">
                     {csvPreview.map((row, i) => {
                       const result = bulkResults?.[i];
                       return (
                         <tr key={i} className={result ? (result.ok ? "bg-green-50" : "bg-red-50") : ""}>
-                          <td className="px-3 py-2 text-gray-400 text-xs">{i + 1}</td>
-                          <td className="px-3 py-2 text-gray-900">{row.full_name}</td>
-                          <td className="px-3 py-2 text-gray-600">{row.email}</td>
-                          <td className="px-3 py-2 text-gray-400">{"*".repeat(Math.min(row.password.length, 8))}</td>
-                          <td className="px-3 py-2 text-gray-600 text-xs">{(() => {
+                          <td className="px-3 py-2 text-slate-400 text-xs">{i + 1}</td>
+                          <td className="px-3 py-2 text-slate-900">{row.full_name}</td>
+                          <td className="px-3 py-2 text-slate-600">{row.email}</td>
+                          <td className="px-3 py-2 text-slate-400">{"*".repeat(Math.min(row.password.length, 8))}</td>
+                          <td className="px-3 py-2 text-slate-600 text-xs">{(() => {
                             const rl: Record<string, string> = { teacher: "Profesor", admin: "Admin", directora_anita: "Directora", viewer: "Observador" };
                             return rl[row.role] || row.role;
                           })()}</td>
-                          <td className="px-3 py-2 text-gray-500 text-xs">{row.label || <span className="text-gray-300">—</span>}</td>
+                          <td className="px-3 py-2 text-slate-500 text-xs">{row.label || <span className="text-slate-300">—</span>}</td>
                           {bulkResults && (
                             <td className="px-3 py-2 text-xs">
                               {result?.ok ? (
@@ -655,24 +655,24 @@ export default function AdminProfesoresPage() {
         {editTeacher && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-4">Editar profesor</h2>
+              <h2 className="text-base font-bold text-slate-900 mb-4">Editar profesor</h2>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nombre completo *</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Nombre completo *</label>
                   <input
                     type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
                     className="input-field" autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Correo electrónico</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Correo electrónico</label>
                   <input
                     type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
                     className="input-field"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Rol</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Rol</label>
                   <select
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value)}
@@ -686,14 +686,14 @@ export default function AdminProfesoresPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Etiqueta</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Etiqueta</label>
                   <input
                     type="text" value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
                     className="input-field" placeholder="Ej: Tecnologías - Sistemas IT"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Nueva contraseña</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Nueva contraseña</label>
                   <div className="relative">
                     <input
                       type={editShowPass ? "text" : "password"} value={editPass}
@@ -703,12 +703,12 @@ export default function AdminProfesoresPage() {
                     <button
                       type="button"
                       onClick={() => setEditShowPass(!editShowPass)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm"
                     >
                       {editShowPass ? "Ocultar" : "Ver"}
                     </button>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-1">Mínimo 6 caracteres. Solo se actualiza si escribes una nueva.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Mínimo 6 caracteres. Solo se actualiza si escribes una nueva.</p>
                 </div>
               </div>
               {editError && <p className="text-xs text-red-600 mt-2">{editError}</p>}
@@ -726,11 +726,11 @@ export default function AdminProfesoresPage() {
         {assignTeacher && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-1">Asignar materia</h2>
-              <p className="text-sm text-gray-500 mb-4">{assignTeacher.full_name}</p>
+              <h2 className="text-base font-bold text-slate-900 mb-1">Asignar materia</h2>
+              <p className="text-sm text-slate-500 mb-4">{assignTeacher.full_name}</p>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Grupo</label>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Grupo</label>
                   <select
                     value={assignGroup}
                     onChange={(e) => { setAssignGroup(e.target.value); setAssignSubjects([]); }}
@@ -743,18 +743,18 @@ export default function AdminProfesoresPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">
                     Materias {assignSubjects.length > 0 && <span className="text-primary-600">({assignSubjects.length} seleccionada{assignSubjects.length !== 1 ? "s" : ""})</span>}
                   </label>
                   {!assignGroup ? (
-                    <p className="text-xs text-gray-400 py-2">Selecciona un grupo primero</p>
+                    <p className="text-xs text-slate-400 py-2">Selecciona un grupo primero</p>
                   ) : (
-                    <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
+                    <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-1">
                       {filteredSubjects.length > 1 && (
-                        <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer border-b border-gray-100 mb-1 pb-2">
+                        <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-50 cursor-pointer border-b border-slate-100 mb-1 pb-2">
                           <input
                             type="checkbox"
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                             checked={assignSubjects.length === filteredSubjects.filter((s) => !assignments.some((a) => a.teacher_id === assignTeacher!.id && a.group_id === assignGroup && a.subject_id === s.id)).length && assignSubjects.length > 0}
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -773,10 +773,10 @@ export default function AdminProfesoresPage() {
                           (a) => a.teacher_id === assignTeacher!.id && a.group_id === assignGroup && a.subject_id === s.id
                         );
                         return (
-                          <label key={s.id} className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer ${alreadyAssigned ? "opacity-40" : "hover:bg-gray-50"}`}>
+                          <label key={s.id} className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer ${alreadyAssigned ? "opacity-40" : "hover:bg-slate-50"}`}>
                             <input
                               type="checkbox"
-                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                               disabled={alreadyAssigned}
                               checked={alreadyAssigned || assignSubjects.includes(s.id)}
                               onChange={(e) => {
@@ -787,7 +787,7 @@ export default function AdminProfesoresPage() {
                                 }
                               }}
                             />
-                            <span className={`text-xs ${alreadyAssigned ? "text-gray-400 line-through" : "text-gray-700"}`}>
+                            <span className={`text-xs ${alreadyAssigned ? "text-slate-400 line-through" : "text-slate-700"}`}>
                               {s.name} {alreadyAssigned ? "(ya asignada)" : ""}
                             </span>
                           </label>
@@ -815,9 +815,9 @@ export default function AdminProfesoresPage() {
         {deleteTeacher && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-2">Eliminar profesor?</h2>
-              <p className="text-sm text-gray-600 mb-1">{deleteTeacher.full_name}</p>
-              <p className="text-xs text-gray-500 mb-5">
+              <h2 className="text-base font-bold text-slate-900 mb-2">Eliminar profesor?</h2>
+              <p className="text-sm text-slate-600 mb-1">{deleteTeacher.full_name}</p>
+              <p className="text-xs text-slate-500 mb-5">
                 Se eliminara su cuenta, perfil y todas sus asignaciones.
               </p>
               <div className="flex justify-end gap-2">

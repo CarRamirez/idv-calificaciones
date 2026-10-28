@@ -70,10 +70,10 @@ export default async function ConcentradosPage() {
       <main className="max-w-full mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
               Concentrados
             </h1>
-            <p className="text-sm text-gray-500">Filtra por grupo, materia y periodo</p>
+            <p className="text-sm text-slate-500">Filtra por grupo, materia y periodo</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
         </div>

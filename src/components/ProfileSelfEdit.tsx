@@ -89,7 +89,7 @@ export default function ProfileSelfEdit({ profileId, initialName, initialEmail, 
   return (
     <div className="card p-5 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
           Mis datos
         </h2>
         {!editing && (
@@ -111,7 +111,7 @@ export default function ProfileSelfEdit({ profileId, initialName, initialEmail, 
       {editing ? (
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Nombre completo</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Nombre completo</label>
             <input
               type="text"
               value={name}
@@ -121,17 +121,17 @@ export default function ProfileSelfEdit({ profileId, initialName, initialEmail, 
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Correo electrónico</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Correo electrónico</label>
             <input
               type="email"
               value={initialEmail}
               disabled
-              className="input-field bg-gray-50 text-gray-400 cursor-not-allowed"
+              className="input-field bg-slate-50 text-slate-400 cursor-not-allowed"
             />
-            <p className="text-[11px] text-gray-400 mt-1">El correo no puede ser modificado.</p>
+            <p className="text-[11px] text-slate-400 mt-1">El correo no puede ser modificado.</p>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Etiqueta / descripción</label>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Etiqueta / descripción</label>
             <input
               type="text"
               value={label}
@@ -140,8 +140,8 @@ export default function ProfileSelfEdit({ profileId, initialName, initialEmail, 
               placeholder="Ej: Matemáticas — 2° grado"
             />
           </div>
-          <div className="border-t border-gray-100 pt-3 mt-3">
-            <p className="text-xs font-medium text-gray-600 mb-2">Cambiar contraseña (opcional)</p>
+          <div className="border-t border-slate-100 pt-3 mt-3">
+            <p className="text-xs font-medium text-slate-600 mb-2">Cambiar contraseña (opcional)</p>
             <div className="relative">
               <input
                 type={showNewPass ? "text" : "password"}
@@ -153,12 +153,12 @@ export default function ProfileSelfEdit({ profileId, initialName, initialEmail, 
               <button
                 type="button"
                 onClick={() => setShowNewPass(!showNewPass)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
               >
                 {showNewPass ? "Ocultar" : "Ver"}
               </button>
             </div>
-            <p className="text-[11px] text-gray-400 mt-1">Déjalo vacío si no deseas cambiar tu contraseña.</p>
+            <p className="text-[11px] text-slate-400 mt-1">Déjalo vacío si no deseas cambiar tu contraseña.</p>
           </div>
           {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
           <div className="flex gap-2 pt-1">
@@ -181,17 +181,17 @@ export default function ProfileSelfEdit({ profileId, initialName, initialEmail, 
       ) : (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 w-20">Nombre:</span>
-            <span className="text-sm text-gray-800 font-medium">{initialName}</span>
+            <span className="text-xs text-slate-400 w-20">Nombre:</span>
+            <span className="text-sm text-slate-800 font-medium">{initialName}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 w-20">Correo:</span>
-            <span className="text-sm text-gray-600">{initialEmail}</span>
+            <span className="text-xs text-slate-400 w-20">Correo:</span>
+            <span className="text-sm text-slate-600">{initialEmail}</span>
           </div>
           {initialLabel && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 w-20">Etiqueta:</span>
-              <span className="text-sm text-gray-600 italic">{initialLabel}</span>
+              <span className="text-xs text-slate-400 w-20">Etiqueta:</span>
+              <span className="text-sm text-slate-600 italic">{initialLabel}</span>
             </div>
           )}
         </div>

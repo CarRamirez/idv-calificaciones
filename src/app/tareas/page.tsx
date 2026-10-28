@@ -182,7 +182,7 @@ export default function TareasPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -213,13 +213,13 @@ export default function TareasPage() {
 
       <main className="page-content max-w-4xl animate-fade-in">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
             </svg>
             Notificación de Tareas
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Envía a los padres de familia el aviso de tareas del día
           </p>
         </div>
@@ -229,7 +229,7 @@ export default function TareasPage() {
           <div className="space-y-4">
             {/* Selector de grupo */}
             <div className="card p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
                 1. Selecciona el grupo
               </label>
               <div className="flex flex-wrap gap-2">
@@ -249,8 +249,8 @@ export default function TareasPage() {
                         isActive
                           ? "bg-primary-600 text-white shadow-md"
                           : hasEmail
-                          ? "bg-white border border-gray-300 text-gray-700 hover:border-primary-300 hover:bg-primary-50"
-                          : "bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed"
+                          ? "bg-white border border-slate-300 text-slate-700 hover:border-primary-300 hover:bg-primary-50"
+                          : "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
                       }`}
                       disabled={!hasEmail}
                       title={!hasEmail ? "Sin correo de padres configurado" : ""}
@@ -269,7 +269,7 @@ export default function TareasPage() {
                 </p>
               )}
               {groupObj && groupObj.parent_email && (
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-slate-400 mt-2">
                   Email del grupo: <span className="font-mono">{groupObj.parent_email}</span>
                 </p>
               )}
@@ -278,7 +278,7 @@ export default function TareasPage() {
             {/* Destinatarios */}
             {selectedGroup && groupObj?.parent_email && (
               <div className="card p-4">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-slate-700 mb-3">
                   2. Selecciona los destinatarios
                 </label>
                 <div className="space-y-2">
@@ -290,7 +290,7 @@ export default function TareasPage() {
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
                         recipients[r.key]
                           ? "border-primary-300 bg-primary-50"
-                          : "border-gray-200 bg-white"
+                          : "border-slate-200 bg-white"
                       }`}
                       onClick={() =>
                         setRecipients((prev) => ({ ...prev, [r.key]: !prev[r.key] }))
@@ -302,18 +302,18 @@ export default function TareasPage() {
                         onChange={() =>
                           setRecipients((prev) => ({ ...prev, [r.key]: !prev[r.key] }))
                         }
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-gray-800">{r.label}</span>
-                        <p className="text-xs text-gray-400 font-mono truncate">{r.desc}</p>
+                        <span className="text-sm font-medium text-slate-800">{r.label}</span>
+                        <p className="text-xs text-slate-400 font-mono truncate">{r.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 {/* Campo para correos adicionales */}
                 <div className="mt-3">
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-xs text-slate-500 mb-1">
                     Correos adicionales (separados por coma)
                   </label>
                   <input
@@ -321,13 +321,13 @@ export default function TareasPage() {
                     placeholder="ej. director@institutodonvasco.edu.mx, otro@correo.com"
                     value={customEmails}
                     onChange={(e) => setCustomEmails(e.target.value)}
-                    className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
 
                 {/* Mensaje personalizado */}
                 <div className="mt-3">
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-xs text-slate-500 mb-1">
                     Mensaje personalizado (opcional)
                   </label>
                   <textarea
@@ -336,10 +336,10 @@ export default function TareasPage() {
                     onChange={(e) => setCustomMessage(e.target.value)}
                     rows={3}
                     maxLength={500}
-                    className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                    className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                   />
                   {customMessage.length > 0 && (
-                    <p className="text-[10px] text-gray-400 text-right mt-1">
+                    <p className="text-[10px] text-slate-400 text-right mt-1">
                       {customMessage.length}/500
                     </p>
                   )}
@@ -350,7 +350,7 @@ export default function TareasPage() {
             {/* Materias */}
             {selectedGroup && filteredSubjects.length > 0 && (
               <div className="card p-4">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-slate-700 mb-3">
                   3. Selecciona las materias con tarea
                 </label>
                 <div className="space-y-2">
@@ -358,7 +358,7 @@ export default function TareasPage() {
                     const isChecked = !!selected[s.id];
                     return (
                       <div key={s.id} className={`rounded-lg border transition-all ${
-                        isChecked ? "border-primary-300 bg-primary-50" : "border-gray-200 bg-white"
+                        isChecked ? "border-primary-300 bg-primary-50" : "border-slate-200 bg-white"
                       }`}>
                         <div
                           className="flex items-center gap-3 px-4 py-3 cursor-pointer"
@@ -368,14 +368,14 @@ export default function TareasPage() {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleSubject(s)}
-                            className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                           />
                           <div className="flex-1">
-                            <span className="text-sm font-medium text-gray-800">{s.name}</span>
-                            <span className="ml-2 text-xs text-gray-400 font-mono">{s.short_name}</span>
+                            <span className="text-sm font-medium text-slate-800">{s.name}</span>
+                            <span className="ml-2 text-xs text-slate-400 font-mono">{s.short_name}</span>
                           </div>
                           {!s.counts_for_avg && (
-                            <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
                               No curricular
                             </span>
                           )}
@@ -388,7 +388,7 @@ export default function TareasPage() {
                               placeholder="Comentario opcional (ej. Traer materiales para maqueta)"
                               value={selected[s.id]?.comment || ""}
                               onChange={(e) => setComment(s.id, e.target.value)}
-                              className="w-full text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="w-full text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                               maxLength={200}
                             />
                           </div>
@@ -438,24 +438,24 @@ export default function TareasPage() {
           {/* ── Historial de envíos ── */}
           <div>
             <div className="card p-4 sticky top-20">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Historial de envíos
               </h3>
               {history.length === 0 ? (
-                <p className="text-xs text-gray-400 text-center py-4">Sin envíos registrados</p>
+                <p className="text-xs text-slate-400 text-center py-4">Sin envíos registrados</p>
               ) : (
                 <div className="space-y-3">
                   {history.map((n) => (
-                    <div key={n.id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                    <div key={n.id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-700">
+                        <span className="text-xs font-medium text-slate-700">
                           {n.groups ? `${n.groups.grade}°${n.groups.letter}` : "—"}
                         </span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-gray-400">{timeAgo(n.sent_at)}</span>
+                          <span className="text-[10px] text-slate-400">{timeAgo(n.sent_at)}</span>
                           {deletingNotif === n.id ? (
                             <div className="flex items-center gap-1">
                               <button
@@ -466,7 +466,7 @@ export default function TareasPage() {
                               </button>
                               <button
                                 onClick={() => setDeletingNotif(null)}
-                                className="text-[10px] text-gray-400 hover:text-gray-600"
+                                className="text-[10px] text-slate-400 hover:text-slate-600"
                               >
                                 Cancelar
                               </button>
@@ -474,7 +474,7 @@ export default function TareasPage() {
                           ) : (
                             <button
                               onClick={() => setDeletingNotif(n.id)}
-                              className="text-gray-300 hover:text-red-500 transition-colors"
+                              className="text-slate-300 hover:text-red-500 transition-colors"
                               title="Eliminar"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,7 +495,7 @@ export default function TareasPage() {
                           </span>
                         ))}
                       </div>
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[10px] text-slate-400 mt-1">
                         {n.profiles?.full_name || "—"} → {n.recipient_email}
                       </p>
                     </div>
