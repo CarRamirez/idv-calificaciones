@@ -51,6 +51,9 @@ export default function RootLayout({
                     resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                   }
                   document.documentElement.setAttribute('data-theme', resolved);
+                  if (localStorage.getItem('theme-vidrio') === '1') {
+                    document.documentElement.classList.add('glass');
+                  }
                   var color = localStorage.getItem('theme-color') || 'indigo';
                   var skins = {
                     indigo: { p: '#5c7cfa', s: '#7c3aed', g: 'linear-gradient(135deg, #5c7cfa 0%, #7c3aed 100%)', r: 'rgba(92,124,250,0.5)', sh: 'rgba(92,124,250,0.35)', bar: 'linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee)' },
@@ -58,7 +61,11 @@ export default function RootLayout({
                     emerald: { p: '#059669', s: '#10b981', g: 'linear-gradient(135deg, #059669 0%, #34d399 100%)', r: 'rgba(5,150,105,0.5)', sh: 'rgba(5,150,105,0.35)', bar: 'linear-gradient(90deg, #059669, #10b981, #34d399, #6ee7b7, #a7f3d0)' },
                     rose: { p: '#e11d48', s: '#f43f5e', g: 'linear-gradient(135deg, #e11d48 0%, #fb7185 100%)', r: 'rgba(225,29,72,0.5)', sh: 'rgba(225,29,72,0.35)', bar: 'linear-gradient(90deg, #e11d48, #f43f5e, #fb7185, #fda4af, #fecdd3)' },
                     amber: { p: '#d97706', s: '#f59e0b', g: 'linear-gradient(135deg, #d97706 0%, #fbbf24 100%)', r: 'rgba(217,119,6,0.5)', sh: 'rgba(217,119,6,0.35)', bar: 'linear-gradient(90deg, #d97706, #f59e0b, #fbbf24, #fde68a, #fef3c7)' },
-                    cyan: { p: '#0891b2', s: '#06b6d4', g: 'linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)', r: 'rgba(8,145,178,0.5)', sh: 'rgba(8,145,178,0.35)', bar: 'linear-gradient(90deg, #0891b2, #06b6d4, #22d3ee, #67e8f9, #a5f3fc)' }
+                    cyan: { p: '#0891b2', s: '#06b6d4', g: 'linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)', r: 'rgba(8,145,178,0.5)', sh: 'rgba(8,145,178,0.35)', bar: 'linear-gradient(90deg, #0891b2, #06b6d4, #22d3ee, #67e8f9, #a5f3fc)' },
+                    silver: { p: '#94a3b8', s: '#cbd5e1', g: 'linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #e2e8f0 100%)', r: 'rgba(148,163,184,0.5)', sh: 'rgba(148,163,184,0.35)', bar: 'linear-gradient(90deg, #64748b, #94a3b8, #cbd5e1, #e2e8f0, #f1f5f9)' },
+                    gold: { p: '#b8860b', s: '#daa520', g: 'linear-gradient(135deg, #b8860b 0%, #daa520 50%, #f0d060 100%)', r: 'rgba(184,134,11,0.5)', sh: 'rgba(184,134,11,0.35)', bar: 'linear-gradient(90deg, #8b6914, #b8860b, #daa520, #f0d060, #fdf0b0)' },
+                    bronze: { p: '#a0522d', s: '#cd7f32', g: 'linear-gradient(135deg, #a0522d 0%, #cd7f32 50%, #dea06c 100%)', r: 'rgba(205,127,50,0.5)', sh: 'rgba(205,127,50,0.35)', bar: 'linear-gradient(90deg, #8b4513, #a0522d, #cd7f32, #dea06c, #f0c8a0)' },
+                    graphite: { p: '#374151', s: '#4b5563', g: 'linear-gradient(135deg, #1f2937 0%, #374151 50%, #6b7280 100%)', r: 'rgba(55,65,81,0.5)', sh: 'rgba(55,65,81,0.35)', bar: 'linear-gradient(90deg, #111827, #1f2937, #374151, #4b5563, #6b7280)' }
                   };
                   var s = skins[color] || skins.indigo;
                   var d = document.documentElement.style;

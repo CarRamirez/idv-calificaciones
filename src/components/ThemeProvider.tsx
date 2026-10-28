@@ -9,17 +9,21 @@ export type ThemeColor = "indigo" | "blue" | "emerald" | "rose" | "amber" | "cya
 type ThemeCtx = {
   mode: ThemeMode;
   color: ThemeColor;
+  vidrio: boolean;
   resolved: "light" | "dark";
   setMode: (m: ThemeMode) => void;
   setColor: (c: ThemeColor) => void;
+  setVidrio: (v: boolean) => void;
 };
 
 const ThemeContext = createContext<ThemeCtx>({
   mode: "light",
   color: "indigo",
+  vidrio: false,
   resolved: "light",
   setMode: () => {},
   setColor: () => {},
+  setVidrio: () => {},
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -139,9 +143,10 @@ function resolveMode(mode: ThemeMode): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function applyToDOM(m: ThemeMode, c: ThemeColor) {
+function applyToDOM(m: ThemeMode, c: ThemeColor, v: boolean) {
   const r = resolveMode(m);
   document.documentElement.setAttribute("data-theme", r);
+  document.documentElement.classList.toggle("glass", v);
   const vars = COLOR_VARS[c] || COLOR_VARS.indigo;
   for (const [key, val] of Object.entries(vars)) {
     document.documentElement.style.setProperty(key, val);
@@ -150,29 +155,33 @@ function applyToDOM(m: ThemeMode, c: ThemeColor) {
 }
 
 // Read per-user keys from localStorage
-function readUserPref(userId: string): { mode: ThemeMode; color: ThemeColor } {
+function readUserPref(userId: string): { mode: ThemeMode; color: ThemeColor; vidrio: boolean } {
   try {
     const mode = (localStorage.getItem(`theme-mode-${userId}`) as ThemeMode) || "light";
     const color = (localStorage.getItem(`theme-color-${userId}`) as ThemeColor) || "indigo";
-    return { mode, color };
+    const vidrio = localStorage.getItem(`theme-vidrio-${userId}`) === "1";
+    return { mode, color, vidrio };
   } catch {
-    return { mode: "light", color: "indigo" };
+    return { mode: "light", color: "indigo", vidrio: false };
   }
 }
 
-function writeUserPref(userId: string, mode: ThemeMode, color: ThemeColor) {
+function writeUserPref(userId: string, mode: ThemeMode, color: ThemeColor, vidrio: boolean) {
   try {
     localStorage.setItem(`theme-mode-${userId}`, mode);
     localStorage.setItem(`theme-color-${userId}`, color);
+    localStorage.setItem(`theme-vidrio-${userId}`, vidrio ? "1" : "0");
     // Also write generic keys for the flash-prevention script in layout.tsx
     localStorage.setItem("theme-mode", mode);
     localStorage.setItem("theme-color", color);
+    localStorage.setItem("theme-vidrio", vidrio ? "1" : "0");
   } catch {}
 }
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>("light");
   const [color, setColorState] = useState<ThemeColor>("indigo");
+  const [vidrio, setVidrioState] = useState(false);
   const [resolved, setResolved] = useState<"light" | "dark">("light");
   const userIdRef = useRef<string | null>(null);
 
@@ -185,43 +194,48 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       const pref = readUserPref(user.id);
       setModeState(pref.mode);
       setColorState(pref.color);
-      const r = applyToDOM(pref.mode, pref.color);
+      setVidrioState(pref.vidrio);
+      const r = applyToDOM(pref.mode, pref.color, pref.vidrio);
       setResolved(r);
-      // Update generic keys so flash-prevention script stays current for this user
-      writeUserPref(user.id, pref.mode, pref.color);
+      writeUserPref(user.id, pref.mode, pref.color, pref.vidrio);
     });
   }, []);
 
-  // Re-apply when mode or color changes
+  // Re-apply when mode, color, or vidrio changes
   useEffect(() => {
-    const r = applyToDOM(mode, color);
+    const r = applyToDOM(mode, color, vidrio);
     setResolved(r);
-  }, [mode, color]);
+  }, [mode, color, vidrio]);
 
   // Listen for system theme changes when in auto mode
   useEffect(() => {
     if (mode !== "auto") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
-      const r = applyToDOM("auto", color);
+      const r = applyToDOM("auto", color, vidrio);
       setResolved(r);
     };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, [mode, color]);
+  }, [mode, color, vidrio]);
 
   const setMode = useCallback((m: ThemeMode) => {
     setModeState(m);
-    if (userIdRef.current) writeUserPref(userIdRef.current, m, color);
-  }, [color]);
+    if (userIdRef.current) writeUserPref(userIdRef.current, m, color, vidrio);
+  }, [color, vidrio]);
 
   const setColor = useCallback((c: ThemeColor) => {
     setColorState(c);
-    if (userIdRef.current) writeUserPref(userIdRef.current, mode, c);
-  }, [mode]);
+    if (userIdRef.current) writeUserPref(userIdRef.current, mode, c, vidrio);
+  }, [mode, vidrio]);
+
+  const setVidrio = useCallback((v: boolean) => {
+    setVidrioState(v);
+    if (userIdRef.current) writeUserPref(userIdRef.current, mode, color, v);
+  }, [mode, color]);
 
   return (
-    <ThemeContext.Provider value={{ mode, color, resolved, setMode, setColor }}>
+    <ThemeContext.Provider value={{ mode, color, vidrio, resolved, setMode, setColor, setVidrio }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -35,11 +35,9 @@
 
   [data-theme="dark"] .card,
   [data-theme="dark"] .stat-card {
-    background: rgba(35, 38, 64, 0.6);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    background: var(--card-bg);
     border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: var(--card-shadow);
   }
 
   [data-theme="dark"] .btn-secondary {
@@ -173,15 +171,13 @@
   /* ── Cards ── */
   .card {
     @apply rounded-2xl p-5;
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
   .card:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   }
 
   .card-interactive {
@@ -294,110 +290,185 @@
 }
 
 
-  /* ── Glassmorphism ── */
-  .glass {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-  .glass-card {
-    @apply rounded-2xl p-5;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-  }
-  .glass-card:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  }
-  .glass-card-interactive {
-    @apply rounded-2xl p-5 cursor-pointer;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-  }
-  .glass-card-interactive:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  }
-  .glass-nav {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(20px) saturate(200%);
-    -webkit-backdrop-filter: blur(20px) saturate(200%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  }
-  .glass-input {
-    @apply block w-full rounded-xl px-4 py-2.5 text-sm shadow-sm
-           placeholder:text-gray-400
-           focus:outline-none focus:ring-2
-           transition-all duration-200;
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-  }
-  .glass-input:focus {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: var(--skin-primary, #5c7cfa);
-    --tw-ring-color: var(--skin-ring, rgba(92, 124, 250, 0.3));
-  }
-  .glass-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-  .glass-modal {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
-  }
+/* ══════════════════════════════════════════════════════
+   GLASSMORPHISM — activado por html.glass (toggle vidrio)
+   Igual que en SIGEFCP: la clase .glass en <html> aplica
+   automáticamente a .card, nav, .input-field, .btn-secondary
+   ══════════════════════════════════════════════════════ */
 
-  /* Dark mode glass variants */
-  [data-theme="dark"] .glass {
-    background: rgba(35, 38, 64, 0.6);
-    border-color: rgba(255, 255, 255, 0.08);
+/* ── Fondo con gradiente radial colorido ── */
+html.glass body {
+  background: transparent;
+}
+html.glass body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 20%, var(--skin-primary, #5c7cfa) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 85% 75%, var(--skin-secondary, #7c3aed) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 60%),
+    var(--page-bg);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* ── Cards vidrio ── */
+html.glass .card,
+html.glass .stat-card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+html.glass .card:hover,
+html.glass .stat-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+html.glass .card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ── Navbar vidrio ── */
+html.glass nav {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ── Inputs vidrio ── */
+html.glass .input-field {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+html.glass .input-field:focus {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Botones vidrio ── */
+html.glass .btn-secondary {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+html.glass .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Dropdowns / paneles flotantes vidrio ── */
+html.glass .shadow-float {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Search bar vidrio ── */
+html.glass .bg-gray-50 {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* ══ DARK + GLASS ══ */
+html.glass[data-theme="dark"] body::before {
+  opacity: 0.35;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 20%, var(--skin-primary, #5c7cfa) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 85% 75%, var(--skin-secondary, #7c3aed) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+    var(--page-bg);
+}
+
+html.glass[data-theme="dark"] .card,
+html.glass[data-theme="dark"] .stat-card {
+  background: rgba(35, 38, 64, 0.55);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+html.glass[data-theme="dark"] .card:hover,
+html.glass[data-theme="dark"] .stat-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+html.glass[data-theme="dark"] nav {
+  background: rgba(35, 38, 64, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.glass[data-theme="dark"] .input-field {
+  background: rgba(42, 45, 74, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+html.glass[data-theme="dark"] .input-field:focus {
+  background: rgba(42, 45, 74, 0.7);
+}
+
+html.glass[data-theme="dark"] .btn-secondary {
+  background: rgba(42, 45, 74, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+html.glass[data-theme="dark"] .btn-secondary:hover {
+  background: rgba(42, 45, 74, 0.65);
+}
+
+html.glass[data-theme="dark"] .shadow-float {
+  background: rgba(35, 38, 64, 0.8);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.glass[data-theme="dark"] .bg-gray-50 {
+  background: rgba(42, 45, 74, 0.35);
+}
+
+/* ══ Fallbacks ══ */
+@supports not (backdrop-filter: blur(1px)) {
+  html.glass .card,
+  html.glass .stat-card {
+    background: rgba(255, 255, 255, 0.92);
   }
-  [data-theme="dark"] .glass-card,
-  [data-theme="dark"] .glass-card-interactive {
-    background: rgba(35, 38, 64, 0.55);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  html.glass nav {
+    background: rgba(255, 255, 255, 0.95) !important;
   }
-  [data-theme="dark"] .glass-card:hover,
-  [data-theme="dark"] .glass-card-interactive:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  html.glass[data-theme="dark"] .card,
+  html.glass[data-theme="dark"] .stat-card {
+    background: rgba(35, 38, 64, 0.95);
   }
-  [data-theme="dark"] .glass-nav {
-    background: rgba(35, 38, 64, 0.7);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+  html.glass[data-theme="dark"] nav {
+    background: rgba(35, 38, 64, 0.95) !important;
   }
-  [data-theme="dark"] .glass-input {
-    background: rgba(42, 45, 74, 0.5);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html.glass body::before { display: none; }
+  html.glass .card,
+  html.glass .stat-card {
+    background: var(--card-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
-  [data-theme="dark"] .glass-input:focus {
-    background: rgba(42, 45, 74, 0.7);
+  html.glass nav {
+    background: var(--nav-bg) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
-  [data-theme="dark"] .glass-badge {
-    background: rgba(42, 45, 74, 0.5);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-  [data-theme="dark"] .glass-modal {
-    background: rgba(35, 38, 64, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
-  }
+}
 
   /* ── Metallic shimmer effect ── */
   .metallic-text {
@@ -423,6 +494,7 @@
     padding: 0 !important;
     font-size: 9px !important;
   }
+  html.glass body::before { display: none !important; }
   nav, .print\:hidden, footer {
     display: none !important;
   }
@@ -441,6 +513,9 @@
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white !important;
   }
   table {
     width: 100% !important;
