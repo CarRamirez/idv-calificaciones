@@ -104,7 +104,17 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile) redirect("/login");
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Perfil no encontrado</h1>
+          <p className="text-gray-500 mb-4">Tu cuenta no tiene un perfil asociado. Contacta al administrador.</p>
+          <a href="/login" className="text-indigo-600 hover:underline">Volver al login</a>
+        </div>
+      </div>
+    );
+  }
 
   // ──── Check for impersonation ────
   const { effectiveProfile, impersonatedUserId } = await getEffectiveProfile(user.id, profile);
