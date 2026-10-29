@@ -13,6 +13,7 @@ import { Menu } from "lucide-react";
 type Props = {
   userName: string;
   userRole: string;
+  children?: React.ReactNode;
 };
 
 const SESSION_DURATION = 10 * 60 * 1000;
@@ -61,7 +62,7 @@ function setCookie(name: string, value: string, days = 365) {
   document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
 }
 
-export default function Navbar({ userName, userRole }: Props) {
+export default function Navbar({ userName, userRole, children }: Props) {
   const router = useRouter();
   const ruta = usePathname();
   const supabase = createClient();
@@ -78,17 +79,11 @@ export default function Navbar({ userName, userRole }: Props) {
       setColapsado((prev) => {
         const next = !prev;
         setCookie("sgf_menu", next ? "1" : "0");
-        document.documentElement.style.setProperty("--sidebar-w", next ? "76px" : "264px");
         return next;
       });
     } else {
       setDrawerOpen((d) => !d);
     }
-  }, []);
-
-  /* Sync --sidebar-w on mount */
-  useEffect(() => {
-    document.documentElement.style.setProperty("--sidebar-w", colapsado ? "76px" : "264px");
   }, []);
 
   /* ── Existing state ── */
@@ -308,13 +303,13 @@ export default function Navbar({ userName, userRole }: Props) {
      RENDER
      ───────────────────────────────────── */
   return (
-    <>
+    <div className="page-container flex min-h-screen">
       {/* Watermark */}
       <div aria-hidden="true" className="fixed inset-0 z-0 pointer-events-none select-none print:hidden" style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }} />
 
-      {/* ═══ SIDEBAR — desktop (fixed) ═══ */}
+      {/* ═══ SIDEBAR — desktop (sticky, flex sibling) ═══ */}
       <aside
-        className={`sidebar-fondo fixed inset-y-0 left-0 z-40 hidden lg:flex flex-col print:hidden transition-[width] duration-200 ease-in-out ${
+        className={`sidebar-fondo sticky top-0 z-40 hidden lg:flex h-screen shrink-0 flex-col print:hidden transition-[width] duration-200 ease-in-out ${
           colapsado ? "w-[76px]" : "w-[264px]"
         }`}
       >
@@ -351,18 +346,18 @@ export default function Navbar({ userName, userRole }: Props) {
         </div>
       </div>
 
-      {/* ═══ TOP BAR ═══ */}
-      <header
-        className={`barra-superior sticky top-0 z-30 border-b print:hidden transition-[margin-left] duration-200 ease-in-out ${
-          colapsado ? "lg:ml-[76px]" : "lg:ml-[264px]"
-        }`}
-        style={{
-          background: "var(--nav-bg)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderColor: "var(--nav-border)",
-        }}
-      >
+      {/* ═══ Content column (flex-1) ═══ */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* ═══ TOP BAR ═══ */}
+        <header
+          className="barra-superior sticky top-0 z-30 border-b print:hidden"
+          style={{
+            background: "var(--nav-bg)",
+            backdropFilter: "blur(20px) saturate(180%)",
+            WebkitBackdropFilter: "blur(20px) saturate(180%)",
+            borderColor: "var(--nav-border)",
+          }}
+        >
         {/* Thin gradient accent bar */}
         <div className="h-[3px] w-full" style={{ background: "var(--skin-accent-bar, linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee))" }} />
 
@@ -641,7 +636,11 @@ export default function Navbar({ userName, userRole }: Props) {
             </div>
           </div>
         </div>
-      </header>
+        </header>
+
+        {/* Page content passed as children */}
+        {children}
+      </div>
 
       {/* Tutorial modal */}
       <Tutorial isOpen={showTutorial} onClose={() => setShowTutorial(false)} userRole={userRole} />
@@ -667,6 +666,6 @@ export default function Navbar({ userName, userRole }: Props) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

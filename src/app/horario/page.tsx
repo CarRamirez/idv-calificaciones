@@ -259,8 +259,7 @@ export default function HorarioPage() {
   }
 
   return (
-    <div className="page-container">
-      <Navbar userName={userName} userRole={userRole} />
+      <Navbar userName={userName} userRole={userRole}>
 
       <main className="page-content animate-fade-in">
         {/* Header */}
@@ -585,6 +584,6 @@ export default function HorarioPage() {
           </div>
         </div>
       </main>
-    </div>
+    </Navbar>
   );
 }

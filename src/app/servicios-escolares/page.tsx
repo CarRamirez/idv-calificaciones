@@ -98,8 +98,7 @@ export default async function ServiciosEscolaresPage() {
   };
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-4">
           <Link
@@ -156,6 +155,6 @@ export default async function ServiciosEscolaresPage() {
           })}
         </div>
       </main>
-    </div>
+    </Navbar>
   );
 }

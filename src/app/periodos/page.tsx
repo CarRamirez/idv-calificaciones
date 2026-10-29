@@ -187,8 +187,7 @@ export default function PeriodosPage() {
   const openCount = periods.filter((p) => p.effectively_open).length;
 
   return (
-    <div className="page-container">
-      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
       <main className="page-content max-w-4xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -417,7 +416,7 @@ export default function PeriodosPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }
 

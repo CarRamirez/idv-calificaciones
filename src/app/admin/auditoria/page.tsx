@@ -167,8 +167,7 @@ export default function AuditoriaPage() {
   if (!profile) return null;
 
   return (
-    <div className="page-container">
-      <Navbar userName={profile.full_name} userRole={profile.role} />
+      <Navbar userName={profile.full_name} userRole={profile.role}>
 
       <main className="page-content animate-fade-in">
         {/* Header */}
@@ -426,6 +425,6 @@ export default function AuditoriaPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

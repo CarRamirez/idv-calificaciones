@@ -74,8 +74,7 @@ export default function DirectorioPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar userName={profile?.full_name || ""} userRole={profile?.role || ""} />
+      <Navbar userName={profile?.full_name || ""} userRole={profile?.role || ""}>
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
@@ -246,6 +245,6 @@ export default function DirectorioPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

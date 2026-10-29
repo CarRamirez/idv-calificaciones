@@ -269,17 +269,9 @@
   .badge-accent { @apply bg-accent-100 text-accent-800; }
   .badge-sky { @apply bg-sky-100 text-sky-700; }
 
-  /* ── Page container (with sidebar offset on lg) ── */
-  :root {
-    --sidebar-w: 264px;
-  }
+  /* ── Page container ── */
   .page-container {
-    @apply min-h-screen;
     background: var(--page-bg);
-    transition: margin-left 0.2s ease-in-out;
-  }
-  @media (min-width: 1024px) {
-    .page-container { margin-left: var(--sidebar-w); }
   }
   .page-content {
     @apply max-w-[1440px] mx-auto px-4 sm:px-6 py-6;
@@ -570,9 +562,6 @@ html.glass[data-theme="dark"] .bg-gray-50 {
   html.glass body::before { display: none !important; }
   nav, header, aside, .print\:hidden, footer {
     display: none !important;
-  }
-  .page-container {
-    margin-left: 0 !important;
   }
   .print\:block {
     display: block !important;

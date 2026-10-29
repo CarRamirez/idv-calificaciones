@@ -174,8 +174,7 @@ export default function AdminMateriasPage() {
   if (!profile) return null;
 
   return (
-    <div className="page-container">
-      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
 
       <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
@@ -473,6 +472,6 @@ export default function AdminMateriasPage() {
           </div>
         </div>
       )}
-    </div>
+    </Navbar>
   );
 }

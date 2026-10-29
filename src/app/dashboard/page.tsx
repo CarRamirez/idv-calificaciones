@@ -406,8 +406,7 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="page-content animate-fade-in">
         {/* Header con periodo activo */}
@@ -985,6 +984,6 @@ export default async function DashboardPage() {
         </div>
         </div>
       </main>
-    </div>
+    </Navbar>
   );
 }

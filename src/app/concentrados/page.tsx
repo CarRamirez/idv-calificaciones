@@ -65,8 +65,7 @@ export default async function ConcentradosPage() {
   }));
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
       <main className="max-w-full mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div>
@@ -85,6 +84,6 @@ export default async function ConcentradosPage() {
           gradeMap={gradeMap}
         />
       </main>
-    </div>
+    </Navbar>
   );
 }

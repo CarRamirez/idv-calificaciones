@@ -51,8 +51,7 @@ export default async function BoletaIndexPage() {
   }
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="text-center mb-8">
@@ -64,6 +63,6 @@ export default async function BoletaIndexPage() {
 
         <BoletaSelector groups={groups} />
       </main>
-    </div>
+    </Navbar>
   );
 }

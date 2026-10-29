@@ -98,8 +98,7 @@ export default async function ConcentradoPage({ params }: Props) {
   }));
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="max-w-full mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-4">
@@ -125,6 +124,6 @@ export default async function ConcentradoPage({ params }: Props) {
           teacherSubjectIds={teacherSubjectIds}
         />
       </main>
-    </div>
+    </Navbar>
   );
 }

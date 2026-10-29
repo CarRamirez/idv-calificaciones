@@ -68,8 +68,7 @@ export default async function BoletaGroupPage({ params }: Props) {
   }));
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
       <main className="page-content animate-fade-in">
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div>
@@ -88,6 +87,6 @@ export default async function BoletaGroupPage({ params }: Props) {
           gradeMaps={gradeMaps}
         />
       </main>
-    </div>
+    </Navbar>
   );
 }

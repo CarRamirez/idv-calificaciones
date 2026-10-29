@@ -71,8 +71,7 @@ export default async function ConcentradoIndexPage() {
   };
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
       <main className="page-content max-w-3xl animate-fade-in">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
@@ -115,6 +114,6 @@ export default async function ConcentradoIndexPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

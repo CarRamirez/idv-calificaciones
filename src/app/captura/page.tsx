@@ -103,8 +103,7 @@ export default async function CapturaIndexPage() {
   const isCompact = effectiveProfile.role === "teacher" && avgSubjectsPerGroup <= 3;
 
   return (
-    <div className="bg-mesh">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header con stats */}
@@ -262,6 +261,6 @@ export default async function CapturaIndexPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

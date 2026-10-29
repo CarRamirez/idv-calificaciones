@@ -89,8 +89,7 @@ export default function RendimientoPage() {
     .slice(0, 5);
 
   return (
-    <div className="page-container">
-      <Navbar userName={displayProfile.full_name} userRole={displayProfile.role} />
+      <Navbar userName={displayProfile.full_name} userRole={displayProfile.role}>
       <main className="page-content animate-fade-in">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
@@ -296,6 +295,6 @@ export default function RendimientoPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

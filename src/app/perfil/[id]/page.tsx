@@ -115,8 +115,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
   });
 
   return (
-    <div className="page-container">
-      <Navbar userName={myEffective.full_name} userRole={myEffective.role} />
+      <Navbar userName={myEffective.full_name} userRole={myEffective.role}>
 
       <main className="page-content max-w-4xl animate-fade-in">
         {/* Back */}
@@ -270,6 +269,6 @@ export default async function PerfilPage({ params }: { params: { id: string } })
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

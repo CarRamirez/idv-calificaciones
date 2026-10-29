@@ -105,8 +105,7 @@ export default async function UsuariosPage() {
   };
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-slate-900">Usuarios</h1>
@@ -132,6 +131,6 @@ export default async function UsuariosPage() {
           })}
         </div>
       </main>
-    </div>
+    </Navbar>
   );
 }

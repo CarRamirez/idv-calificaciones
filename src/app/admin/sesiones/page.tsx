@@ -131,8 +131,7 @@ export default async function SesionesPage() {
   }
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="page-content max-w-6xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
@@ -279,6 +278,6 @@ export default async function SesionesPage() {
           </table>
         </div>
       </main>
-    </div>
+    </Navbar>
   );
 }

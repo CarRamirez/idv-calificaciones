@@ -351,8 +351,7 @@ export default function AdminAlumnosPage() {
   }
 
   return (
-    <div className="page-container">
-      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
       <main className="page-content max-w-5xl animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -681,6 +680,6 @@ export default function AdminAlumnosPage() {
           </div>
         )}
       </main>
-    </div>
+    </Navbar>
   );
 }

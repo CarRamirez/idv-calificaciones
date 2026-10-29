@@ -208,8 +208,7 @@ export default function TareasPage() {
 
 
   return (
-    <div className="page-container">
-      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
 
       <main className="page-content max-w-4xl animate-fade-in">
         <div className="mb-6">
@@ -506,6 +505,6 @@ export default function TareasPage() {
           </div>
         </div>
       </main>
-    </div>
+    </Navbar>
   );
 }

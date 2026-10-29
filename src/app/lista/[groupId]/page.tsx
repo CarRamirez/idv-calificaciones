@@ -43,8 +43,7 @@ export default async function ListaPage({ params }: Props) {
     .order("list_num");
 
   return (
-    <div className="page-container">
-      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role} />
+      <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="page-content animate-fade-in">
         <div className="flex items-center justify-between mb-4 print:hidden">
@@ -70,6 +69,6 @@ export default async function ListaPage({ params }: Props) {
           groupName={`${group.grade}° ${group.letter}`}
         />
       </main>
-    </div>
+    </Navbar>
   );
 }
