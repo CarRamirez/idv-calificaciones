@@ -75,6 +75,8 @@ export default function RootLayout({
                   d.setProperty('--skin-ring', s.r);
                   d.setProperty('--skin-shadow', s.sh);
                   d.setProperty('--skin-accent-bar', s.bar);
+                var mc = document.cookie.match(/(?:^|; )sgf_menu=([^;]*)/);
+                  if (mc && mc[1] === '1') d.setProperty('--sidebar-w', '76px');
                 } catch(e) {}
               })();
             `,

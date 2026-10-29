@@ -269,13 +269,28 @@
   .badge-accent { @apply bg-accent-100 text-accent-800; }
   .badge-sky { @apply bg-sky-100 text-sky-700; }
 
-  /* ── Page container ── */
+  /* ── Page container (with sidebar offset on lg) ── */
+  :root {
+    --sidebar-w: 264px;
+  }
   .page-container {
     @apply min-h-screen;
     background: var(--page-bg);
+    transition: margin-left 0.2s ease-in-out;
+  }
+  @media (min-width: 1024px) {
+    .page-container { margin-left: var(--sidebar-w); }
   }
   .page-content {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 py-6;
+    @apply max-w-[1440px] mx-auto px-4 sm:px-6 py-6;
+  }
+
+  /* ── Sidebar background ── */
+  .sidebar-fondo {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  }
+  [data-theme="dark"] .sidebar-fondo {
+    background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
   }
 
   /* ── Animated gradient background for special pages ── */
@@ -359,12 +374,20 @@ html.glass .card-interactive:hover {
   box-shadow: 0 12px 36px rgb(15 23 42 / 0.15), inset 0 1px 0 rgb(255 255 255 / 0.9);
 }
 
-/* ── Navbar vidrio ── */
-html.glass nav {
+/* ── Navbar / top bar vidrio ── */
+html.glass nav,
+html.glass header.barra-superior {
   background: rgba(255, 255, 255, 0.45) !important;
   backdrop-filter: blur(20px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ── Sidebar vidrio ── */
+html.glass .sidebar-fondo {
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
 /* ── Inputs vidrio ── */
@@ -429,11 +452,17 @@ html.glass[data-theme="dark"] .stat-card:hover {
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
-html.glass[data-theme="dark"] nav {
+html.glass[data-theme="dark"] nav,
+html.glass[data-theme="dark"] header.barra-superior {
   background: rgba(2, 6, 23, 0.45) !important;
   backdrop-filter: blur(20px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.glass[data-theme="dark"] .sidebar-fondo {
+  background: rgba(2, 6, 23, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
 }
 
 html.glass[data-theme="dark"] .input-field {
@@ -505,6 +534,15 @@ html.glass[data-theme="dark"] .bg-gray-50 {
   }
 }
 
+  /* ── Slide-right animation (mobile sidebar drawer) ── */
+  @keyframes slideRight {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  .animate-slide-right {
+    animation: slideRight 0.25s ease-out;
+  }
+
   /* ── Metallic shimmer effect ── */
   .metallic-text {
     background: var(--skin-gradient, linear-gradient(135deg, #5c7cfa 0%, #7c3aed 100%));
@@ -530,8 +568,11 @@ html.glass[data-theme="dark"] .bg-gray-50 {
     font-size: 9px !important;
   }
   html.glass body::before { display: none !important; }
-  nav, .print\:hidden, footer {
+  nav, header, aside, .print\:hidden, footer {
     display: none !important;
+  }
+  .page-container {
+    margin-left: 0 !important;
   }
   .print\:block {
     display: block !important;
