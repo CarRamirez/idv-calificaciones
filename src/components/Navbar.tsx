@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Tutorial from "@/components/Tutorial";
+import Sidebar from "@/components/Sidebar";
 import { useTheme, SKIN_LABELS, SKIN_DOT, type ThemeMode, type ThemeColor } from "@/components/ThemeProvider";
+import { Menu } from "lucide-react";
 
 type Props = {
   userName: string;
@@ -47,14 +49,45 @@ const MODE_LABELS: Record<ThemeMode, string> = {
 
 type OnlineUser = { id: string; full_name: string; role: string; last_active: string };
 
+/* ── Cookie helpers for sidebar collapse state ── */
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+function setCookie(name: string, value: string, days = 365) {
+  const d = new Date();
+  d.setTime(d.getTime() + days * 86400000);
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+}
+
 export default function Navbar({ userName, userRole }: Props) {
   const router = useRouter();
+  const ruta = usePathname();
   const supabase = createClient();
   const { mode, color, vidrio, setMode, setColor, setVidrio } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
+
+  /* ── Sidebar state ── */
+  const [colapsado, setColapsado] = useState(() => getCookie("sgf_menu") === "1");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const alternarSidebar = useCallback(() => {
+    setColapsado((prev) => {
+      const next = !prev;
+      setCookie("sgf_menu", next ? "1" : "0");
+      document.documentElement.style.setProperty("--sidebar-w", next ? "76px" : "264px");
+      return next;
+    });
+  }, []);
+
+  /* Sync --sidebar-w on mount */
+  useEffect(() => {
+    document.documentElement.style.setProperty("--sidebar-w", colapsado ? "76px" : "264px");
+  }, []);
+
+  /* ── Existing state ── */
   const [userId, setUserId] = useState<string | null>(null);
   const [userDropdown, setUserDropdown] = useState(false);
-  const [calDropdown, setCalDropdown] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; type: string; detail: string; href: string }>>([]);
@@ -73,12 +106,12 @@ export default function Navbar({ userName, userRole }: Props) {
   const [countdown, setCountdown] = useState(30);
   const sessionExpiry = useRef(Date.now() + SESSION_DURATION);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const calDropdownRef = useRef<HTMLDivElement>(null);
   const onlineRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = ADMIN_ROLES.includes(userRole);
 
+  /* ── Watermark ── */
   const watermarkBg = useMemo(() => {
     const label = `${userName}  ·  ${ROLE_LABELS[userRole] || userRole}`;
     const encoded = encodeURIComponent(label);
@@ -86,6 +119,7 @@ export default function Navbar({ userName, userRole }: Props) {
     return `url("data:image/svg+xml,${svg}")`;
   }, [userName, userRole]);
 
+  /* ── Effects ── */
   useEffect(() => {
     fetch("/api/auth/permissions")
       .then((res) => res.json())
@@ -102,7 +136,6 @@ export default function Navbar({ userName, userRole }: Props) {
       .catch(() => {});
   }, [userRole]);
 
-  // Presence: heartbeat + online count/users polling
   useEffect(() => {
     const sendHeartbeat = () => fetch("/api/presence", { method: "POST" }).catch(() => {});
     const fetchOnline = () =>
@@ -171,7 +204,6 @@ export default function Navbar({ userName, userRole }: Props) {
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setUserDropdown(false);
-      if (calDropdownRef.current && !calDropdownRef.current.contains(e.target as Node)) setCalDropdown(false);
       if (onlineRef.current && !onlineRef.current.contains(e.target as Node)) setOnlineDropdown(false);
       if (themeRef.current && !themeRef.current.contains(e.target as Node)) setThemeDropdown(false);
     }
@@ -223,184 +255,219 @@ export default function Navbar({ userName, userRole }: Props) {
     setSearchOpen(false); setSearchQuery(""); setSearchResults([]); router.push(href);
   }
 
-  const can = useCallback((perm: string) => permissions.includes(perm), [permissions]);
-  const canAny = useCallback((...perms: string[]) => perms.some(p => permissions.includes(p)), [permissions]);
   const firstName = userName.split(" ")[0];
 
+  /* ── Close drawer on route change ── */
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [ruta]);
+
+  /* ─────────────────────────────────────
+     RENDER
+     ───────────────────────────────────── */
   return (
     <>
       {/* Watermark */}
       <div aria-hidden="true" className="fixed inset-0 z-0 pointer-events-none select-none print:hidden" style={{ backgroundImage: watermarkBg, backgroundRepeat: "repeat" }} />
 
-      <nav className="sticky top-0 z-50 border-b print:hidden" style={{ background: "var(--nav-bg)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", borderColor: "var(--nav-border)" }}>
-        {/* Thin gradient accent bar at top */}
+      {/* ═══ SIDEBAR — desktop (fixed) ═══ */}
+      <aside
+        className={`sidebar-fondo fixed inset-y-0 left-0 z-40 hidden lg:flex flex-col print:hidden transition-[width] duration-200 ease-in-out ${
+          colapsado ? "w-[76px]" : "w-[264px]"
+        }`}
+      >
+        <Sidebar
+          userRole={userRole}
+          permissions={permissions}
+          colapsado={colapsado}
+          onAlternar={alternarSidebar}
+        />
+      </aside>
+
+      {/* ═══ MOBILE DRAWER overlay ═══ */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden print:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setDrawerOpen(false)}
+          />
+          {/* Drawer panel */}
+          <aside className="sidebar-fondo absolute inset-y-0 left-0 w-[280px] animate-slide-right">
+            <Sidebar
+              userRole={userRole}
+              permissions={permissions}
+              colapsado={false}
+              drawer
+              onCerrar={() => setDrawerOpen(false)}
+            />
+          </aside>
+        </div>
+      )}
+
+      {/* ═══ TOP BAR ═══ */}
+      <header
+        className={`barra-superior sticky top-0 z-30 border-b print:hidden transition-[margin-left] duration-200 ease-in-out ${
+          colapsado ? "lg:ml-[76px]" : "lg:ml-[264px]"
+        }`}
+        style={{
+          background: "var(--nav-bg)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          borderColor: "var(--nav-border)",
+        }}
+      >
+        {/* Thin gradient accent bar */}
         <div className="h-[3px] w-full" style={{ background: "var(--skin-accent-bar, linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee))" }} />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14">
-            {/* Logo */}
-            <Link href="/dashboard" className="flex items-center gap-2.5 group">
-              <div className="relative">
-                <Image src="/logo-idv.png" alt="Instituto Don Vasco" width={36} height={36} className="rounded-xl shadow-sm group-hover:shadow-md transition-shadow duration-200" />
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-mint-400 border-2 border-white" />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-sm font-bold bg-clip-text text-transparent" style={{ backgroundImage: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))", fontFamily: "var(--font-display)" }}>
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between gap-4">
+            {/* Left: hamburger (mobile) + logo (mobile only) */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="lg:hidden grid h-10 w-10 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition"
+                aria-label="Abrir menú"
+              >
+                <Menu size={20} />
+              </button>
+
+              <Link href="/dashboard" className="flex items-center gap-2.5 group lg:hidden">
+                <Image src="/logo-idv.png" alt="Instituto Don Vasco" width={32} height={32} className="rounded-lg shadow-sm" />
+                <span className="text-sm font-bold bg-clip-text text-transparent" style={{ backgroundImage: "var(--skin-gradient)", fontFamily: "var(--font-display)" }}>
                   Mnemósine
                 </span>
-                <span className="text-[10px] text-gray-400 font-medium hidden sm:block">Instituto Don Vasco</span>
-              </div>
-            </Link>
+              </Link>
+            </div>
 
-            {/* Center: time + weather + online */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-100">
-              <span className="tabular-nums text-xs font-semibold text-gray-600">{currentTime}</span>
-              {weather && (
-                <>
-                  <span className="w-px h-3 bg-gray-200" />
-                  <span className="flex items-center gap-1 text-xs text-gray-500" title={weather.desc}>
-                    <span>{weather.icon}</span>
-                    <span className="font-medium">{weather.temp}°</span>
-                  </span>
-                </>
+            {/* Center: search */}
+            <div className="relative flex-1 max-w-md" ref={searchRef}>
+              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:shadow-glow focus-within:bg-white focus-within:border-primary-300 transition-all duration-200">
+                <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" placeholder="Buscar alumno o profesor..." value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
+                  onFocus={() => setSearchOpen(true)}
+                  className="bg-transparent border-none outline-none text-xs text-slate-700 placeholder-slate-400 ml-2 w-full"
+                />
+                {searchLoading && <div className="w-3 h-3 border-2 border-primary-400 border-t-transparent rounded-full animate-spin ml-1" />}
+              </div>
+              {searchOpen && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-float border border-slate-200 py-2 z-50 max-h-80 overflow-y-auto animate-slide-down">
+                  {searchResults.map((r) => (
+                    <button key={`${r.type}-${r.id}`} onClick={() => handleSearchSelect(r.href)}
+                      className="w-full text-left px-3 py-2.5 hover:bg-slate-50 flex items-center gap-3 transition-colors rounded-lg mx-1" style={{ width: "calc(100% - 8px)" }}>
+                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${r.type === "student" ? "bg-primary-100 text-primary-600" : "bg-mint-100 text-mint-600"}`}>
+                        {r.name.charAt(0)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-900 truncate">{r.name}</p>
+                        <p className="text-[10px] text-slate-400">{r.type === "student" ? "Alumno" : "Profesor"} · {r.detail}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               )}
-              {onlineCount > 0 && (
-                <>
-                  <span className="w-px h-3 bg-gray-200" />
-                  {isAdmin ? (
-                    <div className="relative" ref={onlineRef}>
-                      <button
-                        onClick={() => setOnlineDropdown(!onlineDropdown)}
-                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-                        title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea — clic para ver`}
-                      >
+              {searchOpen && searchQuery.trim().length >= 2 && !searchLoading && searchResults.length === 0 && (
+                <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-float border border-slate-200 py-4 z-50 text-center text-xs text-slate-400 animate-slide-down">Sin resultados</div>
+              )}
+            </div>
+
+            {/* Right: time/weather/online + theme + user */}
+            <div className="flex items-center gap-2">
+              {/* Time + weather + online pill */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200">
+                <span className="tabular-nums text-xs font-semibold text-slate-600">{currentTime}</span>
+                {weather && (
+                  <>
+                    <span className="w-px h-3 bg-slate-200" />
+                    <span className="flex items-center gap-1 text-xs text-slate-500" title={weather.desc}>
+                      <span>{weather.icon}</span>
+                      <span className="font-medium">{weather.temp}°</span>
+                    </span>
+                  </>
+                )}
+                {onlineCount > 0 && (
+                  <>
+                    <span className="w-px h-3 bg-slate-200" />
+                    {isAdmin ? (
+                      <div className="relative" ref={onlineRef}>
+                        <button
+                          onClick={() => setOnlineDropdown(!onlineDropdown)}
+                          className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                          title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea — clic para ver`}
+                        >
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                          </span>
+                          <span className="font-medium">{onlineCount}</span>
+                          <svg className={`w-2.5 h-2.5 text-slate-400 transition-transform duration-200 ${onlineDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {onlineDropdown && (
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-white rounded-xl shadow-float border border-slate-200 py-2 z-50 animate-slide-down">
+                            <div className="px-3 py-2 border-b border-slate-200">
+                              <p className="text-xs font-semibold text-slate-700">Usuarios en línea</p>
+                            </div>
+                            <div className="max-h-60 overflow-y-auto">
+                              {onlineUsers.length === 0 ? (
+                                <p className="px-3 py-3 text-xs text-slate-400 text-center">Cargando...</p>
+                              ) : (
+                                onlineUsers.map((u) => (
+                                  <div key={u.id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition-colors">
+                                    <div className="relative">
+                                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold" style={{ background: "var(--skin-gradient)", color: "white" }}>
+                                        {u.full_name.charAt(0).toUpperCase()}
+                                      </div>
+                                      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border border-white" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-medium text-slate-800 truncate">{u.full_name}</p>
+                                      <p className="text-[10px] text-slate-400">{ROLE_LABELS[u.role] || u.role}</p>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-slate-500" title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea`}>
                         <span className="relative flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                         </span>
                         <span className="font-medium">{onlineCount}</span>
-                        <svg className={`w-2.5 h-2.5 text-gray-400 transition-transform duration-200 ${onlineDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      {onlineDropdown && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-64 bg-white rounded-2xl shadow-float border border-gray-100 py-2 z-50 animate-slide-down">
-                          <div className="px-3 py-2 border-b border-gray-100">
-                            <p className="text-xs font-semibold text-gray-700">Usuarios en línea</p>
-                          </div>
-                          <div className="max-h-60 overflow-y-auto">
-                            {onlineUsers.length === 0 ? (
-                              <p className="px-3 py-3 text-xs text-gray-400 text-center">Cargando...</p>
-                            ) : (
-                              onlineUsers.map((u) => (
-                                <div key={u.id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors">
-                                  <div className="relative">
-                                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold" style={{ background: "var(--skin-gradient)", color: "white" }}>
-                                      {u.full_name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border border-white" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium text-gray-800 truncate">{u.full_name}</p>
-                                    <p className="text-[10px] text-gray-400">{ROLE_LABELS[u.role] || u.role}</p>
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs text-gray-500" title={`${onlineCount} usuario${onlineCount !== 1 ? "s" : ""} en línea`}>
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                       </span>
-                      <span className="font-medium">{onlineCount}</span>
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Desktop nav + user */}
-            <div className="hidden sm:flex items-center gap-1">
-              {/* Search */}
-              <div className="relative mr-2" ref={searchRef}>
-                <div className="flex items-center bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-primary-200 focus-within:bg-white focus-within:border-primary-200 transition-all duration-200">
-                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input type="text" placeholder="Buscar..." value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
-                    onFocus={() => setSearchOpen(true)}
-                    className="bg-transparent border-none outline-none text-xs text-gray-700 placeholder-gray-400 ml-2 w-32 lg:w-44"
-                  />
-                  {searchLoading && <div className="w-3 h-3 border-2 border-primary-400 border-t-transparent rounded-full animate-spin ml-1" />}
-                </div>
-                {searchOpen && searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-float border border-gray-100 py-2 z-50 max-h-80 overflow-y-auto animate-slide-down">
-                    {searchResults.map((r) => (
-                      <button key={`${r.type}-${r.id}`} onClick={() => handleSearchSelect(r.href)}
-                        className="w-full text-left px-3 py-2.5 hover:bg-gray-50 flex items-center gap-3 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
-                        <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${r.type === "student" ? "bg-primary-100 text-primary-600" : "bg-mint-100 text-mint-600"}`}>
-                          {r.name.charAt(0)}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">{r.name}</p>
-                          <p className="text-[10px] text-gray-400">{r.type === "student" ? "Alumno" : "Profesor"} · {r.detail}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {searchOpen && searchQuery.trim().length >= 2 && !searchLoading && searchResults.length === 0 && (
-                  <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-float border border-gray-100 py-4 z-50 text-center text-xs text-gray-400 animate-slide-down">Sin resultados</div>
+                    )}
+                  </>
                 )}
               </div>
 
-              {/* Nav links */}
-              <NavLink href="/dashboard">Inicio</NavLink>
-              {canAny("calificaciones", "captura", "boleta", "concentrado") && (
-                <div className="relative" ref={calDropdownRef}>
-                  <button onClick={() => setCalDropdown(!calDropdown)} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all duration-200">
-                    Calificaciones
-                    <svg className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${calDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {calDropdown && (
-                    <div className="absolute left-0 mt-1 w-48 bg-white rounded-2xl shadow-float border border-gray-100 py-2 z-50 animate-slide-down">
-                      {canAny("calificaciones", "captura") && (
-                        <Link href="/calificaciones" onClick={() => setCalDropdown(false)} className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
-                          Calificaciones
-                        </Link>
-                      )}
-                      {can("concentrado") && (
-                        <Link href="/concentrados" onClick={() => setCalDropdown(false)} className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
-                          Concentrado
-                        </Link>
-                      )}
-                      {can("boleta") && userRole !== "teacher" && (
-                        <Link href="/boleta" onClick={() => setCalDropdown(false)} className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors rounded-xl mx-1" style={{ width: "calc(100% - 8px)" }}>
-                          Boleta
-                        </Link>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
-                <NavLink href="/usuarios">Usuarios</NavLink>
-              )}
-              {can("periodos") && <NavLink href="/periodos">Periodos</NavLink>}
+              {/* Mobile: compact time + weather */}
+              <div className="sm:hidden flex items-center gap-2">
+                <span className="text-xs text-slate-500 tabular-nums font-medium">{currentTime}</span>
+                {weather && <span className="text-xs">{weather.icon} {weather.temp}°</span>}
+                {onlineCount > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-slate-500">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                    </span>
+                    <span className="font-medium">{onlineCount}</span>
+                  </span>
+                )}
+              </div>
 
-              {/* Theme switcher button */}
+              {/* Theme switcher */}
               <div className="relative" ref={themeRef}>
                 <button
                   onClick={() => setThemeDropdown(!themeDropdown)}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                  className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition duration-150"
                   title="Personalizar tema"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -408,10 +475,10 @@ export default function Navbar({ userName, userRole }: Props) {
                   </svg>
                 </button>
                 {themeDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-float border border-gray-100 py-3 z-50 animate-slide-down">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-float border border-slate-200 py-3 z-50 animate-slide-down">
                     {/* Mode selector */}
                     <div className="px-3 mb-2">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Modo</p>
+                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2">Modo</p>
                       <div className="flex gap-1">
                         {(["light", "dark", "auto"] as ThemeMode[]).map((m) => (
                           <button
@@ -419,8 +486,8 @@ export default function Navbar({ userName, userRole }: Props) {
                             onClick={() => setMode(m)}
                             className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all duration-200 ${
                               mode === m
-                                ? "bg-gray-100 text-gray-900 ring-1 ring-gray-200"
-                                : "text-gray-500 hover:bg-gray-50"
+                                ? "bg-slate-100 text-slate-900 ring-1 ring-slate-200"
+                                : "text-slate-500 hover:bg-slate-50"
                             }`}
                           >
                             <span className="text-sm">{MODE_ICONS[m]}</span>
@@ -429,10 +496,10 @@ export default function Navbar({ userName, userRole }: Props) {
                         ))}
                       </div>
                     </div>
-                    <div className="border-t border-gray-100 my-2" />
+                    <div className="border-t border-slate-200 my-2" />
                     {/* Color skin */}
                     <div className="px-3">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Color</p>
+                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2">Color</p>
                       <div className="grid grid-cols-3 gap-1.5">
                         {(Object.keys(SKIN_LABELS) as ThemeColor[]).map((c) => (
                           <button
@@ -440,8 +507,8 @@ export default function Navbar({ userName, userRole }: Props) {
                             onClick={() => setColor(c)}
                             className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all duration-200 ${
                               color === c
-                                ? "bg-gray-100 ring-1 ring-gray-200"
-                                : "hover:bg-gray-50"
+                                ? "bg-slate-100 ring-1 ring-slate-200"
+                                : "hover:bg-slate-50"
                             }`}
                           >
                             <span
@@ -452,25 +519,25 @@ export default function Navbar({ userName, userRole }: Props) {
                                 transform: color === c ? "scale(1.15)" : "scale(1)",
                               }}
                             />
-                            <span className="text-gray-600">{SKIN_LABELS[c]}</span>
+                            <span className="text-slate-600">{SKIN_LABELS[c]}</span>
                           </button>
                         ))}
                       </div>
                     </div>
-                    <div className="border-t border-gray-100 my-2" />
+                    <div className="border-t border-slate-200 my-2" />
                     {/* Glass toggle */}
                     <div className="px-3">
                       <label className="flex items-center justify-between cursor-pointer group">
                         <div>
-                          <p className="text-xs font-medium text-gray-700 group-hover:text-gray-900 transition-colors">Estilo vidrio</p>
-                          <p className="text-[10px] text-gray-400 leading-tight">Paneles translúcidos</p>
+                          <p className="text-xs font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Estilo vidrio</p>
+                          <p className="text-[10px] text-slate-400 leading-tight">Paneles translúcidos</p>
                         </div>
                         <button
                           role="switch"
                           aria-checked={vidrio}
                           onClick={() => setVidrio(!vidrio)}
                           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${
-                            vidrio ? "bg-green-500" : "bg-gray-200"
+                            vidrio ? "bg-green-500" : "bg-slate-200"
                           }`}
                         >
                           <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
@@ -484,38 +551,38 @@ export default function Navbar({ userName, userRole }: Props) {
               </div>
 
               {/* User dropdown */}
-              <div className="relative ml-1 pl-3 border-l border-gray-200" ref={dropdownRef}>
-                <button onClick={() => setUserDropdown(!userDropdown)} className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-50 transition-all duration-200">
+              <div className="relative pl-3 border-l border-slate-200" ref={dropdownRef}>
+                <button onClick={() => setUserDropdown(!userDropdown)} className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-50 transition-all duration-200">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white" style={{ background: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))" }}>
                     {firstName.charAt(0).toUpperCase()}
                   </div>
-                  <div className="text-left hidden lg:block">
-                    <p className="text-xs font-semibold text-gray-800 leading-tight">{firstName}</p>
-                    <p className="text-[10px] text-gray-400 leading-tight">{ROLE_LABELS[userRole] || userRole}</p>
+                  <div className="text-left hidden md:block">
+                    <p className="text-xs font-semibold text-slate-800 leading-tight">{firstName}</p>
+                    <p className="text-[10px] text-slate-400 leading-tight">{ROLE_LABELS[userRole] || userRole}</p>
                   </div>
-                  <svg className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${userDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-3 h-3 text-slate-400 transition-transform duration-200 hidden md:block ${userDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {userDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-float border border-gray-100 py-2 z-50 animate-slide-down">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">{userName}</p>
-                      <span className={`inline-flex mt-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold ${ROLE_COLORS[userRole] || "bg-gray-100 text-gray-600"}`}>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-float border border-slate-200 py-2 z-50 animate-slide-down">
+                    <div className="px-4 py-3 border-b border-slate-200">
+                      <p className="text-sm font-semibold text-slate-900">{userName}</p>
+                      <span className={`inline-flex mt-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold ${ROLE_COLORS[userRole] || "bg-slate-100 text-slate-600"}`}>
                         {ROLE_LABELS[userRole] || userRole}
                       </span>
                     </div>
                     {userId && (
-                      <Link href={`/perfil/${userId}`} onClick={() => setUserDropdown(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" /></svg>
+                      <Link href={`/perfil/${userId}`} onClick={() => setUserDropdown(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" /></svg>
                         Mi perfil
                       </Link>
                     )}
-                    <button onClick={() => { setShowTutorial(true); setUserDropdown(false); }} className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>
+                    <button onClick={() => { setShowTutorial(true); setUserDropdown(false); }} className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>
                       Tutorial
                     </button>
-                    <div className="border-t border-gray-100 my-1" />
+                    <div className="border-t border-slate-200 my-1" />
                     <button onClick={handleLogout} className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-coral-600 hover:bg-coral-50 transition-colors">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
                       Cerrar sesión
@@ -524,182 +591,9 @@ export default function Navbar({ userName, userRole }: Props) {
                 )}
               </div>
             </div>
-
-            {/* Mobile */}
-            <div className="sm:hidden flex items-center gap-2">
-              <span className="text-xs text-gray-500 tabular-nums font-medium">{currentTime}</span>
-              {weather && <span className="text-xs">{weather.icon} {weather.temp}°</span>}
-              {onlineCount > 0 && (
-                <span className="flex items-center gap-1 text-xs text-gray-500">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
-                  </span>
-                  <span className="font-medium">{onlineCount}</span>
-                </span>
-              )}
-              <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {menuOpen
-                    ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
-                </svg>
-              </button>
-            </div>
           </div>
-
-          {/* Mobile menu */}
-          {menuOpen && (
-            <div className="sm:hidden pb-4 space-y-1 animate-slide-down">
-              {/* Mobile search */}
-              <div className="px-1 py-2">
-                <div className="flex items-center bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5">
-                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input type="text" placeholder="Buscar alumno o profesor..." value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
-                    onFocus={() => setSearchOpen(true)}
-                    className="bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400 ml-2 w-full"
-                  />
-                </div>
-                {searchOpen && searchResults.length > 0 && (
-                  <div className="mt-2 bg-white rounded-2xl border border-gray-100 py-1 max-h-60 overflow-y-auto shadow-soft">
-                    {searchResults.map((r) => (
-                      <button key={`m-${r.type}-${r.id}`} onClick={() => { handleSearchSelect(r.href); setMenuOpen(false); }}
-                        className="w-full text-left px-3 py-2.5 hover:bg-gray-50 flex items-center gap-2.5 rounded-xl">
-                        <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold ${r.type === "student" ? "bg-primary-100 text-primary-600" : "bg-mint-100 text-mint-600"}`}>
-                          {r.name.charAt(0)}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm text-gray-700 truncate">{r.name}</p>
-                          <p className="text-[10px] text-gray-400">{r.type === "student" ? "Alumno" : "Profesor"} · {r.detail}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <MobileNavLink href="/dashboard" onClick={() => setMenuOpen(false)}>Inicio</MobileNavLink>
-              {canAny("calificaciones", "captura", "boleta", "concentrado") && (
-                <>
-                  <p className="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Calificaciones</p>
-                  {canAny("calificaciones", "captura") && <MobileNavLink href="/calificaciones" onClick={() => setMenuOpen(false)} indent>Calificaciones</MobileNavLink>}
-                  {can("concentrado") && <MobileNavLink href="/concentrados" onClick={() => setMenuOpen(false)} indent>Concentrado</MobileNavLink>}
-                  {can("boleta") && userRole !== "teacher" && <MobileNavLink href="/boleta" onClick={() => setMenuOpen(false)} indent>Boleta</MobileNavLink>}
-                </>
-              )}
-              {canAny("admin_profesores", "admin_alumnos", "admin_grupos", "admin_materias", "admin_sesiones", "admin_roles") && (
-                <MobileNavLink href="/usuarios" onClick={() => setMenuOpen(false)}>Usuarios</MobileNavLink>
-              )}
-              {can("periodos") && <MobileNavLink href="/periodos" onClick={() => setMenuOpen(false)}>Periodos</MobileNavLink>}
-
-              {/* Mobile: admin online users list */}
-              {isAdmin && onlineUsers.length > 0 && (
-                <>
-                  <p className="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    En línea ({onlineCount})
-                  </p>
-                  {onlineUsers.map((u) => (
-                    <div key={u.id} className="flex items-center gap-2.5 px-3 py-2 ml-3">
-                      <div className="relative">
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[9px] font-bold text-white" style={{ background: "var(--skin-gradient)" }}>
-                          {u.full_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-green-500 border border-white" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium text-gray-700 truncate">{u.full_name}</p>
-                        <p className="text-[9px] text-gray-400">{ROLE_LABELS[u.role] || u.role}</p>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-
-              {/* Mobile: theme switcher */}
-              <p className="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tema</p>
-              <div className="px-3 flex gap-1">
-                {(["light", "dark", "auto"] as ThemeMode[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setMode(m)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium transition-all ${
-                      mode === m
-                        ? "bg-gray-100 text-gray-900 ring-1 ring-gray-200"
-                        : "text-gray-500 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span>{MODE_ICONS[m]}</span>
-                    <span>{MODE_LABELS[m]}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="px-3 pt-2 flex gap-2 flex-wrap">
-                {(Object.keys(SKIN_LABELS) as ThemeColor[]).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
-                      color === c ? "scale-110 shadow-sm" : "opacity-70 hover:opacity-100"
-                    }`}
-                    style={{
-                      background: SKIN_DOT[c],
-                      borderColor: color === c ? SKIN_DOT[c] : "transparent",
-                    }}
-                    title={SKIN_LABELS[c]}
-                  />
-                ))}
-              </div>
-              {/* Mobile glass toggle */}
-              <div className="px-3 pt-3">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Estilo vidrio</p>
-                    <p className="text-[10px] text-gray-400">Paneles translúcidos</p>
-                  </div>
-                  <button
-                    role="switch"
-                    aria-checked={vidrio}
-                    onClick={() => setVidrio(!vidrio)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-                      vidrio ? "bg-green-500" : "bg-gray-200"
-                    }`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                      vidrio ? "translate-x-[22px]" : "translate-x-[3px]"
-                    }`} />
-                  </button>
-                </label>
-              </div>
-
-              <div className="border-t border-gray-100 mt-2 pt-3">
-                <button
-                  onClick={() => { setShowTutorial(true); setMenuOpen(false); }}
-                  className="block w-full text-left px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-600 rounded-xl transition-colors"
-                >
-                  Tutorial
-                </button>
-                {userId && (
-                  <MobileNavLink href={`/perfil/${userId}`} onClick={() => setMenuOpen(false)}>Mi perfil</MobileNavLink>
-                )}
-                <div className="px-3 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white" style={{ background: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))" }}>
-                      {firstName.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-xs text-gray-500">{userName}</span>
-                  </div>
-                  <button onClick={handleLogout} className="text-xs font-semibold text-coral-500 hover:text-coral-600 transition-colors">
-                    Cerrar sesión
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </nav>
+      </header>
 
       {/* Tutorial modal */}
       <Tutorial isOpen={showTutorial} onClose={() => setShowTutorial(false)} userRole={userRole} />
@@ -726,21 +620,5 @@ export default function Navbar({ userName, userRole }: Props) {
         </div>
       )}
     </>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition duration-150">
-      {children}
-    </Link>
-  );
-}
-
-function MobileNavLink({ href, children, onClick, indent }: { href: string; children: React.ReactNode; onClick?: () => void; indent?: boolean }) {
-  return (
-    <Link href={href} onClick={onClick} className={`block px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded-lg transition-colors ${indent ? "ml-3" : ""}`}>
-      {children}
-    </Link>
   );
 }
