@@ -71,13 +71,19 @@ export default function Navbar({ userName, userRole }: Props) {
   const [colapsado, setColapsado] = useState(() => getCookie("sgf_menu") === "1");
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const alternarSidebar = useCallback(() => {
-    setColapsado((prev) => {
-      const next = !prev;
-      setCookie("sgf_menu", next ? "1" : "0");
-      document.documentElement.style.setProperty("--sidebar-w", next ? "76px" : "264px");
-      return next;
-    });
+  const esEscritorio = () => window.matchMedia("(min-width: 1024px)").matches;
+
+  const alternar = useCallback(() => {
+    if (esEscritorio()) {
+      setColapsado((prev) => {
+        const next = !prev;
+        setCookie("sgf_menu", next ? "1" : "0");
+        document.documentElement.style.setProperty("--sidebar-w", next ? "76px" : "264px");
+        return next;
+      });
+    } else {
+      setDrawerOpen((d) => !d);
+    }
   }, []);
 
   /* Sync --sidebar-w on mount */
@@ -262,6 +268,42 @@ export default function Navbar({ userName, userRole }: Props) {
     setDrawerOpen(false);
   }, [ruta]);
 
+  /* ── Drawer: close on resize to desktop, Escape key, body scroll lock ── */
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); setDrawerOpen(false); }
+      if (e.key === "Tab" && drawerRef.current) {
+        const els = Array.from(drawerRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"));
+        if (!els.length) return;
+        const [first, last] = [els[0], els[els.length - 1]];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    const onResize = () => { if (esEscritorio()) setDrawerOpen(false); };
+
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    setTimeout(() => {
+      const els = drawerRef.current?.querySelectorAll<HTMLElement>("a[href], button:not([disabled])");
+      els?.[0]?.focus();
+    }, 30);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+      hamburgerRef.current?.focus();
+    };
+  }, [drawerOpen]);
+
   /* ─────────────────────────────────────
      RENDER
      ───────────────────────────────────── */
@@ -280,20 +322,24 @@ export default function Navbar({ userName, userRole }: Props) {
           userRole={userRole}
           permissions={permissions}
           colapsado={colapsado}
-          onAlternar={alternarSidebar}
+          onAlternar={alternar}
         />
       </aside>
 
       {/* ═══ MOBILE DRAWER overlay ═══ */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden print:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => setDrawerOpen(false)}
-          />
-          {/* Drawer panel */}
-          <aside className="sidebar-fondo absolute inset-y-0 left-0 w-[280px] animate-slide-right">
+      <div className={`fixed inset-0 z-50 lg:hidden print:hidden ${drawerOpen ? "" : "pointer-events-none"}`} aria-hidden={!drawerOpen}>
+        <div
+          onClick={() => setDrawerOpen(false)}
+          className={`absolute inset-0 bg-slate-950/50 transition-opacity duration-200 ${drawerOpen ? "opacity-100" : "opacity-0"}`}
+        />
+        <div
+          ref={drawerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menú principal"
+          className={`sidebar-fondo absolute inset-y-0 left-0 w-[min(18rem,85vw)] shadow-float transition-transform duration-200 ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}
+        >
+          {drawerOpen && (
             <Sidebar
               userRole={userRole}
               permissions={permissions}
@@ -301,9 +347,9 @@ export default function Navbar({ userName, userRole }: Props) {
               drawer
               onCerrar={() => setDrawerOpen(false)}
             />
-          </aside>
+          )}
         </div>
-      )}
+      </div>
 
       {/* ═══ TOP BAR ═══ */}
       <header
@@ -322,14 +368,16 @@ export default function Navbar({ userName, userRole }: Props) {
 
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between gap-4">
-            {/* Left: hamburger (mobile) + logo (mobile only) */}
+            {/* Left: hamburger (always) + logo (mobile only) */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setDrawerOpen(true)}
-                className="lg:hidden grid h-10 w-10 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition"
-                aria-label="Abrir menú"
+                ref={hamburgerRef}
+                onClick={alternar}
+                aria-label="Mostrar u ocultar el menú"
+                aria-expanded={drawerOpen}
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
               >
-                <Menu size={20} />
+                <Menu size={21} />
               </button>
 
               <Link href="/dashboard" className="flex items-center gap-2.5 group lg:hidden">
