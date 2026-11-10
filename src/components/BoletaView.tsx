@@ -108,7 +108,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id} className="hover:bg-slate-50/50">
-          <td className="px-3 py-2 text-base font-medium text-slate-900 whitespace-nowrap print:text-[11px] print:px-1 print:py-0.5">
+          <td className="materia-name px-3 py-2 text-base font-medium text-slate-900 whitespace-nowrap print:px-1 print:py-0.5">
             {s.name}
           </td>
           {TRIMESTERS.map((t) => (
@@ -160,16 +160,59 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+          /* ── Fondo blanco total, sin colores ── */
+          .boleta-copy,
+          .boleta-copy div,
+          .boleta-copy table,
+          .boleta-copy thead,
+          .boleta-copy thead tr,
+          .boleta-copy tbody,
+          .boleta-copy tbody tr,
+          .boleta-copy td,
+          .boleta-copy th {
+            background-color: #fff !important;
+            background: #fff !important;
+            color: #111 !important;
+            -webkit-print-color-adjust: exact !important;
+          }
+          .boleta-copy .boleta-print-header,
+          .boleta-copy .boleta-print-header *,
+          .boleta-copy .boleta-signature,
+          .boleta-copy .boleta-signature * {
+            color: #111 !important;
+            background: transparent !important;
+          }
+          /* Encabezado de tabla: solo borde inferior grueso */
+          .boleta-copy thead tr th {
+            border-bottom: 1.5px solid #333 !important;
+            font-weight: 700 !important;
+          }
+          /* Bordes de celdas */
+          .boleta-copy td,
+          .boleta-copy th {
+            border-color: #bbb !important;
+          }
+          /* Fila promedio general: borde superior grueso */
+          .boleta-copy .prom-general-row {
+            border-top: 2px solid #333 !important;
+          }
+          .boleta-copy .prom-general-row td {
+            font-weight: 700 !important;
+          }
+          /* ── Layout ── */
           .card {
             box-shadow: none !important;
-            border: 1px solid #d1d5db !important;
-            border-radius: 2px !important;
+            border: 1px solid #aaa !important;
+            border-radius: 0 !important;
           }
           .boleta-print-header {
             display: flex !important;
           }
           .boleta-semaforo-print {
-            display: flex !important;
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
           }
           .boleta-signature {
             display: block !important;
@@ -183,32 +226,53 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             page-break-inside: avoid;
           }
           .boleta-copy + .boleta-copy {
-            border-top: 1px dashed #999;
+            border-top: 1px dashed #666;
             padding-top: 3mm;
           }
+          /* ── Fuentes grandes y legibles ── */
           .boleta-copy table {
-            font-size: 8px !important;
+            font-size: 12px !important;
           }
-          .boleta-copy table th,
+          .boleta-copy .materia-name {
+            font-size: 14px !important;
+            white-space: normal !important;
+            line-height: 1.2 !important;
+            font-weight: 600 !important;
+          }
+          .boleta-copy table th {
+            font-size: 11px !important;
+            padding: 2px 3px !important;
+            line-height: 1.2 !important;
+          }
           .boleta-copy table td {
-            padding: 1px 2px !important;
+            padding: 2px 3px !important;
             line-height: 1.2 !important;
           }
           .boleta-copy .boleta-print-header {
             margin-bottom: 1.5mm !important;
             padding-bottom: 1.5mm !important;
+            border-color: #333 !important;
           }
-          .boleta-copy .boleta-semaforo-print {
-            margin-bottom: 1mm !important;
+          .boleta-copy .boleta-print-header h1 {
+            font-size: 14px !important;
+          }
+          .boleta-copy .boleta-print-header h2 {
+            font-size: 12px !important;
+          }
+          .boleta-copy .boleta-print-header p {
+            font-size: 11px !important;
           }
           .boleta-copy .boleta-signature {
-            margin-top: 4mm !important;
+            margin-top: 3mm !important;
+          }
+          .boleta-copy .boleta-signature p {
+            font-size: 10px !important;
           }
           .boleta-copy .boleta-signature .w-48 {
-            width: 35mm !important;
+            width: 40mm !important;
           }
           .boleta-copy .boleta-signature .w-56 {
-            width: 45mm !important;
+            width: 50mm !important;
           }
         }
       `}} />
@@ -329,7 +393,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               {renderSubjectRows(curricular)}
 
               {/* Fila de promedio general */}
-              <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
+              <tr className="prom-general-row bg-slate-100 font-bold border-t-2 border-slate-300">
                 <td className="px-3 py-2 text-base text-slate-900 print:text-[11px] print:px-1 print:py-0.5">
                   Promedio General
                 </td>
