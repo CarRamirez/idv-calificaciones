@@ -124,7 +124,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 </td>
               ))}
               <td
-                className={`text-center text-sm font-semibold tabular-nums border-l border-slate-200 print:text-[10px] ${semaforoClass(
+                className={`trim-avg text-center text-sm font-semibold tabular-nums border-l border-slate-200 print:text-[10px] ${semaforoClass(
                   getTrimesterAvg(s.id, t)
                 )}`}
               >
@@ -133,7 +133,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             </React.Fragment>
           ))}
           <td
-            className={`text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
+            className={`final-col text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
               final
             )}`}
           >
@@ -149,7 +149,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
   return (
     <div>
-      {/* Print-specific styles */}
+      {/* ═══ Print CSS — Estilo C: Compacta Estructurada (B/N) ═══ */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           @page {
@@ -160,66 +160,14 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* ── Fondo blanco total, sin colores ── */
+
+          /* ── Reset colores: todo B/N ── */
           .boleta-copy,
-          .boleta-copy div,
-          .boleta-copy table,
-          .boleta-copy thead,
-          .boleta-copy thead tr,
-          .boleta-copy tbody,
-          .boleta-copy tbody tr,
-          .boleta-copy td,
-          .boleta-copy th {
-            background-color: #fff !important;
-            background: #fff !important;
+          .boleta-copy * {
             color: #111 !important;
-            -webkit-print-color-adjust: exact !important;
           }
-          .boleta-copy .boleta-print-header,
-          .boleta-copy .boleta-print-header *,
-          .boleta-copy .boleta-signature,
-          .boleta-copy .boleta-signature * {
-            color: #111 !important;
-            background: transparent !important;
-          }
-          /* Encabezado de tabla: solo borde inferior grueso */
-          .boleta-copy thead tr th {
-            border-bottom: 1.5px solid #333 !important;
-            font-weight: 700 !important;
-          }
-          /* Bordes de celdas */
-          .boleta-copy td,
-          .boleta-copy th {
-            border-color: #bbb !important;
-          }
-          /* Fila promedio general: borde superior grueso */
-          .boleta-copy .prom-general-row {
-            border-top: 2px solid #333 !important;
-          }
-          .boleta-copy .prom-general-row td {
-            font-weight: 700 !important;
-          }
-          /* ── Layout ── */
-          .card {
-            box-shadow: none !important;
-            border: 1px solid #aaa !important;
-            border-radius: 0 !important;
-          }
-          .boleta-print-header {
-            display: flex !important;
-          }
-          .boleta-semaforo-print {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            overflow: hidden !important;
-          }
-          .boleta-signature {
-            display: block !important;
-          }
-          .boleta-print-title {
-            display: block !important;
-          }
+
+          /* ── Layout de copia (2 por página) ── */
           .boleta-copy {
             height: 48vh;
             overflow: hidden;
@@ -227,52 +175,158 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           }
           .boleta-copy + .boleta-copy {
             border-top: 1px dashed #666;
-            padding-top: 3mm;
+            padding-top: 2mm;
           }
-          /* ── Fuentes grandes y legibles ── */
-          .boleta-copy table {
-            font-size: 12px !important;
-          }
-          .boleta-copy .materia-name {
-            font-size: 14px !important;
-            white-space: normal !important;
-            line-height: 1.2 !important;
-            font-weight: 600 !important;
-          }
-          .boleta-copy table th {
-            font-size: 11px !important;
-            padding: 2px 3px !important;
-            line-height: 1.2 !important;
-          }
-          .boleta-copy table td {
-            padding: 2px 3px !important;
-            line-height: 1.2 !important;
-          }
+
+          /* ── Header: recuadro enmarcado con grid ── */
           .boleta-copy .boleta-print-header {
-            margin-bottom: 1.5mm !important;
-            padding-bottom: 1.5mm !important;
-            border-color: #333 !important;
+            display: grid !important;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #333 !important;
+            padding: 5px 10px !important;
+            margin-bottom: 4px !important;
+            background: #fff !important;
+          }
+          .boleta-copy .boleta-print-header > div:nth-child(2) {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            padding: 0 14px;
+          }
+          .boleta-copy .boleta-print-header img {
+            width: 32px !important;
+            height: 32px !important;
           }
           .boleta-copy .boleta-print-header h1 {
-            font-size: 14px !important;
-          }
-          .boleta-copy .boleta-print-header h2 {
             font-size: 12px !important;
           }
-          .boleta-copy .boleta-print-header p {
+          .boleta-copy .boleta-print-header h2 {
             font-size: 11px !important;
+            text-transform: uppercase !important;
+          }
+          .boleta-copy .boleta-print-header p {
+            font-size: 9px !important;
+          }
+          .boleta-copy .boleta-print-header .text-right p:first-child {
+            font-size: 12px !important;
+            font-weight: 700 !important;
+          }
+          .boleta-print-title {
+            display: block !important;
+          }
+
+          /* ── Ocultar leyenda semáforo ── */
+          .boleta-semaforo-print {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
+          }
+
+          /* ── Tabla: cuadrícula completa ── */
+          .boleta-copy .card {
+            box-shadow: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+          }
+          .boleta-copy table {
+            border: 2px solid #333 !important;
+            font-size: 12px !important;
+          }
+          .boleta-copy td,
+          .boleta-copy th {
+            border: 1px solid #ccc !important;
+            padding: 2px 3px !important;
+            line-height: 1.2 !important;
+          }
+
+          /* Columna materia: fondo gris + borde derecho grueso */
+          .boleta-copy .materia-name {
+            background: #f0f0f0 !important;
+            border-right: 2px solid #333 !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding-left: 5px !important;
+          }
+
+          /* Encabezados trimestre (fila 1): gris medio */
+          .boleta-copy thead tr:first-child th {
+            background: #e0e0e0 !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border-bottom: 2px solid #333 !important;
+          }
+          .boleta-copy thead tr:first-child th:first-child {
+            background: #f0f0f0 !important;
+            border-right: 2px solid #333 !important;
+          }
+
+          /* Sub-encabezados (fila 2): gris claro */
+          .boleta-copy thead tr:nth-child(2) th {
+            background: #f0f0f0 !important;
+            font-size: 9px !important;
+            font-weight: 600 !important;
+          }
+
+          /* Promedio trimestral: borde derecho grueso */
+          .boleta-copy .trim-avg {
+            font-weight: 700 !important;
+            border-right: 2px solid #333 !important;
+          }
+
+          /* Columna Final: enmarcada con bordes gruesos */
+          .boleta-copy .final-col {
+            border-left: 2.5px solid #333 !important;
+            border-right: 2.5px solid #333 !important;
+            font-weight: 800 !important;
+            font-size: 13px !important;
+          }
+
+          /* Zebra striping (filas impares) */
+          .boleta-copy tbody tr:nth-child(odd) td:not(.materia-name) {
+            background: #fafafa !important;
+          }
+          .boleta-copy tbody tr:nth-child(even) td:not(.materia-name) {
+            background: #fff !important;
+          }
+
+          /* Fila Promedio General */
+          .boleta-copy .prom-general-row td {
+            border-top: 2.5px solid #333 !important;
+            font-weight: 700 !important;
+            background: #e0e0e0 !important;
+            font-size: 12px !important;
+          }
+          .boleta-copy .prom-general-row td:first-child {
+            border-right: 2px solid #333 !important;
+          }
+
+          /* Separador No Curriculares */
+          .boleta-copy .no-curricular-sep td {
+            background: #f0f0f0 !important;
+            border-top: 2px solid #333 !important;
+            font-size: 9px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+          }
+
+          /* ── Firmas ── */
+          .boleta-signature {
+            display: block !important;
           }
           .boleta-copy .boleta-signature {
-            margin-top: 3mm !important;
+            margin-top: 2mm !important;
           }
           .boleta-copy .boleta-signature p {
-            font-size: 10px !important;
+            font-size: 9px !important;
           }
-          .boleta-copy .boleta-signature .w-48 {
-            width: 40mm !important;
-          }
-          .boleta-copy .boleta-signature .w-56 {
-            width: 50mm !important;
+          .boleta-copy .boleta-signature .sig-line-inner {
+            border-top: 1.5px solid #333 !important;
           }
         }
       `}} />
@@ -328,7 +382,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           </div>
         </div>
 
-        {/* Semáforo leyenda para impresión */}
+        {/* Semáforo leyenda para impresión (oculta en B/N) */}
         <div className="hidden boleta-semaforo-print gap-3 mb-2 text-[8px] justify-center">
           <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-800 border border-red-200">Requiere Apoyo (&lt;7)</span>
           <span className="px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-800 border border-yellow-200">En Desarrollo (7-7.9)</span>
@@ -358,7 +412,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 ))}
                 <th
                   rowSpan={2}
-                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l-2 border-slate-300 w-16 py-2 print:text-[11px] print:py-1 print:w-12"
+                  className="final-col text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l-2 border-slate-300 w-16 py-2 print:text-[11px] print:py-1 print:w-12"
                 >
                   Prom. Final
                 </th>
@@ -381,7 +435,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                         {PERIOD_NAMES[p]}
                       </th>
                     ))}
-                    <th className="text-center text-[11px] font-bold text-primary-700 border-b border-primary-200 border-l border-slate-200 py-1.5 w-14 bg-primary-100/50 print:text-[12px] print:py-0.5 print:w-10">
+                    <th className="trim-avg text-center text-[11px] font-bold text-primary-700 border-b border-primary-200 border-l border-slate-200 py-1.5 w-14 bg-primary-100/50 print:text-[12px] print:py-0.5 print:w-10">
                       Prom.
                     </th>
                   </React.Fragment>
@@ -394,7 +448,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
               {/* Fila de promedio general */}
               <tr className="prom-general-row bg-slate-100 font-bold border-t-2 border-slate-300">
-                <td className="px-3 py-2 text-base text-slate-900 print:text-[11px] print:px-1 print:py-0.5">
+                <td className="materia-name px-3 py-2 text-base text-slate-900 print:text-[11px] print:px-1 print:py-0.5">
                   Promedio General
                 </td>
                 {TRIMESTERS.map((t) => {
@@ -411,7 +465,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                         <td key={p} className="border-l border-slate-200" />
                       ))}
                       <td
-                        className={`text-center text-sm font-bold tabular-nums border-l border-slate-200 print:text-[12px] ${semaforoClass(
+                        className={`trim-avg text-center text-sm font-bold tabular-nums border-l border-slate-200 print:text-[12px] ${semaforoClass(
                           trimGenAvg
                         )}`}
                       >
@@ -421,7 +475,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   );
                 })}
                 <td
-                  className={`text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
+                  className={`final-col text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
                     generalAvg
                   )}`}
                 >
@@ -433,7 +487,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
               {/* Separador y materias no curriculares */}
               {noCurricular.length > 0 && (
                 <>
-                  <tr>
+                  <tr className="no-curricular-sep">
                     <td
                       colSpan={100}
                       className="px-3 py-2 text-sm font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 border-t-2 border-slate-200 print:text-[10px] print:px-1 print:py-1"
@@ -452,12 +506,12 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
         <div className="hidden boleta-signature mt-10 px-6">
           <div className="flex justify-between items-end">
             <div className="text-center">
-              <div className="w-48 border-t border-slate-400 pt-1">
+              <div className="sig-line-inner w-48 border-t border-slate-400 pt-1">
                 <p className="text-[10px] font-semibold text-slate-800">Padre / Madre / Tutor</p>
               </div>
             </div>
             <div className="text-center">
-              <div className="w-56 border-t border-slate-400 pt-1">
+              <div className="sig-line-inner w-56 border-t border-slate-400 pt-1">
                 <p className="text-[10px] font-semibold text-slate-800">Lic. Ana Laura Zúñiga García</p>
                 <p className="text-[9px] text-slate-500">Directora de Secundaria</p>
               </div>

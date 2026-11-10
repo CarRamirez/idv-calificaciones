@@ -100,7 +100,7 @@ function SingleBoleta({
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id}>
-          <td className="px-1 py-0.5 text-left font-semibold text-slate-900 whitespace-nowrap" style={{ fontSize: "15px" }}>{s.name}</td>
+          <td className="materia-name px-1 py-0.5 text-left font-semibold text-slate-900 whitespace-nowrap" style={{ fontSize: "15px" }}>{s.name}</td>
           {TRIMESTERS.map((t) => (
             <React.Fragment key={t.id}>
               {t.periods.map((p) => (
@@ -108,12 +108,12 @@ function SingleBoleta({
                   {fmt(getScore(s.id, p))}
                 </td>
               ))}
-              <td className={`text-center font-semibold tabular-nums border-l border-slate-200 ${semaforoClass(getTrimesterAvg(s.id, t))}`}>
+              <td className={`trim-avg text-center font-semibold tabular-nums border-l border-slate-200 ${semaforoClass(getTrimesterAvg(s.id, t))}`}>
                 {fmt(getTrimesterAvg(s.id, t))}
               </td>
             </React.Fragment>
           ))}
-          <td className={`text-center font-bold tabular-nums border-l-2 border-slate-300 ${semaforoClass(final)}`}>{fmt(final)}</td>
+          <td className={`final-col text-center font-bold tabular-nums border-l-2 border-slate-300 ${semaforoClass(final)}`}>{fmt(final)}</td>
           <td className="text-center tabular-nums text-slate-500 border-l border-slate-100">{totalAbs || "—"}</td>
         </tr>
       );
@@ -133,7 +133,7 @@ function SingleBoleta({
           </div>
         </div>
         <div className="text-center">
-          <h2 className="font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "13px" }}>Boleta de Calificaciones</h2>
+          <h2 className="hidden boleta-print-title font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "13px" }}>Boleta de Calificaciones</h2>
           <p className="text-slate-500" style={{ fontSize: "11px" }}>Ciclo Escolar 2026-2027</p>
         </div>
         <div className="text-right">
@@ -161,7 +161,7 @@ function SingleBoleta({
                 {t.shortName}
               </th>
             ))}
-            <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-slate-300 py-0.5" style={{ width: "28px" }}>Final</th>
+            <th rowSpan={2} className="final-col text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-slate-300 py-0.5" style={{ width: "28px" }}>Final</th>
             <th rowSpan={2} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-slate-100 py-0.5" style={{ width: "22px" }}>IA</th>
           </tr>
           <tr className="bg-indigo-50/60">
@@ -172,7 +172,7 @@ function SingleBoleta({
                     {PERIOD_NAMES[p]}
                   </th>
                 ))}
-                <th className="text-center font-bold text-indigo-700 border-b border-indigo-200 border-l border-slate-200 py-0.5 bg-indigo-100/50" style={{ width: "24px" }}>Prom.</th>
+                <th className="trim-avg text-center font-bold text-indigo-700 border-b border-indigo-200 border-l border-slate-200 py-0.5 bg-indigo-100/50" style={{ width: "24px" }}>Prom.</th>
               </React.Fragment>
             ))}
           </tr>
@@ -180,23 +180,23 @@ function SingleBoleta({
         <tbody>
           {renderRows(curricular)}
           <tr className="prom-general-row bg-slate-100 font-bold border-t-2 border-slate-300">
-            <td className="px-1 py-0.5 text-slate-900 font-bold" style={{ fontSize: "14px" }}>Promedio General</td>
+            <td className="materia-name px-1 py-0.5 text-slate-900 font-bold" style={{ fontSize: "14px" }}>Promedio General</td>
             {TRIMESTERS.map((t) => {
               const trimAvgs = curricular.map((s) => getTrimesterAvg(s.id, t)).filter((a): a is number => a !== null);
               const trimGenAvg = trimAvgs.length > 0 ? trimAvgs.reduce((a, b) => a + b, 0) / trimAvgs.length : null;
               return (
                 <React.Fragment key={t.id}>
                   {t.periods.map((p) => (<td key={p} className="border-l border-slate-200" />))}
-                  <td className={`text-center font-bold tabular-nums border-l border-slate-200 ${semaforoClass(trimGenAvg)}`}>{fmt(trimGenAvg)}</td>
+                  <td className={`trim-avg text-center font-bold tabular-nums border-l border-slate-200 ${semaforoClass(trimGenAvg)}`}>{fmt(trimGenAvg)}</td>
                 </React.Fragment>
               );
             })}
-            <td className={`text-center font-bold tabular-nums border-l-2 border-slate-300 ${semaforoClass(generalAvg)}`}>{fmt(generalAvg)}</td>
+            <td className={`final-col text-center font-bold tabular-nums border-l-2 border-slate-300 ${semaforoClass(generalAvg)}`}>{fmt(generalAvg)}</td>
             <td className="border-l border-slate-100" />
           </tr>
           {noCurricular.length > 0 && (
             <>
-              <tr>
+              <tr className="no-curricular-sep">
                 <td colSpan={100} className="px-1 py-0.5 font-semibold text-slate-400 uppercase bg-slate-50 border-t-2 border-slate-200" style={{ fontSize: "11px" }}>
                   No curriculares
                 </td>
@@ -208,15 +208,15 @@ function SingleBoleta({
       </table>
 
       {/* Signatures */}
-      <div className="mt-3 px-4">
+      <div className="boleta-signature mt-3 px-4">
         <div className="flex justify-between items-end">
           <div className="text-center">
-            <div style={{ width: "35mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
+            <div className="sig-line-inner" style={{ width: "35mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
               <p className="font-semibold text-slate-800" style={{ fontSize: "11px" }}>Padre / Madre / Tutor</p>
             </div>
           </div>
           <div className="text-center">
-            <div style={{ width: "45mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
+            <div className="sig-line-inner" style={{ width: "45mm", borderTop: "1px solid #9ca3af", paddingTop: "1px" }}>
               <p className="font-semibold text-slate-800" style={{ fontSize: "11px" }}>Lic. Ana Laura Zúñiga García</p>
               <p className="text-slate-500" style={{ fontSize: "10px" }}>Directora de Secundaria</p>
             </div>
@@ -234,6 +234,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
 
   return (
     <div>
+      {/* ═══ Print CSS — Estilo C: Compacta Estructurada (B/N) ═══ */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media screen {
           .boleta-all-print-area { display: none; }
@@ -243,49 +244,14 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .boleta-all-screen { display: none !important; }
           .boleta-all-print-area { display: block !important; }
-          /* ── Fondo blanco total, sin colores ── */
+
+          /* ── Reset colores: todo B/N ── */
           .boleta-single,
-          .boleta-single div,
-          .boleta-single table,
-          .boleta-single thead,
-          .boleta-single thead tr,
-          .boleta-single tbody,
-          .boleta-single tbody tr,
-          .boleta-single td,
-          .boleta-single th {
-            background-color: #fff !important;
-            background: #fff !important;
+          .boleta-single * {
             color: #111 !important;
           }
-          .boleta-header,
-          .boleta-header * {
-            color: #111 !important;
-            background: transparent !important;
-          }
-          .boleta-header {
-            border-color: #333 !important;
-          }
-          .boleta-single thead tr th {
-            border-bottom: 1.5px solid #333 !important;
-            font-weight: 700 !important;
-          }
-          .boleta-single td,
-          .boleta-single th {
-            border-color: #bbb !important;
-          }
-          .boleta-single .prom-general-row {
-            border-top: 2px solid #333 !important;
-          }
-          .boleta-single .prom-general-row td {
-            font-weight: 700 !important;
-          }
-          /* Ocultar leyenda semaforo */
-          .print-hide-legend {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-          }
-          /* ── Layout ── */
+
+          /* ── Layout de copia (2 por página) ── */
           .boleta-single {
             height: 48vh;
             overflow: hidden;
@@ -295,21 +261,148 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             border-top: 1px dashed #666;
             padding-top: 2mm;
           }
-          .boleta-page-break {
-            page-break-after: always;
+
+          /* ── Header: recuadro enmarcado con grid ── */
+          .boleta-single .boleta-header {
+            display: grid !important;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #333 !important;
+            padding: 5px 10px !important;
+            margin-bottom: 4px !important;
+            background: #fff !important;
           }
-          /* ── Fuentes grandes ── */
-          .boleta-single table {
+          .boleta-single .boleta-header > div:nth-child(2) {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            padding: 0 14px;
+          }
+          .boleta-single .boleta-header img {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .boleta-single .boleta-header h1 {
             font-size: 12px !important;
           }
-          .boleta-single table th {
+          .boleta-single .boleta-header h2 {
             font-size: 11px !important;
+            text-transform: uppercase !important;
+          }
+          .boleta-single .boleta-header p {
+            font-size: 9px !important;
+          }
+          .boleta-single .boleta-header .text-right p:first-child {
+            font-size: 12px !important;
+            font-weight: 700 !important;
+          }
+          .boleta-print-title {
+            display: block !important;
+          }
+
+          /* ── Ocultar leyenda semáforo ── */
+          .print-hide-legend {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
+          }
+
+          /* ── Tabla: cuadrícula completa ── */
+          .boleta-single table {
+            border: 2px solid #333 !important;
+            font-size: 12px !important;
+          }
+          .boleta-single td,
+          .boleta-single th {
+            border: 1px solid #ccc !important;
             padding: 2px 3px !important;
             line-height: 1.2 !important;
           }
-          .boleta-single table td {
-            padding: 2px 3px !important;
-            line-height: 1.2 !important;
+
+          /* Columna materia: fondo gris + borde derecho grueso */
+          .boleta-single .materia-name {
+            background: #f0f0f0 !important;
+            border-right: 2px solid #333 !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding-left: 5px !important;
+          }
+
+          /* Encabezados trimestre (fila 1): gris medio */
+          .boleta-single thead tr:first-child th {
+            background: #e0e0e0 !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border-bottom: 2px solid #333 !important;
+          }
+          .boleta-single thead tr:first-child th:first-child {
+            background: #f0f0f0 !important;
+            border-right: 2px solid #333 !important;
+          }
+
+          /* Sub-encabezados (fila 2): gris claro */
+          .boleta-single thead tr:nth-child(2) th {
+            background: #f0f0f0 !important;
+            font-size: 9px !important;
+            font-weight: 600 !important;
+          }
+
+          /* Promedio trimestral: borde derecho grueso */
+          .boleta-single .trim-avg {
+            font-weight: 700 !important;
+            border-right: 2px solid #333 !important;
+          }
+
+          /* Columna Final: enmarcada con bordes gruesos */
+          .boleta-single .final-col {
+            border-left: 2.5px solid #333 !important;
+            border-right: 2.5px solid #333 !important;
+            font-weight: 800 !important;
+            font-size: 13px !important;
+          }
+
+          /* Zebra striping (filas impares) */
+          .boleta-single tbody tr:nth-child(odd) td:not(.materia-name) {
+            background: #fafafa !important;
+          }
+          .boleta-single tbody tr:nth-child(even) td:not(.materia-name) {
+            background: #fff !important;
+          }
+
+          /* Fila Promedio General */
+          .boleta-single .prom-general-row td {
+            border-top: 2.5px solid #333 !important;
+            font-weight: 700 !important;
+            background: #e0e0e0 !important;
+            font-size: 12px !important;
+          }
+          .boleta-single .prom-general-row td:first-child {
+            border-right: 2px solid #333 !important;
+          }
+
+          /* Separador No Curriculares */
+          .boleta-single .no-curricular-sep td {
+            background: #f0f0f0 !important;
+            border-top: 2px solid #333 !important;
+            font-size: 9px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+          }
+
+          /* ── Firmas ── */
+          .boleta-single .boleta-signature p {
+            font-size: 9px !important;
+          }
+          .boleta-single .boleta-signature .sig-line-inner {
+            border-top: 1.5px solid #333 !important;
+          }
+
+          .boleta-page-break {
+            page-break-after: always;
           }
         }
       `}} />
@@ -319,7 +412,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
         <div className="flex justify-end mb-4">
           <button onClick={handlePrint} className="btn-primary text-sm flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
             Imprimir todas ({students.length} boletas)
           </button>
