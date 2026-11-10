@@ -154,7 +154,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
         @media print {
           @page {
             size: letter portrait;
-            margin: 5mm 6mm;
+            margin: 4mm 5mm;
           }
           body {
             -webkit-print-color-adjust: exact !important;
@@ -169,13 +169,13 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
           /* ── Layout de copia (2 por página) ── */
           .boleta-copy {
-            height: 48vh;
+            height: 49vh;
             overflow: hidden;
             page-break-inside: avoid;
           }
           .boleta-copy + .boleta-copy {
             border-top: 1px dashed #666;
-            padding-top: 2mm;
+            padding-top: 1mm;
           }
 
           /* ── Header: recuadro enmarcado con grid ── */
@@ -183,33 +183,33 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             display: grid !important;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border: 2px solid #333 !important;
-            padding: 5px 10px !important;
-            margin-bottom: 4px !important;
+            padding: 3px 8px !important;
+            margin-bottom: 2px !important;
             background: #fff !important;
           }
           .boleta-copy .boleta-print-header > div:nth-child(2) {
             border-left: 1px solid #ccc;
             border-right: 1px solid #ccc;
-            padding: 0 14px;
+            padding: 0 10px;
           }
           .boleta-copy .boleta-print-header img {
-            width: 32px !important;
-            height: 32px !important;
+            width: 26px !important;
+            height: 26px !important;
           }
           .boleta-copy .boleta-print-header h1 {
-            font-size: 12px !important;
+            font-size: 10px !important;
           }
           .boleta-copy .boleta-print-header h2 {
-            font-size: 11px !important;
+            font-size: 9px !important;
             text-transform: uppercase !important;
           }
           .boleta-copy .boleta-print-header p {
-            font-size: 9px !important;
+            font-size: 7.5px !important;
           }
           .boleta-copy .boleta-print-header .text-right p:first-child {
-            font-size: 12px !important;
+            font-size: 10px !important;
             font-weight: 700 !important;
           }
           .boleta-print-title {
@@ -233,31 +233,31 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           }
           .boleta-copy table {
             border: 2px solid #333 !important;
-            font-size: 12px !important;
+            font-size: 9.5px !important;
           }
           .boleta-copy td,
           .boleta-copy th {
             border: 1px solid #ccc !important;
-            padding: 2px 3px !important;
-            line-height: 1.2 !important;
+            padding: 1px 2px !important;
+            line-height: 1.15 !important;
           }
 
           /* Columna materia: fondo gris + borde derecho grueso */
           .boleta-copy .materia-name {
             background: #f0f0f0 !important;
             border-right: 2px solid #333 !important;
-            font-size: 13px !important;
+            font-size: 10px !important;
             font-weight: 600 !important;
-            padding-left: 5px !important;
+            padding-left: 4px !important;
           }
 
           /* Encabezados trimestre (fila 1): gris medio */
           .boleta-copy thead tr:first-child th {
             background: #e0e0e0 !important;
-            font-size: 10px !important;
+            font-size: 8px !important;
             font-weight: 700 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
+            letter-spacing: 0.3px !important;
             border-bottom: 2px solid #333 !important;
           }
           .boleta-copy thead tr:first-child th:first-child {
@@ -268,7 +268,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           /* Sub-encabezados (fila 2): gris claro */
           .boleta-copy thead tr:nth-child(2) th {
             background: #f0f0f0 !important;
-            font-size: 9px !important;
+            font-size: 7.5px !important;
             font-weight: 600 !important;
           }
 
@@ -283,7 +283,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             border-left: 2.5px solid #333 !important;
             border-right: 2.5px solid #333 !important;
             font-weight: 800 !important;
-            font-size: 13px !important;
+            font-size: 10px !important;
           }
 
           /* Zebra striping (filas impares) */
@@ -299,7 +299,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             border-top: 2.5px solid #333 !important;
             font-weight: 700 !important;
             background: #e0e0e0 !important;
-            font-size: 12px !important;
+            font-size: 9.5px !important;
           }
           .boleta-copy .prom-general-row td:first-child {
             border-right: 2px solid #333 !important;
@@ -309,10 +309,10 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           .boleta-copy .no-curricular-sep td {
             background: #f0f0f0 !important;
             border-top: 2px solid #333 !important;
-            font-size: 9px !important;
+            font-size: 7px !important;
             font-weight: 700 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
+            letter-spacing: 0.3px !important;
           }
 
           /* ── Firmas ── */
@@ -320,10 +320,10 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             display: block !important;
           }
           .boleta-copy .boleta-signature {
-            margin-top: 2mm !important;
+            margin-top: 1mm !important;
           }
           .boleta-copy .boleta-signature p {
-            font-size: 9px !important;
+            font-size: 7.5px !important;
           }
           .boleta-copy .boleta-signature .sig-line-inner {
             border-top: 1.5px solid #333 !important;

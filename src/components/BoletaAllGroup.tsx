@@ -240,7 +240,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           .boleta-all-print-area { display: none; }
         }
         @media print {
-          @page { size: letter portrait; margin: 5mm 6mm; }
+          @page { size: letter portrait; margin: 4mm 5mm; }
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .boleta-all-screen { display: none !important; }
           .boleta-all-print-area { display: block !important; }
@@ -253,13 +253,13 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
 
           /* ── Layout de copia (2 por página) ── */
           .boleta-single {
-            height: 48vh;
+            height: 49vh;
             overflow: hidden;
             page-break-inside: avoid;
           }
           .boleta-single + .boleta-single {
             border-top: 1px dashed #666;
-            padding-top: 2mm;
+            padding-top: 1mm;
           }
 
           /* ── Header: recuadro enmarcado con grid ── */
@@ -267,33 +267,33 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             display: grid !important;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border: 2px solid #333 !important;
-            padding: 5px 10px !important;
-            margin-bottom: 4px !important;
+            padding: 3px 8px !important;
+            margin-bottom: 2px !important;
             background: #fff !important;
           }
           .boleta-single .boleta-header > div:nth-child(2) {
             border-left: 1px solid #ccc;
             border-right: 1px solid #ccc;
-            padding: 0 14px;
+            padding: 0 10px;
           }
           .boleta-single .boleta-header img {
-            width: 32px !important;
-            height: 32px !important;
+            width: 26px !important;
+            height: 26px !important;
           }
           .boleta-single .boleta-header h1 {
-            font-size: 12px !important;
+            font-size: 10px !important;
           }
           .boleta-single .boleta-header h2 {
-            font-size: 11px !important;
+            font-size: 9px !important;
             text-transform: uppercase !important;
           }
           .boleta-single .boleta-header p {
-            font-size: 9px !important;
+            font-size: 7.5px !important;
           }
           .boleta-single .boleta-header .text-right p:first-child {
-            font-size: 12px !important;
+            font-size: 10px !important;
             font-weight: 700 !important;
           }
           .boleta-print-title {
@@ -311,31 +311,31 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           /* ── Tabla: cuadrícula completa ── */
           .boleta-single table {
             border: 2px solid #333 !important;
-            font-size: 12px !important;
+            font-size: 9.5px !important;
           }
           .boleta-single td,
           .boleta-single th {
             border: 1px solid #ccc !important;
-            padding: 2px 3px !important;
-            line-height: 1.2 !important;
+            padding: 1px 2px !important;
+            line-height: 1.15 !important;
           }
 
           /* Columna materia: fondo gris + borde derecho grueso */
           .boleta-single .materia-name {
             background: #f0f0f0 !important;
             border-right: 2px solid #333 !important;
-            font-size: 13px !important;
+            font-size: 10px !important;
             font-weight: 600 !important;
-            padding-left: 5px !important;
+            padding-left: 4px !important;
           }
 
           /* Encabezados trimestre (fila 1): gris medio */
           .boleta-single thead tr:first-child th {
             background: #e0e0e0 !important;
-            font-size: 10px !important;
+            font-size: 8px !important;
             font-weight: 700 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
+            letter-spacing: 0.3px !important;
             border-bottom: 2px solid #333 !important;
           }
           .boleta-single thead tr:first-child th:first-child {
@@ -346,7 +346,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           /* Sub-encabezados (fila 2): gris claro */
           .boleta-single thead tr:nth-child(2) th {
             background: #f0f0f0 !important;
-            font-size: 9px !important;
+            font-size: 7.5px !important;
             font-weight: 600 !important;
           }
 
@@ -361,7 +361,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             border-left: 2.5px solid #333 !important;
             border-right: 2.5px solid #333 !important;
             font-weight: 800 !important;
-            font-size: 13px !important;
+            font-size: 10px !important;
           }
 
           /* Zebra striping (filas impares) */
@@ -377,7 +377,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             border-top: 2.5px solid #333 !important;
             font-weight: 700 !important;
             background: #e0e0e0 !important;
-            font-size: 12px !important;
+            font-size: 9.5px !important;
           }
           .boleta-single .prom-general-row td:first-child {
             border-right: 2px solid #333 !important;
@@ -387,15 +387,15 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           .boleta-single .no-curricular-sep td {
             background: #f0f0f0 !important;
             border-top: 2px solid #333 !important;
-            font-size: 9px !important;
+            font-size: 7px !important;
             font-weight: 700 !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
+            letter-spacing: 0.3px !important;
           }
 
           /* ── Firmas ── */
           .boleta-single .boleta-signature p {
-            font-size: 9px !important;
+            font-size: 7.5px !important;
           }
           .boleta-single .boleta-signature .sig-line-inner {
             border-top: 1.5px solid #333 !important;
