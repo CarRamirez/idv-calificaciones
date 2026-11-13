@@ -292,33 +292,33 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             display: grid !important;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             border: 2px solid #333 !important;
-            padding: 3px 8px !important;
-            margin-bottom: 2px !important;
+            padding: 5px 10px !important;
+            margin-bottom: 3px !important;
             background: #fff !important;
           }
           .boleta-single .boleta-header > div:nth-child(2) {
             border-left: 1px solid #ccc;
             border-right: 1px solid #ccc;
-            padding: 0 10px;
+            padding: 0 12px;
           }
           .boleta-single .boleta-header img {
-            width: 26px !important;
-            height: 26px !important;
+            width: 38px !important;
+            height: 38px !important;
           }
           .boleta-single .boleta-header h1 {
-            font-size: 10px !important;
+            font-size: 12px !important;
           }
           .boleta-single .boleta-header h2 {
-            font-size: 9px !important;
+            font-size: 11px !important;
             text-transform: uppercase !important;
           }
           .boleta-single .boleta-header p {
-            font-size: 7.5px !important;
+            font-size: 8.5px !important;
           }
           .boleta-single .boleta-header .text-right p:first-child {
-            font-size: 10px !important;
+            font-size: 12px !important;
             font-weight: 700 !important;
           }
           .boleta-print-title {
@@ -359,9 +359,18 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           .boleta-single .materia-name {
             background: #fff !important;
             border-right: 2px solid #333 !important;
-            font-size: 10px !important;
+            font-size: 8.5pt !important;
             font-weight: 600 !important;
             padding-left: 4px !important;
+            white-space: nowrap !important;
+          }
+
+          .boleta-single td:not(.materia-name):not(.final-col),
+          .boleta-single th:not(:first-child):not(.final-col):not(.col-ia) {
+            width: 32px !important;
+            min-width: 32px !important;
+            max-width: 32px !important;
+            text-align: center !important;
           }
 
           /* Encabezados trimestre (fila 1) */
@@ -397,6 +406,9 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
             border-right: 2.5px solid #333 !important;
             font-weight: 800 !important;
             font-size: 10px !important;
+            width: 42px !important;
+            min-width: 42px !important;
+            max-width: 42px !important;
           }
 
           /* Zebra striping — fondo blanco para todas */
