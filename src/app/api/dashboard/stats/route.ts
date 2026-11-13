@@ -217,6 +217,73 @@ export async function GET() {
       }
     });
 
+    // Helper: compute per-period average for a group's curricular subjects
+    function getGroupPeriodAvg(
+      grpStudents: any[],
+      period: number
+    ): { avg: number | null; atRiskCount: number } {
+      let totalAvg = 0;
+      let avgCount = 0;
+      let atRisk = 0;
+      grpStudents.forEach((s: any) => {
+        const sGrades = gradesByStudent[s.id] || {};
+        let sum = 0;
+        let cnt = 0;
+        Object.entries(sGrades).forEach(([subId, periodScores]) => {
+          if (countingSubjects.has(subId)) {
+            const score = periodScores[period];
+            if (score != null) { sum += score; cnt++; }
+          }
+        });
+        if (cnt > 0) {
+          const avg = sum / cnt;
+          totalAvg += avg;
+          avgCount++;
+          if (avg < 6) atRisk++;
+        }
+      });
+      return {
+        avg: avgCount > 0 ? Math.round((totalAvg / avgCount) * 10) / 10 : null,
+        atRiskCount: atRisk,
+      };
+    }
+
+    // Helper: compute per-trimester average for a group
+    function getGroupTrimesterAvg(
+      grpStudents: any[],
+      trimester: { periods: number[] }
+    ): { avg: number | null; atRiskCount: number } {
+      let totalAvg = 0;
+      let avgCount = 0;
+      let atRisk = 0;
+      grpStudents.forEach((s: any) => {
+        const sGrades = gradesByStudent[s.id] || {};
+        let sum = 0;
+        let cnt = 0;
+        Object.entries(sGrades).forEach(([subId, periodScores]) => {
+          if (countingSubjects.has(subId)) {
+            const scores = trimester.periods
+              .map((p) => periodScores[p])
+              .filter((sc): sc is number => sc != null);
+            if (scores.length > 0) {
+              sum += scores.reduce((a, b) => a + b, 0) / scores.length;
+              cnt++;
+            }
+          }
+        });
+        if (cnt > 0) {
+          const avg = sum / cnt;
+          totalAvg += avg;
+          avgCount++;
+          if (avg < 6) atRisk++;
+        }
+      });
+      return {
+        avg: avgCount > 0 ? Math.round((totalAvg / avgCount) * 10) / 10 : null,
+        atRiskCount: atRisk,
+      };
+    }
+
     (groups || []).forEach((g: any) => {
       const grpStudents = studentsByGroup[g.id] || [];
       if (grpStudents.length === 0) return;
@@ -287,6 +354,18 @@ export async function GET() {
         penaltyTotals.push({ name: ps.short_name, total });
       });
 
+      // Per-period averages (mensual)
+      const periodAvgs: Record<number, { avg: number | null; atRiskCount: number }> = {};
+      [1, 2, 3, 4, 5, 6, 7, 8].forEach((p) => {
+        periodAvgs[p] = getGroupPeriodAvg(grpStudents, p);
+      });
+
+      // Per-trimester averages
+      const trimesterAvgs: Record<number, { avg: number | null; atRiskCount: number }> = {};
+      PERF_TRIMESTERS.forEach((t, idx) => {
+        trimesterAvgs[idx + 1] = getGroupTrimesterAvg(grpStudents, t);
+      });
+
       performanceByGroup.push({
         groupId: g.id,
         grade: g.grade,
@@ -298,6 +377,8 @@ export async function GET() {
         atRiskStudents,
         failingSubjects,
         penaltyTotals,
+        periodAvgs,
+        trimesterAvgs,
       });
     });
   }

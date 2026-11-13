@@ -46,6 +46,12 @@ function semaforoClass(score: number | null): string {
   return "bg-green-100 text-green-800";
 }
 
+/** Subjects where we SUM instead of averaging (non-curricular counters) */
+function isSumSubject(name: string): boolean {
+  const lower = name.toLowerCase();
+  return lower.includes("tarea") || lower.includes("inasistencia") || lower.includes("incidencia");
+}
+
 
 export default function BoletaView({ student, group, subjects, gradeMap }: Props) {
   const printRef = useRef<HTMLDivElement>(null);
@@ -77,6 +83,22 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
     return avgs.reduce((a, b) => a + b, 0) / avgs.length;
   }
 
+  function getTrimesterSum(subjectId: string, trimester: { periods: number[] }): number | null {
+    const scores = trimester.periods
+      .map((p) => getScore(subjectId, p))
+      .filter((s): s is number => s !== null);
+    if (scores.length === 0) return null;
+    return scores.reduce((a, b) => a + b, 0);
+  }
+
+  function getSubjectFinalSum(subjectId: string): number | null {
+    const sums = TRIMESTERS.map((t) => getTrimesterSum(subjectId, t)).filter(
+      (s): s is number => s !== null
+    );
+    if (sums.length === 0) return null;
+    return sums.reduce((a, b) => a + b, 0);
+  }
+
   function getTotalAbsences(subjectId: string): number {
     return [1, 2, 3, 4, 5, 6, 7, 8].reduce(
       (sum, p) => sum + getAbsences(subjectId, p),
@@ -104,42 +126,46 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
   function renderSubjectRows(subjectList: Subject[]) {
     return subjectList.map((s) => {
-      const final = getSubjectFinal(s.id);
+      const isSum = isSumSubject(s.name);
+      const final = isSum ? getSubjectFinalSum(s.id) : getSubjectFinal(s.id);
       const totalAbs = getTotalAbsences(s.id);
       return (
         <tr key={s.id} className="hover:bg-slate-50/50">
           <td className="materia-name px-3 py-2 text-base font-medium text-slate-900 whitespace-nowrap print:px-1 print:py-0.5">
             {s.name}
           </td>
-          {TRIMESTERS.map((t) => (
-            <React.Fragment key={t.id}>
-              {t.periods.map((p) => (
+          {TRIMESTERS.map((t) => {
+            const trimVal = isSum ? getTrimesterSum(s.id, t) : getTrimesterAvg(s.id, t);
+            return (
+              <React.Fragment key={t.id}>
+                {t.periods.map((p) => (
+                  <td
+                    key={p}
+                    className={`text-center text-sm tabular-nums border-l border-slate-100 print:text-[10px] ${
+                      isSum ? "" : semaforoClass(getScore(s.id, p))
+                    }`}
+                  >
+                    {fmt(getScore(s.id, p))}
+                  </td>
+                ))}
                 <td
-                  key={p}
-                  className={`text-center text-sm tabular-nums border-l border-slate-100 print:text-[10px] ${semaforoClass(
-                    getScore(s.id, p)
-                  )}`}
+                  className={`trim-avg text-center text-sm font-semibold tabular-nums border-l border-slate-200 print:text-[10px] ${
+                    isSum ? "" : semaforoClass(trimVal)
+                  }`}
                 >
-                  {fmt(getScore(s.id, p))}
+                  {fmt(trimVal)}
                 </td>
-              ))}
-              <td
-                className={`trim-avg text-center text-sm font-semibold tabular-nums border-l border-slate-200 print:text-[10px] ${semaforoClass(
-                  getTrimesterAvg(s.id, t)
-                )}`}
-              >
-                {fmt(getTrimesterAvg(s.id, t))}
-              </td>
-            </React.Fragment>
-          ))}
+              </React.Fragment>
+            );
+          })}
           <td
-            className={`final-col text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${semaforoClass(
-              final
-            )}`}
+            className={`final-col text-center text-sm font-bold tabular-nums border-l-2 border-slate-300 print:text-[10px] ${
+              isSum ? "" : semaforoClass(final)
+            }`}
           >
             {fmt(final)}
           </td>
-          <td className="text-center text-sm tabular-nums text-slate-500 border-l border-slate-100 print:text-[10px]">
+          <td className="col-ia text-center text-sm tabular-nums text-slate-500 border-l border-slate-100 print:text-[10px]">
             {totalAbs || "—"}
           </td>
         </tr>
@@ -242,18 +268,28 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             line-height: 1.15 !important;
           }
 
-          /* Columna materia: fondo gris + borde derecho grueso */
+          /* ── Ocultar columna IA en impresión ── */
+          .boleta-copy .col-ia {
+            display: none !important;
+          }
+
+          /* ── Ocultar leyenda "No curriculares" ── */
+          .boleta-copy .no-curricular-sep {
+            display: none !important;
+          }
+
+          /* Columna materia: borde derecho grueso */
           .boleta-copy .materia-name {
-            background: #f0f0f0 !important;
+            background: #fff !important;
             border-right: 2px solid #333 !important;
             font-size: 10px !important;
             font-weight: 600 !important;
             padding-left: 4px !important;
           }
 
-          /* Encabezados trimestre (fila 1): gris medio */
+          /* Encabezados trimestre (fila 1) */
           .boleta-copy thead tr:first-child th {
-            background: #e0e0e0 !important;
+            background: #fff !important;
             font-size: 8px !important;
             font-weight: 700 !important;
             text-transform: uppercase !important;
@@ -261,13 +297,13 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             border-bottom: 2px solid #333 !important;
           }
           .boleta-copy thead tr:first-child th:first-child {
-            background: #f0f0f0 !important;
+            background: #fff !important;
             border-right: 2px solid #333 !important;
           }
 
-          /* Sub-encabezados (fila 2): gris claro */
+          /* Sub-encabezados (fila 2) */
           .boleta-copy thead tr:nth-child(2) th {
-            background: #f0f0f0 !important;
+            background: #fff !important;
             font-size: 7.5px !important;
             font-weight: 600 !important;
           }
@@ -286,11 +322,8 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             font-size: 10px !important;
           }
 
-          /* Zebra striping (filas impares) */
-          .boleta-copy tbody tr:nth-child(odd) td:not(.materia-name) {
-            background: #fafafa !important;
-          }
-          .boleta-copy tbody tr:nth-child(even) td:not(.materia-name) {
+          /* Zebra striping — fondo blanco para todas */
+          .boleta-copy tbody tr td:not(.materia-name) {
             background: #fff !important;
           }
 
@@ -298,16 +331,16 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           .boleta-copy .prom-general-row td {
             border-top: 2.5px solid #333 !important;
             font-weight: 700 !important;
-            background: #e0e0e0 !important;
+            background: #fff !important;
             font-size: 9.5px !important;
           }
           .boleta-copy .prom-general-row td:first-child {
             border-right: 2px solid #333 !important;
           }
 
-          /* Separador No Curriculares */
+          /* Separador No Curriculares (oculto en impresión, ver regla arriba) */
           .boleta-copy .no-curricular-sep td {
-            background: #f0f0f0 !important;
+            background: #fff !important;
             border-top: 2px solid #333 !important;
             font-size: 7px !important;
             font-weight: 700 !important;
@@ -418,7 +451,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 </th>
                 <th
                   rowSpan={2}
-                  className="text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-slate-100 w-12 py-2 print:text-[11px] print:py-1 print:w-10"
+                  className="col-ia text-center text-xs font-semibold text-primary-800 uppercase tracking-wider border-b border-primary-200 border-l border-slate-100 w-12 py-2 print:text-[11px] print:py-1 print:w-10"
                 >
                   IA
                 </th>
@@ -481,7 +514,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 >
                   {fmt(generalAvg)}
                 </td>
-                <td className="border-l border-slate-100" />
+                <td className="col-ia border-l border-slate-100" />
               </tr>
 
               {/* Separador y materias no curriculares */}
