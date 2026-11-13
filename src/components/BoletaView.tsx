@@ -180,7 +180,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
         @media print {
           @page {
             size: letter portrait;
-            margin: 4mm 5mm;
+            margin: 2mm 5mm;
           }
           html, body {
             -webkit-print-color-adjust: exact !important;
@@ -199,14 +199,17 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
 
           /* ── Layout de copia (2 por página) ── */
           .boleta-copy {
-            height: 50%;
+            height: calc(50vh - 2mm);
             box-sizing: border-box;
             overflow: hidden;
             page-break-inside: avoid;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
           }
           .boleta-copy + .boleta-copy {
             border-top: 1px dashed #666;
-            padding-top: 0mm;
+            padding-top: 1mm;
+            margin-top: 0 !important;
           }
 
           /* ── Header: recuadro enmarcado con grid ── */
