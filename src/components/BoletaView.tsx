@@ -366,17 +366,19 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
           }
 
           /* Fila Promedio General - oculta en impresion */
-          .boleta-copy .prom-general-row {
+          .boleta-copy .prom-general-row,
+          .boleta-copy .prom-general-row td,
+          .boleta-copy tr.prom-general-row {
             display: none !important;
-          }
-          .boleta-copy .prom-general-row td {
-            border-top: 2.5px solid #333 !important;
-            font-weight: 700 !important;
-            background: #fff !important;
-            font-size: 9.5px !important;
-          }
-          .boleta-copy .prom-general-row td:first-child {
-            border-right: 2px solid #333 !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            line-height: 0 !important;
+            font-size: 0 !important;
           }
 
 
