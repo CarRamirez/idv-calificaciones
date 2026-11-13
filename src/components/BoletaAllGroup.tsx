@@ -353,15 +353,26 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
           /* ── Separador grueso entre curriculares y no curriculares ── */
           .boleta-single .no-curricular-sep {
             height: 0 !important;
+            max-height: 0 !important;
             line-height: 0 !important;
             font-size: 0 !important;
+            overflow: hidden !important;
+            visibility: collapse !important;
           }
           .boleta-single .no-curricular-sep td {
             padding: 0 !important;
             height: 0 !important;
-            border-top: 2.5px solid #333 !important;
+            max-height: 0 !important;
+            border-top: none !important;
             border-bottom: none !important;
             background: transparent !important;
+            font-size: 0 !important;
+            line-height: 0 !important;
+            overflow: hidden !important;
+            color: transparent !important;
+          }
+          .boleta-single .no-curricular-sep + tr td {
+            border-top: 2.5px solid #333 !important;
           }
 
           /* Columna materia: borde derecho grueso */
