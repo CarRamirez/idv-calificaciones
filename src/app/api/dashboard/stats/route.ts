@@ -218,10 +218,10 @@ export async function GET() {
     });
 
     // Helper: compute per-period average for a group's curricular subjects
-    function getGroupPeriodAvg(
+    const getGroupPeriodAvg = (
       grpStudents: any[],
       period: number
-    ): { avg: number | null; atRiskCount: number } {
+    ): { avg: number | null; atRiskCount: number } => {
       let totalAvg = 0;
       let avgCount = 0;
       let atRisk = 0;
@@ -249,10 +249,10 @@ export async function GET() {
     }
 
     // Helper: compute per-trimester average for a group
-    function getGroupTrimesterAvg(
+    const getGroupTrimesterAvg = (
       grpStudents: any[],
       trimester: { periods: number[] }
-    ): { avg: number | null; atRiskCount: number } {
+    ): { avg: number | null; atRiskCount: number } => {
       let totalAvg = 0;
       let avgCount = 0;
       let atRisk = 0;
