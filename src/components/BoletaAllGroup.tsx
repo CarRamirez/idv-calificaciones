@@ -266,7 +266,7 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
         }
         @media print {
           @page { size: letter portrait; margin: 4mm 5mm; }
-          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          html, body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: #fff !important; background-color: #fff !important; margin: 0 !important; padding: 0 !important; }
           .boleta-all-screen { display: none !important; }
           .boleta-all-print-area { display: block !important; }
 
@@ -278,13 +278,14 @@ export default function BoletaAllGroup({ students, group, subjects, gradeMaps }:
 
           /* ── Layout de copia (2 por página) ── */
           .boleta-single {
-            height: 49vh;
+            height: 50%;
+            box-sizing: border-box;
             overflow: hidden;
             page-break-inside: avoid;
           }
           .boleta-single + .boleta-single {
             border-top: 1px dashed #666;
-            padding-top: 1mm;
+            padding-top: 0mm;
           }
 
           /* ── Header: recuadro enmarcado con grid ── */
