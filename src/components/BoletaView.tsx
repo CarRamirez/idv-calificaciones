@@ -273,26 +273,50 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             display: none !important;
           }
 
-          /* ── Ocultar leyenda "No curriculares" ── */
+          /* ── Separador grueso entre curriculares y no curriculares ── */
           .boleta-copy .no-curricular-sep {
-            display: none !important;
+            height: 0 !important;
+            line-height: 0 !important;
+            font-size: 0 !important;
+          }
+          .boleta-copy .no-curricular-sep td {
+            padding: 0 !important;
+            height: 0 !important;
+            border-top: 2.5px solid #333 !important;
+            border-bottom: none !important;
+            background: transparent !important;
           }
 
           /* Columna materia: borde derecho grueso */
           .boleta-copy .materia-name {
+            width: 180px !important;
+            min-width: 180px !important;
+            max-width: 180px !important;
             background: #fff !important;
             border-right: 2px solid #333 !important;
             font-size: 8.5pt !important;
             font-weight: 600 !important;
             padding-left: 4px !important;
             white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
           }
 
-          .boleta-copy td:not(.materia-name):not(.final-col),
-          .boleta-copy th:not(:first-child):not(.final-col):not(.col-ia) {
-            width: 32px !important;
-            min-width: 32px !important;
-            max-width: 32px !important;
+          /* ── Anchos por trimestre (iguales 120px c/u) ── */
+          /* 1er y 2do Trim: 3 cols x 40px = 120px */
+          .boleta-copy tbody td:nth-child(n+2):nth-child(-n+7),
+          .boleta-copy thead tr:nth-child(2) th:nth-child(n+1):nth-child(-n+6) {
+            width: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            text-align: center !important;
+          }
+          /* 3er Trim: 5 cols x 24px = 120px */
+          .boleta-copy tbody td:nth-child(n+8):nth-child(-n+12),
+          .boleta-copy thead tr:nth-child(2) th:nth-child(n+7):nth-child(-n+11) {
+            width: 24px !important;
+            min-width: 24px !important;
+            max-width: 24px !important;
             text-align: center !important;
           }
 
@@ -317,29 +341,34 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             font-weight: 600 !important;
           }
 
-          /* Promedio trimestral: borde derecho grueso */
+          /* Promedio trimestral: borde derecho grueso + sombreado */
           .boleta-copy .trim-avg {
             font-weight: 700 !important;
             border-right: 2px solid #333 !important;
+            background: rgba(0,0,0,0.05) !important;
           }
 
-          /* Columna Final: enmarcada con bordes gruesos */
+          /* Columna Final: enmarcada + sombreado */
           .boleta-copy .final-col {
             border-left: 2.5px solid #333 !important;
             border-right: 2.5px solid #333 !important;
             font-weight: 800 !important;
             font-size: 10px !important;
-            width: 42px !important;
-            min-width: 42px !important;
-            max-width: 42px !important;
+            background: rgba(0,0,0,0.05) !important;
+            width: 50px !important;
+            min-width: 50px !important;
+            max-width: 50px !important;
           }
 
-          /* Zebra striping — fondo blanco para todas */
-          .boleta-copy tbody tr td:not(.materia-name) {
+          /* Fondo blanco para celdas normales (promedios sombreados) */
+          .boleta-copy tbody tr td:not(.materia-name):not(.trim-avg):not(.final-col) {
             background: #fff !important;
           }
 
-          /* Fila Promedio General */
+          /* Fila Promedio General - oculta en impresion */
+          .boleta-copy .prom-general-row {
+            display: none !important;
+          }
           .boleta-copy .prom-general-row td {
             border-top: 2.5px solid #333 !important;
             font-weight: 700 !important;
@@ -350,15 +379,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
             border-right: 2px solid #333 !important;
           }
 
-          /* Separador No Curriculares (oculto en impresión, ver regla arriba) */
-          .boleta-copy .no-curricular-sep td {
-            background: #fff !important;
-            border-top: 2px solid #333 !important;
-            font-size: 7px !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.3px !important;
-          }
+
 
           /* ── Firmas ── */
           .boleta-signature {
