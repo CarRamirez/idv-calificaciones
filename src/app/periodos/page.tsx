@@ -191,7 +191,7 @@ export default function PeriodosPage() {
       <main className="page-content max-w-4xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Periodos de Evaluación</h1>
+            <h1 className="text-xl font-extrabold text-slate-900">Periodos de Evaluación</h1>
             <p className="text-sm text-slate-500 mt-0.5">
               {openCount === 0
                 ? "Todos los periodos están cerrados"
@@ -493,7 +493,7 @@ function PeriodRow({
           <button
             onClick={onNotify}
             disabled={notifyingThis}
-            className="text-[11px] text-indigo-500 hover:text-indigo-700 transition-colors flex items-center gap-1 disabled:opacity-50"
+            className="text-[11px] text-primary-500 hover:text-primary-700 transition-colors flex items-center gap-1 disabled:opacity-50"
             title="Notificar maestros por correo"
           >
             {notifyingThis ? (

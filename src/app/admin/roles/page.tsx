@@ -262,7 +262,7 @@ export default function AdminRolesPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Roles y Permisos</h1>
+            <h1 className="text-xl font-extrabold text-slate-900">Roles y Permisos</h1>
             <p className="text-sm text-slate-500">Gestiona roles y asigna permisos por módulo</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>

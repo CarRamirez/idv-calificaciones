@@ -148,7 +148,7 @@ function SingleBoleta({
   return (
     <div className="boleta-single">
       {/* Header */}
-      <div className="boleta-header flex items-center justify-between mb-1 pb-1 border-b-2 border-indigo-600">
+      <div className="boleta-header flex items-center justify-between mb-1 pb-1 border-b-2 border-primary-600">
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-idv.png" alt="IDV" className="w-10 h-10 object-contain" />
@@ -158,7 +158,7 @@ function SingleBoleta({
           </div>
         </div>
         <div className="text-center">
-          <h2 className="hidden boleta-print-title font-semibold text-indigo-700 uppercase tracking-wide" style={{ fontSize: "13px" }}>Boleta de Calificaciones</h2>
+          <h2 className="hidden boleta-print-title font-semibold text-primary-700 uppercase tracking-wide" style={{ fontSize: "13px" }}>Boleta de Calificaciones</h2>
           <p className="text-slate-500" style={{ fontSize: "11px" }}>Ciclo Escolar 2026-2027</p>
         </div>
         <div className="text-right">
@@ -179,25 +179,25 @@ function SingleBoleta({
       {/* Table */}
       <table className="w-full border-collapse boleta-table" style={{ fontSize: "13px" }}>
         <thead>
-          <tr className="bg-indigo-50">
-            <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-indigo-800 uppercase border-b border-indigo-200" style={{ minWidth: "120px" }}>Asignatura</th>
+          <tr className="bg-primary-50">
+            <th rowSpan={2} className="px-1 py-0.5 text-left font-semibold text-primary-800 uppercase border-b border-primary-200" style={{ minWidth: "120px" }}>Asignatura</th>
             {TRIMESTERS.map((t) => (
-              <th key={t.id} colSpan={t.periods.length + 1} className="text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-slate-200 py-0.5">
+              <th key={t.id} colSpan={t.periods.length + 1} className="text-center font-semibold text-primary-800 uppercase border-b border-primary-200 border-l border-slate-200 py-0.5">
                 {t.shortName}
               </th>
             ))}
-            <th rowSpan={2} className="final-col text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l-2 border-slate-300 py-0.5" style={{ width: "28px" }}>Final</th>
-            <th rowSpan={2} className="col-ia text-center font-semibold text-indigo-800 uppercase border-b border-indigo-200 border-l border-slate-100 py-0.5" style={{ width: "22px" }}>IA</th>
+            <th rowSpan={2} className="final-col text-center font-semibold text-primary-800 uppercase border-b border-primary-200 border-l-2 border-slate-300 py-0.5" style={{ width: "28px" }}>Final</th>
+            <th rowSpan={2} className="col-ia text-center font-semibold text-primary-800 uppercase border-b border-primary-200 border-l border-slate-100 py-0.5" style={{ width: "22px" }}>IA</th>
           </tr>
-          <tr className="bg-indigo-50/60">
+          <tr className="bg-primary-50/60">
             {TRIMESTERS.map((t) => (
               <React.Fragment key={t.id}>
                 {t.periods.map((p) => (
-                  <th key={p} className="text-center font-medium text-indigo-700 border-b border-indigo-200 border-l border-slate-200 py-0.5" style={{ width: "24px" }}>
+                  <th key={p} className="text-center font-medium text-primary-700 border-b border-primary-200 border-l border-slate-200 py-0.5" style={{ width: "24px" }}>
                     {PERIOD_NAMES[p]}
                   </th>
                 ))}
-                <th className="trim-avg text-center font-bold text-indigo-700 border-b border-indigo-200 border-l border-slate-200 py-0.5 bg-indigo-100/50" style={{ width: "24px" }}>Prom.</th>
+                <th className="trim-avg text-center font-bold text-primary-700 border-b border-primary-200 border-l border-slate-200 py-0.5 bg-primary-100/50" style={{ width: "24px" }}>Prom.</th>
               </React.Fragment>
             ))}
           </tr>

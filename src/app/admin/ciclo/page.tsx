@@ -165,7 +165,7 @@ export default function AdminCicloPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Grupos</h1>
+            <h1 className="text-xl font-extrabold text-slate-900">Grupos</h1>
             <p className="text-sm text-slate-500">
               {groups.length} grupo{groups.length !== 1 ? "s" : ""} registrado{groups.length !== 1 ? "s" : ""}
             </p>

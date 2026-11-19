@@ -74,7 +74,7 @@ export default async function ConcentradoIndexPage() {
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
       <main className="page-content max-w-3xl animate-fade-in">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-2xl font-bold text-slate-900">
             Concentrado de Calificaciones
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -102,7 +102,7 @@ export default async function ConcentradoIndexPage() {
                           href={`/concentrado/${g.id}`}
                           className={`${colors.bg} border ${colors.border} ${colors.hover} rounded-xl p-4 text-center transition-all group block`}
                         >
-                          <p className={`text-2xl font-extrabold ${colors.text}`} style={{ fontFamily: "var(--font-display)" }}>
+                          <p className={`text-2xl font-extrabold ${colors.text}`}>
                             {g.grade}° {g.letter}
                           </p>
                         </Link>

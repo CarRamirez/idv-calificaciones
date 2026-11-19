@@ -196,7 +196,7 @@ export default function Tutorial({ isOpen, onClose, userRole }: Props) {
           {/* Title */}
           <h3
             className="text-lg font-extrabold text-slate-900 mb-2"
-            style={{ fontFamily: "var(--font-display)" }}
+           
           >
             {step.title}
           </h3>

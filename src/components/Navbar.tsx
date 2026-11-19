@@ -652,7 +652,7 @@ export default function Navbar({ userName, userRole, children }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: "var(--font-display)" }}>Sesión por expirar</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Sesión por expirar</h3>
             <p className="text-sm text-slate-500 mb-1">
               Tu sesión se cerrará en <span className="font-bold text-amber-600 tabular-nums">{countdown}s</span>
             </p>

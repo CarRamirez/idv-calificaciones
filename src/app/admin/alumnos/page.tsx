@@ -356,7 +356,7 @@ export default function AdminAlumnosPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900">
               Alumnos
             </h1>
             <p className="text-sm text-slate-500">Gestión de alumnos por grupo</p>

@@ -357,7 +357,7 @@ export default function AdminProfesoresPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-          <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Profesores</h1>
+          <h1 className="text-xl font-extrabold text-slate-900">Profesores</h1>
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowNew(true)} className="btn-primary text-sm">
               + Nuevo profesor

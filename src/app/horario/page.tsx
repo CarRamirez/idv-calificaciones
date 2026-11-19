@@ -120,7 +120,7 @@ const SUBJECT_COLORS: Record<string, { bg: string; text: string }> = {
   ORTO:     { bg: "bg-cyan-100", text: "text-cyan-800" },
   SALUD:    { bg: "bg-lime-100", text: "text-lime-800" },
   VIDA:     { bg: "bg-emerald-100", text: "text-emerald-800" },
-  VALORES:  { bg: "bg-indigo-100", text: "text-indigo-800" },
+  VALORES:  { bg: "bg-primary-100", text: "text-primary-800" },
   DEPORTES: { bg: "bg-yellow-100", text: "text-yellow-800" },
   BRENDA:   { bg: "bg-slate-200", text: "text-slate-700" },
   GINA:     { bg: "bg-slate-200", text: "text-slate-700" },
@@ -371,17 +371,17 @@ export default function HorarioPage() {
                           key={idx}
                           className={`border-b border-slate-100 transition-colors ${
                             idx === activeSlotIdx && selectedDay === todayName
-                              ? "bg-indigo-50 ring-2 ring-inset ring-indigo-400"
+                              ? "bg-primary-50 ring-2 ring-inset ring-primary-400"
                               : "hover:bg-slate-50/50"
                           }`}
                         >
                           <td className={`px-3 py-2 text-xs font-medium whitespace-nowrap ${
                             idx === activeSlotIdx && selectedDay === todayName
-                              ? "text-indigo-700 font-bold"
+                              ? "text-primary-700 font-bold"
                               : "text-slate-500"
                           }`}>
                             {idx === activeSlotIdx && selectedDay === todayName && (
-                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse mr-1 align-middle" />
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse mr-1 align-middle" />
                             )}
                             {slot.start} - {slot.end}
                           </td>
@@ -513,17 +513,17 @@ export default function HorarioPage() {
                           key={idx}
                           className={`border-b border-slate-100 transition-colors ${
                             idx === activeSlotIdx
-                              ? "bg-indigo-50/70 ring-1 ring-inset ring-indigo-300"
+                              ? "bg-primary-50/70 ring-1 ring-inset ring-primary-300"
                               : "hover:bg-slate-50/30"
                           }`}
                         >
                           <td className={`px-2 py-1.5 text-[10px] font-medium whitespace-nowrap sticky left-0 z-10 ${
                             idx === activeSlotIdx
-                              ? "bg-indigo-50 text-indigo-700 font-bold"
+                              ? "bg-primary-50 text-primary-700 font-bold"
                               : "bg-white text-slate-500"
                           }`}>
                             {idx === activeSlotIdx && (
-                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse mr-0.5 align-middle" />
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse mr-0.5 align-middle" />
                             )}
                             {slot.start}
                             <br />

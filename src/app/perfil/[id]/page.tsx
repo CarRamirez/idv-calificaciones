@@ -138,7 +138,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>{profile.full_name}</h1>
+              <h1 className="text-xl font-extrabold text-slate-900">{profile.full_name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                   profile.role === "admin" ? "bg-purple-100 text-purple-700" :

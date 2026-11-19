@@ -110,7 +110,7 @@ export default async function DashboardPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-800 mb-2">Perfil no encontrado</h1>
           <p className="text-slate-500 mb-4">Tu cuenta no tiene un perfil asociado. Contacta al administrador.</p>
-          <a href="/login" className="text-indigo-600 hover:underline">Volver al login</a>
+          <a href="/login" className="text-primary-600 hover:underline">Volver al login</a>
         </div>
       </div>
     );
@@ -412,7 +412,7 @@ export default async function DashboardPage() {
         {/* Header con periodo activo */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900">
               Bienvenido, {effectiveProfile.full_name.split(" ")[0]}
             </h1>
             <p className="text-sm text-slate-400">
@@ -459,13 +459,13 @@ export default async function DashboardPage() {
           </Link>
           {/* Servicios Escolares */}
           <Link href="/servicios-escolares" className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group">
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+              <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors duration-200">Servicios Escolares</p>
+              <p className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors duration-200">Servicios Escolares</p>
               <p className="text-[11px] text-slate-400">Constancias y documentos</p>
             </div>
           </Link>
@@ -498,7 +498,7 @@ export default async function DashboardPage() {
                   <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center">
                     <IconBook className="w-5 h-5 text-primary-600" />
                   </div>
-                  <span className="text-3xl font-extrabold text-primary-600" style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="text-3xl font-extrabold text-primary-600">
                     {teacherAssignments.length}
                   </span>
                 </div>
@@ -510,7 +510,7 @@ export default async function DashboardPage() {
                   <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
                     <IconGroups className="w-5 h-5 text-violet-600" />
                   </div>
-                  <span className="text-3xl font-extrabold text-violet-600" style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="text-3xl font-extrabold text-violet-600">
                     {teacherGroupIds.length}
                   </span>
                 </div>
@@ -522,7 +522,7 @@ export default async function DashboardPage() {
                   <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center">
                     <IconUsers className="w-5 h-5 text-accent-600" />
                   </div>
-                  <span className="text-3xl font-extrabold text-accent-600" style={{ fontFamily: "var(--font-display)" }}>
+                  <span className="text-3xl font-extrabold text-accent-600">
                     {Object.values(teacherStudentCounts).reduce((a, b) => a + b, 0)}
                   </span>
                 </div>
@@ -546,7 +546,7 @@ export default async function DashboardPage() {
                     <h3 className="text-sm font-bold text-slate-800">Mi avance de captura</h3>
                     <p className="text-xs text-slate-400">{activePeriod.name} — {teacherCaptureEntered} de {teacherCaptureTotal} calificaciones</p>
                   </div>
-                  <span className="text-2xl font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: teacherCaptureEntered >= teacherCaptureTotal ? "#16a34a" : teacherCaptureEntered / teacherCaptureTotal > 0.5 ? "#d97706" : "#dc2626" }}>
+                  <span className="text-2xl font-extrabold tabular-nums" style={{ color: teacherCaptureEntered >= teacherCaptureTotal ? "#16a34a" : teacherCaptureEntered / teacherCaptureTotal > 0.5 ? "#d97706" : "#dc2626" }}>
                     {teacherCaptureTotal > 0 ? Math.round((teacherCaptureEntered / teacherCaptureTotal) * 100) : 0}%
                   </span>
                 </div>
@@ -568,7 +568,7 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
               Mis grupos
             </h2>
             {Object.keys(teacherByGroup).length === 0 ? (
@@ -688,7 +688,7 @@ export default async function DashboardPage() {
                     <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                       <IconUsers className="w-5 h-5 text-primary-600" />
                     </div>
-                    <span className="text-2xl font-extrabold text-primary-600" style={{ fontFamily: "var(--font-display)" }}>
+                    <span className="text-2xl font-extrabold text-primary-600">
                       {totalStudents}
                     </span>
                   </div>
@@ -705,7 +705,7 @@ export default async function DashboardPage() {
                     <div className="w-11 h-11 rounded-xl bg-mint-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
                       <IconTeacher className="w-5 h-5 text-mint-600" />
                     </div>
-                    <span className="text-2xl font-extrabold text-primary-600" style={{ fontFamily: "var(--font-display)" }}>
+                    <span className="text-2xl font-extrabold text-primary-600">
                       {totalTeachers}
                     </span>
                   </div>
@@ -722,7 +722,7 @@ export default async function DashboardPage() {
                     <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
                       <IconGroups className="w-5 h-5 text-accent-600" />
                     </div>
-                    <span className="text-2xl font-extrabold text-accent-600" style={{ fontFamily: "var(--font-display)" }}>
+                    <span className="text-2xl font-extrabold text-accent-600">
                       {groups.length}
                     </span>
                   </div>
@@ -736,10 +736,10 @@ export default async function DashboardPage() {
                   className="card-interactive p-5 group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
                       <IconSubjects className="w-5 h-5 text-violet-600" />
                     </div>
-                    <span className="text-2xl font-extrabold text-violet-600" style={{ fontFamily: "var(--font-display)" }}>
+                    <span className="text-2xl font-extrabold text-violet-600">
                       {totalSubjects}
                     </span>
                   </div>
@@ -886,7 +886,7 @@ export default async function DashboardPage() {
 
             {/* ── Group cards ── */}
             <div>
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
                 Concentrado por grupo
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

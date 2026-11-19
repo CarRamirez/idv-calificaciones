@@ -179,7 +179,7 @@ export default function AdminMateriasPage() {
       <main className="page-content max-w-5xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>Materias</h1>
+            <h1 className="text-xl font-extrabold text-slate-900">Materias</h1>
             <p className="text-sm text-slate-500">
               {subjects.length} materia{subjects.length !== 1 ? "s" : ""} registrada{subjects.length !== 1 ? "s" : ""}
             </p>

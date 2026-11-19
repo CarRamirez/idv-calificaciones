@@ -136,7 +136,7 @@ export default async function SesionesPage() {
       <main className="page-content max-w-6xl animate-fade-in">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900">
               Registro de Sesiones
             </h1>
             <p className="text-sm text-slate-500">

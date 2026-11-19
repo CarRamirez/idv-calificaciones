@@ -103,7 +103,7 @@ export default async function ConcentradoPage({ params }: Props) {
       <main className="max-w-full mx-auto px-4 sm:px-6 py-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900">
               Concentrado — {group.grade}° {group.letter}
             </h1>
             <p className="text-sm text-slate-500">

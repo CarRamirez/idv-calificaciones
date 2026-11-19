@@ -171,7 +171,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
       `}} />
 
       {/* Print header */}
-      <div className="hidden concentrado-print-header items-center justify-between mb-3 pb-2 border-b-2 border-indigo-600">
+      <div className="hidden concentrado-print-header items-center justify-between mb-3 pb-2 border-b-2 border-primary-600">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-idv.png" alt="IDV" className="w-14 h-14 object-contain" />

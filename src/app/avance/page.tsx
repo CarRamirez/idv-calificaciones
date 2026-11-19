@@ -128,7 +128,7 @@ export default function AvancePage() {
       <main className="page-content max-w-full animate-fade-in">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-xl font-extrabold text-slate-900">
               Avance de Captura
             </h1>
             <p className="text-sm text-slate-500">Progreso de captura de calificaciones por profesor y periodo</p>
