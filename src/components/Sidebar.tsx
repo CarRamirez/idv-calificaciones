@@ -263,6 +263,18 @@ export default function Sidebar({ userRole, permissions, colapsado, drawer = fal
             {colapsado ? <ChevronsRight size={18} /> : <><ChevronsLeft size={18} /> Contraer menú</>}
           </button>
         )}
+        <p className={`px-3 pt-2 text-center text-[10px] leading-tight text-slate-500 ${soloExpandido}`}>
+          © {new Date().getFullYear()} RCom<br />
+          I.S.C. Roberto Carlos Ramírez Sánchez
+        </p>
+        {(colapsado && !drawer) && (
+          <p
+            className="hidden lg:block px-1 pt-2 text-center text-[9px] leading-tight text-slate-500"
+            title="© RCom - I.S.C. Roberto Carlos Ramírez Sánchez"
+          >
+            © RCom
+          </p>
+        )}
       </div>
     </div>
   );
