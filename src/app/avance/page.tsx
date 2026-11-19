@@ -1,376 +1,329 @@
-"use client";
-
-import React from "react";
-import { useEffect, useState, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { redirect } from "next/navigation";
+import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
-import Link from "next/link";
+import AvanceCliente from "./AvanceCliente";
 
-type Assignment = {
-  group_id: string;
-  group_label: string;
-  subject_name: string;
-  subject_short: string;
-  subject_id: string;
-  periods: Record<number, { expected: number; captured: number }>;
-};
+export const dynamic = "force-dynamic";
 
-type TeacherProgress = {
-  teacher_id: string;
-  full_name: string;
-  email: string | null;
-  assignments: Assignment[];
-  periods: Record<number, { expected: number; captured: number }>;
-};
-
-type PeriodInfo = {
+/* ── Types ── */
+type Period = {
   period_number: number;
   name: string;
   trimester: number;
   is_open: boolean;
 };
 
-const TRIMESTERS = [
-  { id: 1, name: "1T", periods: [1, 2] },
-  { id: 2, name: "2T", periods: [3, 4] },
-  { id: 3, name: "3T", periods: [5, 6, 7, 8] },
-];
+type TeacherRow = {
+  teacher_id: string;
+  full_name: string;
+  email: string | null;
+  capturadas: number;
+  total: number;
+  filas: {
+    group_id: string;
+    subject_id: string;
+    group_label: string;
+    subject_name: string;
+    grade: number;
+    alumnos: number;
+    capturadas: number;
+  }[];
+};
 
-type ViewMode = "periods" | "trimesters";
+export default async function AvancePage({
+  searchParams,
+}: {
+  searchParams: { t?: string };
+}) {
+  const supabase = createServerSupabaseClient();
 
-function statusColor(captured: number, expected: number): { bg: string; text: string; label: string } {
-  if (expected === 0) return { bg: "bg-slate-100", text: "text-slate-400", label: "—" };
-  const pct = captured / expected;
-  if (pct >= 1) return { bg: "bg-green-100", text: "text-green-700", label: "✓" };
-  if (pct > 0) return { bg: "bg-yellow-100", text: "text-yellow-700", label: `${Math.round(pct * 100)}%` };
-  return { bg: "bg-red-100", text: "text-red-700", label: "0%" };
-}
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-export default function AvancePage() {
-  const supabase = createClient();
-  const router = useRouter();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", user.id)
+    .single();
+  if (!profile) redirect("/login");
 
-  const [profile, setProfile] = useState<{ full_name: string; role: string } | null>(null);
-  const [effectiveProfile, setEffectiveProfile] = useState<{ full_name: string; role: string } | null>(null);
-  const [teachers, setTeachers] = useState<TeacherProgress[]>([]);
-  const [periods, setPeriods] = useState<PeriodInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<ViewMode>("periods");
-  const [search, setSearch] = useState("");
-  const [expandedTeacher, setExpandedTeacher] = useState<string | null>(null);
+  const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
+  if (
+    effectiveProfile.role === "viewer" ||
+    effectiveProfile.role === "teacher"
+  )
+    redirect("/dashboard");
 
-  useEffect(() => {
-    fetch("/api/auth/effective-profile")
-      .then((r) => r.json())
-      .then((data) => { if (data.full_name) setEffectiveProfile(data); })
-      .catch(() => {});
-  }, []);
+  const admin = createAdminClient();
 
-  useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
-      const { data: prof } = await supabase
-        .from("profiles").select("full_name, role").eq("id", user.id).single();
-      if (!prof) { router.push("/dashboard"); return; }
-      setProfile(prof);
+  /* ── School year & periods ── */
+  const { data: schoolYear } = await supabase
+    .from("school_years")
+    .select("id, name")
+    .eq("is_current", true)
+    .single();
 
-      const res = await fetch("/api/admin/avance");
-      if (!res.ok) { router.push("/dashboard"); return; }
-      const data = await res.json();
-      setTeachers(data.teachers || []);
-      setPeriods(data.periods || []);
-      setLoading(false);
-    }
-    init();
-  }, []);
-
-  const filteredTeachers = useMemo(() => {
-    if (!search.trim()) return teachers;
-    const q = search.toLowerCase();
-    return teachers.filter((t) => t.full_name.toLowerCase().includes(q));
-  }, [teachers, search]);
-
-  // Summary stats
-  const summary = useMemo(() => {
-    const openPeriods = periods.filter((p) => p.is_open).map((p) => p.period_number);
-    let totalComplete = 0;
-    let totalPartial = 0;
-    let totalEmpty = 0;
-
-    teachers.forEach((t) => {
-      openPeriods.forEach((pn) => {
-        const p = t.periods[pn];
-        if (!p || p.expected === 0) return;
-        const pct = p.captured / p.expected;
-        if (pct >= 1) totalComplete++;
-        else if (pct > 0) totalPartial++;
-        else totalEmpty++;
-      });
-    });
-
-    return { totalComplete, totalPartial, totalEmpty, openPeriods };
-  }, [teachers, periods]);
-
-  if (loading || !profile) {
+  if (!schoolYear) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-sm text-slate-500">Cargando avance de captura...</div>
-      </div>
+      <Navbar
+        userName={effectiveProfile.full_name}
+        userRole={effectiveProfile.role}
+      >
+        <main className="page-content space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="grid h-12 w-12 place-items-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+              <svg
+                className="h-[22px] w-[22px]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </span>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Avance de captura
+              </h1>
+              <p className="text-sm text-slate-500">
+                No hay ciclo escolar activo.
+              </p>
+            </div>
+          </div>
+        </main>
+      </Navbar>
     );
   }
 
-  const displayProfile = effectiveProfile || profile;
+  /* ── Evaluation periods ── */
+  const { data: evalPeriods } = await admin
+    .from("evaluation_periods")
+    .select(
+      "id, period_number, name, trimester, is_open, open_date, close_date"
+    )
+    .eq("school_year_id", schoolYear.id)
+    .order("period_number");
+
+  const periods: (Period & { id: string })[] = (evalPeriods || []).map(
+    (p: any) => ({
+      id: p.id,
+      period_number: p.period_number,
+      name: p.name,
+      trimester: p.trimester,
+      is_open: p.is_open,
+    })
+  );
+
+  /* ── Active period: chosen (?t=), or the open one, or the last ── */
+  const abierto = periods.find((p) => p.is_open);
+  const elegido =
+    periods.find((p) => p.id === searchParams.t) ??
+    abierto ??
+    periods[periods.length - 1] ??
+    null;
+
+  const esAbierto = !!elegido && elegido.id === abierto?.id;
+
+  if (!elegido) {
+    return (
+      <Navbar
+        userName={effectiveProfile.full_name}
+        userRole={effectiveProfile.role}
+      >
+        <main className="page-content space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="grid h-12 w-12 place-items-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+              <svg
+                className="h-[22px] w-[22px]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </span>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Avance de captura
+              </h1>
+              <p className="text-sm text-slate-500">
+                Ciclo {schoolYear.name} · No hay periodos configurados.
+              </p>
+            </div>
+          </div>
+        </main>
+      </Navbar>
+    );
+  }
+
+  /* ── Load avance data ── */
+  // Teachers
+  const { data: teachers } = await admin
+    .from("profiles")
+    .select("id, full_name, email")
+    .eq("role", "teacher")
+    .order("full_name");
+
+  // Assignments
+  const { data: assignments } = await admin
+    .from("teacher_assignments")
+    .select(
+      "teacher_id, group_id, subject_id, groups(id, grade, letter), subjects(id, name, short_name, counts_for_avg)"
+    );
+
+  // Active students
+  const { data: students } = await admin
+    .from("students")
+    .select("id, group_id")
+    .eq("status", "activo");
+
+  const studentsByGroup: Record<string, string[]> = {};
+  (students || []).forEach((s: any) => {
+    if (!studentsByGroup[s.group_id]) studentsByGroup[s.group_id] = [];
+    studentsByGroup[s.group_id].push(s.id);
+  });
+
+  // Grades for the chosen period
+  const { data: gradesData } = await admin
+    .from("grades")
+    .select("student_id, subject_id")
+    .eq("period", elegido.period_number)
+    .not("score", "is", null);
+
+  const capturedSet = new Set<string>();
+  (gradesData || []).forEach((g: any) => {
+    capturedSet.add(`${g.student_id}:${g.subject_id}`);
+  });
+
+  /* ── Build teacher progress ── */
+  const teacherMap: Record<string, TeacherRow> = {};
+  (teachers || []).forEach((t: any) => {
+    teacherMap[t.id] = {
+      teacher_id: t.id,
+      full_name: t.full_name,
+      email: t.email,
+      capturadas: 0,
+      total: 0,
+      filas: [],
+    };
+  });
+
+  // All groups for sinProfe detection
+  const { data: allGroups } = await admin
+    .from("groups")
+    .select("id, grade, letter")
+    .neq("letter", "Bajas")
+    .order("grade")
+    .order("letter");
+
+  const { data: allSubjects } = await admin
+    .from("subjects")
+    .select("id, name, short_name, grade, counts_for_avg")
+    .order("sort_order");
+
+  const assignedSet = new Set<string>();
+
+  (assignments || []).forEach((a: any) => {
+    if (!a.groups || !a.subjects) return;
+    if (!teacherMap[a.teacher_id]) return;
+
+    assignedSet.add(`${a.group_id}-${a.subject_id}`);
+
+    const groupStudents = studentsByGroup[a.group_id] || [];
+    const groupLabel = `${a.groups.grade}°${a.groups.letter}`;
+
+    let captured = 0;
+    for (const sid of groupStudents) {
+      if (capturedSet.has(`${sid}:${a.subject_id}`)) captured++;
+    }
+
+    teacherMap[a.teacher_id].filas.push({
+      group_id: a.group_id,
+      subject_id: a.subject_id,
+      group_label: groupLabel,
+      subject_name: a.subjects.short_name || a.subjects.name,
+      grade: a.groups.grade,
+      alumnos: groupStudents.length,
+      capturadas: captured,
+    });
+
+    teacherMap[a.teacher_id].capturadas += captured;
+    teacherMap[a.teacher_id].total += groupStudents.length;
+  });
+
+  // Build teacher list sorted by % ascending (least progress first)
+  const docentes = Object.values(teacherMap)
+    .filter((t) => t.filas.length > 0)
+    .sort((a, b) => {
+      const pctA = a.total ? a.capturadas / a.total : 0;
+      const pctB = b.total ? b.capturadas / b.total : 0;
+      return pctA - pctB || a.full_name.localeCompare(b.full_name, "es");
+    });
+
+  // Global stats
+  const totalCapturadas = docentes.reduce((s, d) => s + d.capturadas, 0);
+  const totalExpected = docentes.reduce((s, d) => s + d.total, 0);
+  const pct = totalExpected
+    ? Math.round((totalCapturadas / totalExpected) * 100)
+    : 0;
+  const pendientes = docentes.filter((d) => d.capturadas < d.total).length;
+
+  // Sin profesor: groups×subjects that should have an assignment but don't
+  const sinProfe: { group_label: string; subject_name: string; grade: number }[] = [];
+  (allGroups || []).forEach((g: any) => {
+    (allSubjects || [])
+      .filter((s: any) => s.grade === g.grade && s.counts_for_avg !== false)
+      .forEach((s: any) => {
+        if (!assignedSet.has(`${g.id}-${s.id}`)) {
+          sinProfe.push({
+            group_label: `${g.grade}°${g.letter}`,
+            subject_name: s.short_name || s.name,
+            grade: g.grade,
+          });
+        }
+      });
+  });
+
+  /* ── Period nav data ── */
+  const periodsNav = periods.map((p) => ({
+    id: p.id,
+    name: p.name,
+    is_open: p.is_open,
+    active: p.id === elegido.id,
+  }));
 
   return (
-      <Navbar userName={displayProfile.full_name} userRole={displayProfile.role}>
-      <main className="page-content max-w-full animate-fade-in">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <div>
-            <h1 className="text-xl font-extrabold text-slate-900">
-              Avance de Captura
-            </h1>
-            <p className="text-sm text-slate-500">Progreso de captura de calificaciones por profesor y periodo</p>
-          </div>
-          <Link href="/dashboard" className="btn-secondary text-sm">← Inicio</Link>
-        </div>
-
-        {/* Summary cards */}
-        {summary.openPeriods.length > 0 && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="card !p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-green-700">{summary.totalComplete}</p>
-                <p className="text-[11px] text-slate-500">Completos</p>
-              </div>
-            </div>
-            <div className="card !p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-yellow-700">{summary.totalPartial}</p>
-                <p className="text-[11px] text-slate-500">Parciales</p>
-              </div>
-            </div>
-            <div className="card !p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-red-700">{summary.totalEmpty}</p>
-                <p className="text-[11px] text-slate-500">Sin captura</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Controls */}
-        <div className="card p-4 mb-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <input
-              type="text"
-              placeholder="Buscar profesor..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input-field text-sm max-w-xs"
-            />
-            <div className="flex gap-1 ml-auto">
-              <button
-                onClick={() => setViewMode("periods")}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === "periods"
-                    ? "bg-primary-600 text-white shadow-sm"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                Por periodo
-              </button>
-              <button
-                onClick={() => setViewMode("trimesters")}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === "trimesters"
-                    ? "bg-primary-600 text-white shadow-sm"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                Por trimestre
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Semáforo legend */}
-        <div className="flex gap-4 mb-3 text-xs">
-          <span className="px-2 py-1 rounded bg-green-100 text-green-700 font-medium">✓ Completo</span>
-          <span className="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">Parcial</span>
-          <span className="px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Sin captura</span>
-          <span className="px-2 py-1 rounded bg-slate-100 text-slate-400">Sin asignación</span>
-        </div>
-
-        {/* Table */}
-        <div className="card overflow-x-auto">
-          <table className="grade-table">
-            <thead>
-              <tr>
-                <th className="min-w-[200px] sticky left-0 bg-white z-10">Profesor</th>
-                {viewMode === "periods"
-                  ? periods.map((p) => (
-                      <th key={p.period_number} className={`text-center text-xs w-20 ${p.is_open ? "bg-green-50" : ""}`}>
-                        <span className="block">{p.name}</span>
-                        {p.is_open && <span className="block text-[9px] text-green-600 font-normal">Abierto</span>}
-                      </th>
-                    ))
-                  : TRIMESTERS.map((t) => (
-                      <th key={t.id} className="text-center text-xs w-24">{t.name}</th>
-                    ))
-                }
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTeachers.map((teacher) => {
-                const isExpanded = expandedTeacher === teacher.teacher_id;
-                return (
-                  <React.Fragment key={teacher.teacher_id}>
-                    <tr
-                      className="cursor-pointer hover:bg-slate-50 transition-colors"
-                      onClick={() => setExpandedTeacher(isExpanded ? null : teacher.teacher_id)}
-                    >
-                      <td className="sticky left-0 bg-white z-10">
-                        <div className="flex items-center gap-2">
-                          <svg className={`w-3 h-3 text-slate-400 transition-transform ${isExpanded ? "rotate-90" : ""}`} fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                          </svg>
-                          <div>
-                            <span className="text-xs font-medium text-slate-900">{teacher.full_name}</span>
-                            <span className="block text-[10px] text-slate-400">
-                              {teacher.assignments.length} asignación{teacher.assignments.length !== 1 ? "es" : ""}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      {viewMode === "periods"
-                        ? periods.map((p) => {
-                            const prog = teacher.periods[p.period_number];
-                            const st = statusColor(prog?.captured || 0, prog?.expected || 0);
-                            return (
-                              <td key={p.period_number} className={`text-center ${st.bg}`}>
-                                <span className={`text-xs font-semibold ${st.text}`}>{st.label}</span>
-                                {prog && prog.expected > 0 && (
-                                  <span className="block text-[9px] text-slate-400">
-                                    {prog.captured}/{prog.expected}
-                                  </span>
-                                )}
-                              </td>
-                            );
-                          })
-                        : TRIMESTERS.map((t) => {
-                            const totalExp = t.periods.reduce((sum, pn) => sum + (teacher.periods[pn]?.expected || 0), 0);
-                            const totalCap = t.periods.reduce((sum, pn) => sum + (teacher.periods[pn]?.captured || 0), 0);
-                            const st = statusColor(totalCap, totalExp);
-                            return (
-                              <td key={t.id} className={`text-center ${st.bg}`}>
-                                <span className={`text-xs font-semibold ${st.text}`}>{st.label}</span>
-                                {totalExp > 0 && (
-                                  <span className="block text-[9px] text-slate-400">
-                                    {totalCap}/{totalExp}
-                                  </span>
-                                )}
-                              </td>
-                            );
-                          })
-                      }
-                    </tr>
-                    {/* Expanded detail */}
-                    {isExpanded && (
-                      <tr>
-                        <td colSpan={viewMode === "periods" ? periods.length + 1 : TRIMESTERS.length + 1} className="!p-0">
-                          <div className="bg-slate-50 px-6 py-3 border-t border-b border-slate-200">
-                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                              Detalle de asignaciones
-                            </p>
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-xs">
-                                <thead>
-                                  <tr className="text-slate-500">
-                                    <th className="text-left py-1 pr-4 font-medium">Grupo</th>
-                                    <th className="text-left py-1 pr-4 font-medium">Materia</th>
-                                    {viewMode === "periods"
-                                      ? periods.map((p) => (
-                                          <th key={p.period_number} className="text-center py-1 w-16 font-medium">{p.name}</th>
-                                        ))
-                                      : TRIMESTERS.map((t) => (
-                                          <th key={t.id} className="text-center py-1 w-20 font-medium">{t.name}</th>
-                                        ))
-                                    }
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {teacher.assignments.map((a, idx) => (
-                                      <tr key={idx} className="border-t border-slate-200">
-                                        <td className="py-1.5 pr-4 font-medium text-slate-700">{a.group_label}</td>
-                                        <td className="py-1.5 pr-4 text-slate-600">{a.subject_short}</td>
-                                        {viewMode === "periods"
-                                          ? periods.map((p) => {
-                                              const ap = a.periods?.[p.period_number];
-                                              if (!ap || ap.expected === 0) {
-                                                return <td key={p.period_number} className="text-center py-1.5 text-slate-300">—</td>;
-                                              }
-                                              const pct = ap.captured / ap.expected;
-                                              const st = statusColor(ap.captured, ap.expected);
-                                              return (
-                                                <td key={p.period_number} className={`text-center py-1.5 ${st.bg}`}>
-                                                  <span className={`text-[10px] font-semibold ${st.text}`}>{ap.captured}/{ap.expected}</span>
-                                                  {pct < 1 && pct > 0 && (
-                                                    <span className="block text-[9px] text-slate-400">faltan {ap.expected - ap.captured}</span>
-                                                  )}
-                                                </td>
-                                              );
-                                            })
-                                          : TRIMESTERS.map((t) => {
-                                              const tExp = t.periods.reduce((s, pn) => s + (a.periods?.[pn]?.expected || 0), 0);
-                                              const tCap = t.periods.reduce((s, pn) => s + (a.periods?.[pn]?.captured || 0), 0);
-                                              if (tExp === 0) return <td key={t.id} className="text-center py-1.5 text-slate-300">—</td>;
-                                              const st = statusColor(tCap, tExp);
-                                              return (
-                                                <td key={t.id} className={`text-center py-1.5 ${st.bg}`}>
-                                                  <span className={`text-[10px] font-semibold ${st.text}`}>{tCap}/{tExp}</span>
-                                                </td>
-                                              );
-                                            })
-                                        }
-                                      </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-              {filteredTeachers.length === 0 && (
-                <tr>
-                  <td colSpan={viewMode === "periods" ? periods.length + 1 : TRIMESTERS.length + 1} className="text-center py-8 text-slate-400 text-sm">
-                    {search ? "No se encontraron profesores" : "No hay datos de avance"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+    <Navbar
+      userName={effectiveProfile.full_name}
+      userRole={effectiveProfile.role}
+    >
+      <main className="page-content space-y-6">
+        <AvanceCliente
+          ciclo={schoolYear.name}
+          periodoNombre={elegido.name}
+          esAbierto={esAbierto}
+          pct={pct}
+          totalCapturadas={totalCapturadas}
+          totalExpected={totalExpected}
+          pendientes={pendientes}
+          docentes={docentes}
+          sinProfe={sinProfe}
+          periodsNav={periodsNav}
+        />
       </main>
     </Navbar>
   );

@@ -1,6 +1,8 @@
+export const dynamic = "force-dynamic";
+
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -14,25 +16,58 @@ type Student = {
   curp: string | null;
   list_num: number;
   group_id: string;
-  status: string; // 'activo' | 'inactivo' | 'baja'
+  status: string;
   avatar_url: string | null;
+  control_number: string | null;
 };
 
-// Helper to identify "Bajas" groups
+type CambioInterno = {
+  student_id: string;
+  grupo_destino: string;
+  motivo: string | null;
+};
+
 function isBajasGroup(g: Group): boolean {
   return g.letter === "Bajas";
 }
 
-/** Title Case display: "MICHAUS VELAZQUEZ KEVIN" → "Michaus Velazquez Kevin" */
 function toTitleCase(str: string): string {
   return str.replace(/\S+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 }
+
+const GRADE_COLOR: Record<number, string> = {
+  1: "text-blue-700 dark:text-blue-400",
+  2: "text-emerald-700 dark:text-emerald-400",
+  3: "text-purple-700 dark:text-purple-400",
+};
 
 const STATUS_OPTIONS = [
   { value: "activo", label: "Activo", color: "bg-green-100 text-green-700" },
   { value: "inactivo", label: "Inactivo", color: "bg-amber-100 text-amber-700" },
   { value: "baja", label: "Baja", color: "bg-red-100 text-red-700" },
 ];
+
+/* ── Segment chip component (like SIGEFCP) ── */
+function Segmento({ etiqueta, valor, opciones, onCambio }: {
+  etiqueta: string;
+  valor: string;
+  opciones: [string, string][];
+  onCambio: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="mr-1 text-xs font-bold uppercase tracking-wider text-slate-400">{etiqueta}</span>
+      <div className="inline-flex rounded-xl bg-slate-100 p-1">
+        {opciones.map(([v, t]) => (
+          <button key={v} onClick={() => onCambio(v)}
+            className={`rounded-lg px-3 py-1 text-sm font-semibold transition-colors ${
+              valor === v ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"
+            }`}>{t}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminAlumnosPage() {
   const supabase = createClient();
@@ -49,12 +84,16 @@ export default function AdminAlumnosPage() {
   }, []);
 
   const [groups, setGroups] = useState<Group[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
-  const [students, setStudents] = useState<Student[]>([]);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("todos");
+  const [filterStatus, setFilterStatus] = useState<"activos" | "sin_curp" | "bajas">("activos");
+  const [gradoF, setGradoF] = useState<number | "">("");
+  const [grupoF, setGrupoF] = useState<string>("");
+
+  // Cambios internos
+  const [cambiosInternos, setCambiosInternos] = useState<Record<string, CambioInterno>>({});
 
   // Modal state for add/edit
   const [showModal, setShowModal] = useState(false);
@@ -64,20 +103,26 @@ export default function AdminAlumnosPage() {
   const [formListNum, setFormListNum] = useState("");
   const [formError, setFormError] = useState("");
 
-  // Group change modal
+  // Cambio interno modal
+  const [cambioModal, setCambioModal] = useState<{ student: Student; terminar: boolean } | null>(null);
+  const [cambioDestino, setCambioDestino] = useState<string>("");
+  const [cambioMotivo, setCambioMotivo] = useState("");
+  const [cambiando, setCambiando] = useState(false);
+
+  // Delete confirmation
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Status change
+  const [changingStatus, setChangingStatus] = useState<string | null>(null);
+
+  // Group change modal (for moves/reactivation from bajas)
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [groupChangeStudent, setGroupChangeStudent] = useState<Student | null>(null);
   const [targetGroup, setTargetGroup] = useState<string>("");
   const [groupChangeError, setGroupChangeError] = useState("");
   const [pendingReactivateStatus, setPendingReactivateStatus] = useState<string | null>(null);
 
-  // Delete confirmation
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  // Status change (inline)
-  const [changingStatus, setChangingStatus] = useState<string | null>(null);
-
-  // Init
+  // Init — load ALL students at once
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -97,66 +142,136 @@ export default function AdminAlumnosPage() {
       }
       setProfile(prof);
 
+      // Load groups
       const { data: grps } = await supabase
         .from("groups")
         .select("id, grade, letter")
         .order("grade")
         .order("letter");
+      if (grps) setGroups(grps);
 
-      if (grps && grps.length > 0) {
-        setGroups(grps);
-        setSelectedGroup(grps[0].id);
+      // Load ALL students at once (not per-group)
+      const { data: studs } = await supabase
+        .from("students")
+        .select("id, full_name, curp, list_num, group_id, status, avatar_url, control_number")
+        .order("full_name");
+      if (studs) setAllStudents(studs as Student[]);
+
+      // Load active cambios internos
+      const { data: cambios } = await supabase
+        .from("cambios_internos")
+        .select("student_id, grupo_destino, motivo")
+        .is("fin", null);
+      if (cambios) {
+        const map: Record<string, CambioInterno> = {};
+        (cambios as CambioInterno[]).forEach((c) => { map[c.student_id] = c; });
+        setCambiosInternos(map);
       }
+
       setLoading(false);
     }
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load students
-  const loadStudents = useCallback(async () => {
-    if (!selectedGroup) return;
-    const { data } = await supabase
+  // Reload students
+  const reloadStudents = useCallback(async () => {
+    const { data: studs } = await supabase
       .from("students")
-      .select("*")
-      .eq("group_id", selectedGroup)
+      .select("id, full_name, curp, list_num, group_id, status, avatar_url, control_number")
       .order("full_name");
-    setStudents(data || []);
-  }, [selectedGroup]);
+    if (studs) setAllStudents(studs as Student[]);
 
-  useEffect(() => { loadStudents(); }, [loadStudents]);
+    const { data: cambios } = await supabase
+      .from("cambios_internos")
+      .select("student_id, grupo_destino, motivo")
+      .is("fin", null);
+    if (cambios) {
+      const map: Record<string, CambioInterno> = {};
+      (cambios as CambioInterno[]).forEach((c) => { map[c.student_id] = c; });
+      setCambiosInternos(map);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Filter students
-  const filtered = students.filter((s) => {
-    const matchesSearch =
-      s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-      (s.curp && s.curp.toLowerCase().includes(search.toLowerCase()));
-    const matchesStatus = filterStatus === "todos" || s.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
+  // Group map
+  const gMap = useMemo(() => new Map(groups.map((g) => [g.id, g])), [groups]);
 
-  const currentGroup = groups.find((g) => g.id === selectedGroup);
-  const groupLabel = currentGroup ? `${currentGroup.grade}° ${currentGroup.letter}` : "";
+  const etiqueta = useCallback((id: string) => {
+    const g = gMap.get(id);
+    return g ? `${g.grade}°${g.letter}` : "?";
+  }, [gMap]);
 
-  // Same-grade groups for transfers (exclude Bajas groups)
-  const sameGradeGroups = currentGroup
-    ? groups.filter((g) => g.grade === currentGroup.grade && g.id !== selectedGroup && !isBajasGroup(g))
-    : [];
+  // Filtered list (all client-side)
+  type Row = Student & { huesped?: boolean; grupoReal?: string };
 
-  // Find the Bajas group for the current grade
-  const bajasGroupForGrade = currentGroup
-    ? groups.find((g) => g.grade === currentGroup.grade && isBajasGroup(g))
-    : null;
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
 
-  // Is current group a Bajas group?
-  const isCurrentBajas = currentGroup ? isBajasGroup(currentGroup) : false;
+    const base: Row[] = [];
+
+    // Regular students
+    allStudents.forEach((s) => { base.push(s); });
+
+    // Add ghost rows for cloned students (they appear in destination group too)
+    allStudents.forEach((s) => {
+      const c = cambiosInternos[s.id];
+      if (c && s.status === "activo") {
+        base.push({ ...s, huesped: true, grupoReal: s.group_id, group_id: c.grupo_destino });
+      }
+    });
+
+    return base
+      .filter((s) => {
+        // Grade filter
+        if (gradoF !== "") {
+          const g = gMap.get(s.group_id);
+          if (!g || g.grade !== gradoF) return false;
+        }
+        // Group filter
+        if (grupoF) {
+          if (s.group_id !== grupoF) return false;
+        }
+        // Status filter
+        if (filterStatus === "bajas") {
+          if (s.status !== "baja") return false;
+        } else if (filterStatus === "sin_curp") {
+          if (s.status === "baja" || s.curp) return false;
+        } else {
+          if (s.status === "baja") return false;
+        }
+        // Search
+        if (q) {
+          const haystack = `${s.full_name} ${s.curp || ""} ${s.control_number || ""}`.toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const ga = gMap.get(a.group_id);
+        const gb = gMap.get(b.group_id);
+        if (!ga || !gb) return 0;
+        if (ga.grade !== gb.grade) return ga.grade - gb.grade;
+        if (ga.letter !== gb.letter) return ga.letter.localeCompare(gb.letter);
+        return a.full_name.localeCompare(b.full_name);
+      });
+  }, [allStudents, cambiosInternos, search, gradoF, grupoF, filterStatus, gMap]);
+
+  const sinCurp = useMemo(() => allStudents.filter((s) => s.status !== "baja" && !s.curp).length, [allStudents]);
+
+  // ── Same-grade groups for a student ──
+  function sameGradeGroups(studentGroupId: string) {
+    const g = gMap.get(studentGroupId);
+    if (!g) return [];
+    return groups.filter((gr) => gr.grade === g.grade && gr.id !== studentGroupId && !isBajasGroup(gr));
+  }
 
   // ── Add modal ──
   function openAdd() {
     setEditStudent(null);
     setFormName("");
     setFormCurp("");
-    const maxNum = students.length > 0 ? Math.max(...students.map((s) => s.list_num)) : 0;
-    setFormListNum(String(maxNum + 1));
+    setFormListNum("");
     setFormError("");
     setShowModal(true);
   }
@@ -173,8 +288,6 @@ export default function AdminAlumnosPage() {
   async function handleSave() {
     const name = formName.trim();
     if (!name) { setFormError("El nombre es obligatorio"); return; }
-    const num = parseInt(formListNum);
-    if (isNaN(num) || num < 1) { setFormError("N° de lista inválido"); return; }
 
     setSaving(true);
     setFormError("");
@@ -185,18 +298,23 @@ export default function AdminAlumnosPage() {
         .update({
           full_name: name,
           curp: formCurp.trim().toUpperCase() || null,
-          list_num: num,
         })
         .eq("id", editStudent.id);
       if (error) { setFormError(error.message); setSaving(false); return; }
     } else {
+      // For new student, determine group
+      const gId = grupoF || (groups.length > 0 ? groups[0].id : "");
+      if (!gId) { setFormError("No hay grupos disponibles"); setSaving(false); return; }
+      // Get next list_num
+      const groupStudents = allStudents.filter((s) => s.group_id === gId);
+      const maxNum = groupStudents.length > 0 ? Math.max(...groupStudents.map((s) => s.list_num)) : 0;
       const { error } = await supabase
         .from("students")
         .insert({
           full_name: name,
           curp: formCurp.trim().toUpperCase() || null,
-          list_num: num,
-          group_id: selectedGroup,
+          list_num: maxNum + 1,
+          group_id: gId,
           status: "activo",
         });
       if (error) { setFormError(error.message); setSaving(false); return; }
@@ -204,127 +322,79 @@ export default function AdminAlumnosPage() {
 
     setSaving(false);
     setShowModal(false);
-    // Re-sort alphabetically and reassign list_num
-    await autoSortStudents();
-  }
-
-  /** Sort students alphabetically by full_name and reassign list_num */
-  async function autoSortStudents() {
-    if (!selectedGroup) return;
-    const { data } = await supabase
-      .from("students")
-      .select("id, full_name, list_num")
-      .eq("group_id", selectedGroup)
-      .order("full_name");
-    if (!data || data.length === 0) { loadStudents(); return; }
-
-    // Build batch of updates only where list_num changed
-    const updates: { id: string; list_num: number }[] = [];
-    data.forEach((s, idx) => {
-      const newNum = idx + 1;
-      if (s.list_num !== newNum) updates.push({ id: s.id, list_num: newNum });
-    });
-
-    // Apply updates in parallel (small batch per group)
-    if (updates.length > 0) {
-      await Promise.all(
-        updates.map((u) =>
-          supabase.from("students").update({ list_num: u.list_num }).eq("id", u.id)
-        )
-      );
-    }
-
-    loadStudents();
+    await reloadStudents();
   }
 
   // ── Status change ──
-  async function handleStatusChange(studentId: string, newStatus: string) {
-    const student = students.find((s) => s.id === studentId);
-    if (!student) return;
+  async function handleStatusChange(student: Student, newStatus: string) {
+    setChangingStatus(student.id);
+    const g = gMap.get(student.group_id);
+    const bajasGroup = g ? groups.find((gr) => gr.grade === g.grade && isBajasGroup(gr)) : null;
+    const isInBajas = g ? isBajasGroup(g) : false;
 
-    setChangingStatus(studentId);
-
-    if (newStatus === "baja" && bajasGroupForGrade && !isCurrentBajas) {
-      // Auto-move to Bajas group
-      const { data: targetStudents } = await supabase
-        .from("students")
-        .select("list_num")
-        .eq("group_id", bajasGroupForGrade.id)
-        .order("list_num", { ascending: false })
-        .limit(1);
-      const nextNum = targetStudents && targetStudents.length > 0 ? targetStudents[0].list_num + 1 : 1;
-
-      await supabase
-        .from("students")
-        .update({ status: "baja", group_id: bajasGroupForGrade.id, list_num: nextNum })
-        .eq("id", studentId);
-    } else if (newStatus !== "baja" && isCurrentBajas) {
-      // Reactivating from Bajas — need to pick a group
+    if (newStatus === "baja" && bajasGroup && !isInBajas) {
+      const groupStudents = allStudents.filter((s) => s.group_id === bajasGroup.id);
+      const nextNum = groupStudents.length > 0 ? Math.max(...groupStudents.map((s) => s.list_num)) + 1 : 1;
+      await supabase.from("students").update({ status: "baja", group_id: bajasGroup.id, list_num: nextNum }).eq("id", student.id);
+    } else if (newStatus !== "baja" && isInBajas) {
       setGroupChangeStudent(student);
-      setTargetGroup(sameGradeGroups.length > 0 ? sameGradeGroups[0].id : "");
+      const sg = sameGradeGroups(student.group_id);
+      setTargetGroup(sg.length > 0 ? sg[0].id : "");
       setGroupChangeError("");
       setPendingReactivateStatus(newStatus);
       setShowGroupModal(true);
       setChangingStatus(null);
       return;
     } else {
-      await supabase
-        .from("students")
-        .update({ status: newStatus })
-        .eq("id", studentId);
+      await supabase.from("students").update({ status: newStatus }).eq("id", student.id);
     }
-
-    await loadStudents();
+    await reloadStudents();
     setChangingStatus(null);
   }
 
-  // ── Group change ──
-  function openGroupChange(s: Student) {
-    setGroupChangeStudent(s);
-    setTargetGroup(sameGradeGroups.length > 0 ? sameGradeGroups[0].id : "");
-    setGroupChangeError("");
-    setShowGroupModal(true);
+  // ── Cambio interno ──
+  async function ejecutarCambio() {
+    if (!cambioModal) return;
+    setCambiando(true);
+
+    if (cambioModal.terminar) {
+      const { error } = await supabase.rpc("terminar_cambio_interno", { p_student_id: cambioModal.student.id });
+      if (error) { alert(error.message); setCambiando(false); return; }
+    } else {
+      if (!cambioDestino) { setCambiando(false); return; }
+      const { error } = await supabase.rpc("crear_cambio_interno", {
+        p_student_id: cambioModal.student.id,
+        p_destino: cambioDestino,
+        p_motivo: cambioMotivo.trim() || null,
+      });
+      if (error) { alert(error.message); setCambiando(false); return; }
+    }
+
+    setCambiando(false);
+    setCambioModal(null);
+    setCambioDestino("");
+    setCambioMotivo("");
+    await reloadStudents();
   }
 
+  // ── Group change (reactivation from bajas) ──
   async function handleGroupChange() {
     if (!groupChangeStudent || !targetGroup) return;
     setSaving(true);
     setGroupChangeError("");
-
-    // Get next available list_num in target group
-    const { data: targetStudents } = await supabase
-      .from("students")
-      .select("list_num")
-      .eq("group_id", targetGroup)
-      .order("list_num", { ascending: false })
-      .limit(1);
-
-    const nextNum = targetStudents && targetStudents.length > 0
-      ? targetStudents[0].list_num + 1
-      : 1;
-
-    // If reactivating from Bajas, also update status
+    const groupStudents = allStudents.filter((s) => s.group_id === targetGroup);
+    const nextNum = groupStudents.length > 0 ? Math.max(...groupStudents.map((s) => s.list_num)) + 1 : 1;
     const updateData: Record<string, unknown> = { group_id: targetGroup, list_num: nextNum };
-    if (pendingReactivateStatus) {
-      updateData.status = pendingReactivateStatus;
-    }
+    if (pendingReactivateStatus) updateData.status = pendingReactivateStatus;
 
-    const { error } = await supabase
-      .from("students")
-      .update(updateData)
-      .eq("id", groupChangeStudent.id);
-
-    if (error) {
-      setGroupChangeError(error.message);
-      setSaving(false);
-      return;
-    }
+    const { error } = await supabase.from("students").update(updateData).eq("id", groupChangeStudent.id);
+    if (error) { setGroupChangeError(error.message); setSaving(false); return; }
 
     setSaving(false);
     setShowGroupModal(false);
     setGroupChangeStudent(null);
     setPendingReactivateStatus(null);
-    loadStudents();
+    await reloadStudents();
   }
 
   // ── Delete ──
@@ -332,15 +402,8 @@ export default function AdminAlumnosPage() {
     if (!deleteId) return;
     await supabase.from("students").delete().eq("id", deleteId);
     setDeleteId(null);
-    loadStudents();
+    await reloadStudents();
   }
-
-  // ── Counts ──
-  const countByStatus = {
-    activo: students.filter((s) => s.status === "activo").length,
-    inactivo: students.filter((s) => s.status === "inactivo").length,
-    baja: students.filter((s) => s.status === "baja").length,
-  };
 
   if (loading || !profile) {
     return (
@@ -351,173 +414,185 @@ export default function AdminAlumnosPage() {
   }
 
   return (
-      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
-      <main className="page-content max-w-5xl animate-fade-in">
+    <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
+      <main className="page-content animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-900">
-              Alumnos
-            </h1>
-            <p className="text-sm text-slate-500">Gestión de alumnos por grupo</p>
+            <h1 className="text-2xl font-bold text-slate-900">Alumnos</h1>
+            <p className="text-sm text-slate-500">Altas, bajas, cambios de grupo y corrección de datos.</p>
           </div>
           <Link href="/dashboard" className="btn-secondary text-sm">← Volver</Link>
         </div>
 
-        {/* Group tabs */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {groups.filter((g) => !isBajasGroup(g)).map((g) => (
-            <button
-              key={g.id}
-              onClick={() => setSelectedGroup(g.id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                selectedGroup === g.id
-                  ? "bg-primary-600 text-white"
-                  : "bg-white text-slate-600 border border-slate-300 hover:bg-slate-50"
-              }`}
-            >
-              {g.grade}° {g.letter}
-            </button>
-          ))}
-          {/* Separator + Bajas groups */}
-          {groups.some((g) => isBajasGroup(g)) && (
-            <>
-              <span className="text-slate-300 self-center">|</span>
-              {groups.filter((g) => isBajasGroup(g)).map((g) => (
-                <button
-                  key={g.id}
-                  onClick={() => setSelectedGroup(g.id)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    selectedGroup === g.id
-                      ? "bg-red-600 text-white"
-                      : "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
-                  }`}
-                >
-                  ⊘ {g.grade}° Bajas
+        {/* Top bar: search + status chips + actions */}
+        <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+          <div className="flex flex-wrap items-end gap-2">
+            <input
+              type="text"
+              placeholder="Buscar nombre, CURP o N° de control…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="input-field w-64"
+            />
+            <div className="inline-flex rounded-xl bg-slate-100 p-1">
+              {([
+                ["activos", "Activos"],
+                ["sin_curp", `Sin CURP (${sinCurp})`],
+                ["bajas", "Bajas"],
+              ] as const).map(([k, t]) => (
+                <button key={k} onClick={() => setFilterStatus(k)}
+                  className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                    filterStatus === k ? "bg-white shadow-sm text-slate-900" : "text-slate-500"
+                  }`}>{t}</button>
+              ))}
+            </div>
+          </div>
+          <button onClick={openAdd} className="btn-primary text-sm whitespace-nowrap">+ Nuevo alumno</button>
+        </div>
+
+        {/* Filter chips: Grado → Grupo (like SIGEFCP) */}
+        <div className="card flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl p-3 mb-4">
+          <Segmento etiqueta="Grado" valor={String(gradoF)}
+            opciones={[["", "Todos"], ["1", "1°"], ["2", "2°"], ["3", "3°"]]}
+            onCambio={(v) => { setGradoF(v ? Number(v) : ""); setGrupoF(""); }} />
+          {gradoF !== "" && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-bold uppercase tracking-wider text-slate-400">Grupo</span>
+              <button onClick={() => setGrupoF("")}
+                className={`rounded-lg px-2.5 py-1 text-sm font-semibold transition-colors ${
+                  grupoF === "" ? "bg-primary-600 text-white" : "bg-slate-100"
+                }`}>Todos</button>
+              {groups.filter((g) => g.grade === gradoF && !isBajasGroup(g)).map((g) => (
+                <button key={g.id} onClick={() => setGrupoF(g.id)}
+                  className={`min-w-[2.75rem] rounded-lg px-2.5 py-1 text-sm font-bold transition-colors ${
+                    grupoF === g.id ? "bg-primary-600 text-white shadow-sm" : `bg-slate-100 ${GRADE_COLOR[g.grade] || ""}`
+                  }`}>
+                  {g.grade}°{g.letter}
                 </button>
               ))}
-            </>
+            </div>
           )}
         </div>
 
-        {/* Actions bar */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <input
-            type="text"
-            placeholder="Buscar alumno..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input-field flex-1"
-          />
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="input-field w-auto"
-          >
-            <option value="todos">Todos ({students.length})</option>
-            <option value="activo">Activos ({countByStatus.activo})</option>
-            <option value="inactivo">Inactivos ({countByStatus.inactivo})</option>
-            <option value="baja">Bajas ({countByStatus.baja})</option>
-          </select>
-          <button onClick={openAdd} className="btn-primary text-sm whitespace-nowrap">
-            + Agregar alumno
-          </button>
-        </div>
+        {/* Count */}
+        <p className="text-xs text-slate-500 mb-2">
+          {filtered.length} {filtered.length === 1 ? "alumno" : "alumnos"}
+          {grupoF ? ` · ${etiqueta(grupoF)}` : gradoF !== "" ? ` · ${gradoF}°` : ""}
+        </p>
 
-        {/* Students table */}
+        {/* Table */}
         <div className="card overflow-x-auto">
-          <table className="grade-table">
+          <table className="grade-table w-full">
             <thead>
               <tr>
-                <th className="w-14">N°</th>
-                <th>Nombre completo</th>
-                <th className="hidden sm:table-cell">CURP</th>
-                <th className="w-28 text-center">Estado</th>
-                <th className="w-36 text-center">Acciones</th>
+                <th className="w-20 text-left">Grupo</th>
+                <th className="text-left">Alumno</th>
+                <th className="text-left">N° Control</th>
+                <th className="hidden sm:table-cell text-left">CURP</th>
+                <th className="text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-slate-400 text-sm">
-                    {students.length === 0
-                      ? `No hay alumnos en ${groupLabel}. Agrega el primero.`
-                      : "Sin resultados para el filtro aplicado."}
+                    No hay alumnos con ese filtro.
                   </td>
                 </tr>
               ) : (
-                filtered.map((s) => (
-                  <tr key={s.id} className={s.status !== "activo" ? "opacity-50" : ""}>
-                    <td className="text-center font-medium">{s.list_num}</td>
-                    <td className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {s.avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={s.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
-                        ) : (
-                          <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                            {s.full_name.charAt(0)}
-                          </div>
-                        )}
-                        {toTitleCase(s.full_name)}
-                      </div>
-                    </td>
-                    <td className="hidden sm:table-cell text-xs text-slate-500 font-mono">
-                      {s.curp || "—"}
-                    </td>
-                    <td className="text-center">
-                      <select
-                        value={s.status}
-                        onChange={(e) => handleStatusChange(s.id, e.target.value)}
-                        disabled={changingStatus === s.id}
-                        className={`text-xs px-2 py-1 rounded-lg border-0 font-medium cursor-pointer ${
-                          STATUS_OPTIONS.find((o) => o.value === s.status)?.color || "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {STATUS_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => openEdit(s)}
-                          className="text-xs text-primary-600 hover:text-primary-800 px-1.5 py-0.5"
-                          title="Editar datos"
-                        >
-                          Editar
-                        </button>
-                        {sameGradeGroups.length > 0 && !isCurrentBajas && (
-                          <button
-                            onClick={() => openGroupChange(s)}
-                            className="text-xs text-violet-600 hover:text-violet-800 px-1.5 py-0.5"
-                            title="Cambiar de grupo"
-                          >
-                            Mover
-                          </button>
-                        )}
-                        <button
-                          onClick={() => setDeleteId(s.id)}
-                          className="text-xs text-red-600 hover:text-red-800 px-1.5 py-0.5"
-                          title="Eliminar alumno"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filtered.slice(0, 400).map((s: Row) => {
+                  const g = gMap.get(s.group_id);
+                  const isHuesped = !!s.huesped;
+                  const cambio = cambiosInternos[s.id];
+                  return (
+                    <tr key={`${s.id}${isHuesped ? "-h" : ""}`}
+                      className={`${s.status === "baja" ? "opacity-50" : ""} ${isHuesped ? "bg-sky-50/60" : ""}`}>
+                      <td className={`font-bold ${g ? GRADE_COLOR[g.grade] || "" : ""}`}>
+                        {etiqueta(s.group_id)}
+                      </td>
+                      <td className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {s.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={s.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                              {s.full_name.charAt(0)}
+                            </div>
+                          )}
+                          <span>{toTitleCase(s.full_name)}</span>
+                          {isHuesped && (
+                            <span className="inline-flex items-center gap-1 ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-100 text-sky-700">
+                              Clonado · alumno de {etiqueta(s.grupoReal || s.group_id)}
+                            </span>
+                          )}
+                          {!isHuesped && cambio && (
+                            <span className="inline-flex items-center gap-1 ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
+                              Clonado en {etiqueta(cambio.grupo_destino)}
+                            </span>
+                          )}
+                          {s.status === "baja" && (
+                            <span className="inline-flex items-center ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-600">baja</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="font-mono text-xs tabular-nums">{s.control_number || <span className="text-slate-300">—</span>}</td>
+                      <td className="hidden sm:table-cell font-mono text-xs text-slate-500">
+                        {s.curp || <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">falta</span>}
+                      </td>
+                      <td>
+                        <div className="flex flex-wrap gap-1 justify-end">
+                          {!isHuesped && (
+                            <button onClick={() => openEdit(s)}
+                              className="text-xs text-primary-600 hover:text-primary-800 px-2 py-1 rounded hover:bg-slate-50 transition-colors">
+                              Editar
+                            </button>
+                          )}
+                          {/* Cambio interno */}
+                          {s.status === "activo" && !isHuesped && !cambio && (
+                            <button onClick={() => { setCambioModal({ student: s, terminar: false }); setCambioDestino(""); setCambioMotivo(""); }}
+                              className="text-xs text-violet-600 hover:text-violet-800 px-2 py-1 rounded hover:bg-violet-50 transition-colors">
+                              Cambio interno
+                            </button>
+                          )}
+                          {/* Regresar de cambio interno */}
+                          {!isHuesped && cambio && (
+                            <button onClick={() => setCambioModal({ student: s, terminar: true })}
+                              className="text-xs text-sky-600 hover:text-sky-800 px-2 py-1 rounded hover:bg-sky-50 transition-colors">
+                              ↩ Regresar a {etiqueta(s.group_id)}
+                            </button>
+                          )}
+                          {/* Baja / Reactivar */}
+                          {!isHuesped && (
+                            <button onClick={() => handleStatusChange(s, s.status === "baja" ? "activo" : "baja")}
+                              disabled={changingStatus === s.id}
+                              className={`text-xs px-2 py-1 rounded transition-colors ${
+                                s.status === "baja"
+                                  ? "text-green-600 hover:text-green-800 hover:bg-green-50"
+                                  : "text-red-600 hover:text-red-800 hover:bg-red-50"
+                              }`}>
+                              {changingStatus === s.id ? "..." : s.status === "baja" ? "Reactivar" : "Baja"}
+                            </button>
+                          )}
+                          {!isHuesped && s.status === "baja" && (
+                            <button onClick={() => setDeleteId(s.id)}
+                              className="text-xs text-red-600 hover:text-red-800 px-2 py-1 rounded hover:bg-red-50 transition-colors">
+                              Eliminar
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
-          {students.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 text-right flex flex-wrap gap-3 justify-end">
-              <span className="text-green-600 font-medium">{countByStatus.activo} activos</span>
-              {countByStatus.inactivo > 0 && <span className="text-amber-600">{countByStatus.inactivo} inactivos</span>}
-              {countByStatus.baja > 0 && <span className="text-red-600">{countByStatus.baja} bajas</span>}
-              <span>· {students.length} total en {groupLabel}</span>
-            </div>
+          {filtered.length > 400 && (
+            <p className="p-3 text-center text-xs text-slate-400">
+              Mostrando 400 de {filtered.length}. Filtra por grupo o busca por nombre.
+            </p>
           )}
         </div>
 
@@ -526,7 +601,7 @@ export default function AdminAlumnosPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
               <h2 className="text-base font-bold text-slate-900 mb-4">
-                {editStudent ? "Editar alumno" : `Nuevo alumno — ${groupLabel}`}
+                {editStudent ? "Editar alumno" : "Nuevo alumno"}
               </h2>
 
               {editStudent && (
@@ -537,7 +612,7 @@ export default function AdminAlumnosPage() {
                     entityId={editStudent.id}
                     size={80}
                     onUploaded={(url) => {
-                      setStudents((prev) => prev.map((s) => s.id === editStudent.id ? { ...s, avatar_url: url } : s));
+                      setAllStudents((prev) => prev.map((s) => s.id === editStudent.id ? { ...s, avatar_url: url } : s));
                     }}
                   />
                 </div>
@@ -545,51 +620,21 @@ export default function AdminAlumnosPage() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-700 mb-1 block">
-                    Nombre completo *
-                  </label>
-                  <input
-                    type="text"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    className="input-field"
-                    placeholder="APELLIDO PATERNO APELLIDO MATERNO NOMBRE(S)"
-                    autoFocus
-                  />
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">Nombre completo *</label>
+                  <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
+                    className="input-field" placeholder="APELLIDO PATERNO APELLIDO MATERNO NOMBRE(S)" autoFocus />
                 </div>
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="text-xs font-medium text-slate-700 mb-1 block">CURP</label>
-                    <input
-                      type="text"
-                      value={formCurp}
-                      onChange={(e) => setFormCurp(e.target.value)}
-                      className="input-field font-mono"
-                      placeholder="18 caracteres"
-                      maxLength={18}
-                    />
-                  </div>
-                  <div className="w-24">
-                    <label className="text-xs font-medium text-slate-700 mb-1 block">N° Lista</label>
-                    <input
-                      type="number"
-                      value={formListNum}
-                      onChange={(e) => setFormListNum(e.target.value)}
-                      className="input-field text-center"
-                      min={1}
-                    />
-                  </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-700 mb-1 block">CURP <span className="text-slate-400">(opcional)</span></label>
+                  <input type="text" value={formCurp} onChange={(e) => setFormCurp(e.target.value)}
+                    className="input-field font-mono uppercase" placeholder="18 caracteres" maxLength={18} />
                 </div>
               </div>
 
-              {formError && (
-                <p className="text-xs text-red-600 mt-2">{formError}</p>
-              )}
+              {formError && <p className="text-xs text-red-600 mt-2">{formError}</p>}
 
               <div className="flex justify-end gap-2 mt-5">
-                <button onClick={() => setShowModal(false)} className="btn-secondary" disabled={saving}>
-                  Cancelar
-                </button>
+                <button onClick={() => setShowModal(false)} className="btn-secondary" disabled={saving}>Cancelar</button>
                 <button onClick={handleSave} className="btn-primary text-sm" disabled={saving}>
                   {saving ? "Guardando..." : editStudent ? "Guardar cambios" : "Agregar"}
                 </button>
@@ -598,59 +643,81 @@ export default function AdminAlumnosPage() {
           </div>
         )}
 
-        {/* ── Group Change Modal ── */}
+        {/* ── Cambio interno Modal ── */}
+        {cambioModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
+              <h2 className="text-base font-bold text-slate-900 mb-3">
+                {cambioModal.terminar ? "Regresar a su grupo" : "Cambio interno de grupo"}
+              </h2>
+
+              {cambioModal.terminar ? (
+                <p className="text-sm text-slate-600 mb-4">
+                  <strong>{toTitleCase(cambioModal.student.full_name)}</strong> deja de estar clonado en{" "}
+                  {etiqueta(cambiosInternos[cambioModal.student.id]?.grupo_destino || "")} y
+                  regresa a su grupo original <strong>{etiqueta(cambioModal.student.group_id)}</strong>.
+                  Las calificaciones que ya se capturaron se conservan.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-600">
+                    <strong>{toTitleCase(cambioModal.student.full_name)}</strong> sigue inscrito en{" "}
+                    <strong>{etiqueta(cambioModal.student.group_id)}</strong>.
+                    Mientras dure el cambio, los profesores del grupo elegido le capturan calificaciones.
+                  </p>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Grupo donde tomará clases
+                    <select className="input-field mt-1" value={cambioDestino}
+                      onChange={(e) => setCambioDestino(e.target.value)}>
+                      <option value="">Elige el grupo…</option>
+                      {sameGradeGroups(cambioModal.student.group_id).map((g) => (
+                        <option key={g.id} value={g.id}>{g.grade}°{g.letter}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Motivo <span className="font-normal text-slate-400">(opcional)</span>
+                    <input className="input-field mt-1" maxLength={200} value={cambioMotivo}
+                      onChange={(e) => setCambioMotivo(e.target.value)} />
+                  </label>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 mt-5">
+                <button onClick={() => setCambioModal(null)} className="btn-secondary" disabled={cambiando}>Cancelar</button>
+                <button onClick={ejecutarCambio}
+                  disabled={cambiando || (!cambioModal.terminar && !cambioDestino)}
+                  className="btn-primary text-sm">
+                  {cambiando ? "Guardando…" : cambioModal.terminar ? "Regresar" : "Hacer cambio"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Group Change Modal (reactivation from Bajas) ── */}
         {showGroupModal && groupChangeStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm mx-4 p-6">
-              <h2 className="text-base font-bold text-slate-900 mb-2">
-                {pendingReactivateStatus ? "Reactivar alumno — Seleccionar grupo" : "Cambiar de grupo"}
-              </h2>
+              <h2 className="text-base font-bold text-slate-900 mb-2">Reactivar alumno — Seleccionar grupo</h2>
               <p className="text-sm text-slate-600 mb-4">
-                {pendingReactivateStatus
-                  ? <>Selecciona el grupo destino para <span className="font-semibold">{groupChangeStudent.full_name}</span>:</>
-                  : <>Mover a <span className="font-semibold">{groupChangeStudent.full_name}</span> de{" "}
-                    <span className="font-semibold">{groupLabel}</span> a:</>
-                }
+                Selecciona el grupo destino para <span className="font-semibold">{toTitleCase(groupChangeStudent.full_name)}</span>:
               </p>
-
               <div className="flex flex-wrap gap-2 mb-4">
-                {sameGradeGroups.map((g) => (
-                  <button
-                    key={g.id}
-                    onClick={() => setTargetGroup(g.id)}
+                {sameGradeGroups(groupChangeStudent.group_id).map((g) => (
+                  <button key={g.id} onClick={() => setTargetGroup(g.id)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      targetGroup === g.id
-                        ? "bg-violet-600 text-white"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                    }`}
-                  >
-                    {g.grade}° {g.letter}
-                  </button>
+                      targetGroup === g.id ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}>{g.grade}° {g.letter}</button>
                 ))}
               </div>
-
-              <p className="text-xs text-slate-400 mb-4">
-                Se asignará el siguiente número de lista disponible en el grupo destino. Las calificaciones existentes se conservan.
-              </p>
-
-              {groupChangeError && (
-                <p className="text-xs text-red-600 mb-3">{groupChangeError}</p>
-              )}
-
+              {groupChangeError && <p className="text-xs text-red-600 mb-3">{groupChangeError}</p>}
               <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => { setShowGroupModal(false); setGroupChangeStudent(null); setPendingReactivateStatus(null); }}
-                  className="btn-secondary"
-                  disabled={saving}
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleGroupChange}
-                  className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors"
-                  disabled={saving || !targetGroup}
-                >
-                  {saving ? "Moviendo..." : "Confirmar cambio"}
+                <button onClick={() => { setShowGroupModal(false); setGroupChangeStudent(null); setPendingReactivateStatus(null); }}
+                  className="btn-secondary" disabled={saving}>Cancelar</button>
+                <button onClick={handleGroupChange} disabled={saving || !targetGroup}
+                  className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors">
+                  {saving ? "Moviendo..." : "Confirmar"}
                 </button>
               </div>
             </div>
@@ -666,13 +733,9 @@ export default function AdminAlumnosPage() {
                 Se eliminarán también sus calificaciones registradas. Esta acción no se puede deshacer.
               </p>
               <div className="flex justify-end gap-2">
-                <button onClick={() => setDeleteId(null)} className="btn-secondary">
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
-                >
+                <button onClick={() => setDeleteId(null)} className="btn-secondary">Cancelar</button>
+                <button onClick={handleDelete}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
                   Sí, eliminar
                 </button>
               </div>

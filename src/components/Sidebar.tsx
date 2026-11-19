@@ -74,7 +74,7 @@ function buildSecciones(userRole: string): NavSection[] {
         { label: "Avance", href: "/avance", icon: TrendingUp, perm: "captura" },
         { label: "Boletas", href: "/boleta", icon: BookOpen, perm: "boleta" },
         { label: "Concentrados", href: "/concentrados", icon: ClipboardList, perm: "concentrado" },
-        { label: "Rendimiento", href: "/rendimiento", icon: BarChart3, perm: "rendimiento" },
+        { label: "Reportes", href: "/rendimiento", icon: BarChart3, perm: "rendimiento" },
         { label: "Periodos", href: "/periodos", icon: Calendar, perm: "periodos" },
       ],
     },
