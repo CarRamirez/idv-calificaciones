@@ -218,7 +218,7 @@ export default function Sidebar({ userRole, permissions, colapsado, drawer = fal
                           ${drawer ? "" : colapsado ? "justify-center" : "justify-center lg:justify-start"}
                           ${
                             on
-                              ? "bg-white/20 text-white shadow-sm before:absolute before:-left-2.5 before:top-2 before:h-[calc(100%-1rem)] before:w-1 before:rounded-r before:bg-white"
+                              ? "bg-primary-600 text-white shadow-sm before:absolute before:-left-2.5 before:top-2 before:h-[calc(100%-1rem)] before:w-1 before:rounded-r before:bg-white"
                               : "text-slate-300 hover:bg-white/[0.08] hover:text-white"
                           }`}
                       >

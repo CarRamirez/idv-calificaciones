@@ -35,7 +35,7 @@ export default async function BoletaGroupPage({ params }: Props) {
     .select("id, full_name, list_num, curp")
     .eq("group_id", params.groupId)
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   const { data: subjects } = await supabase
     .from("subjects")

@@ -39,7 +39,7 @@ export default async function ConcentradosPage() {
     .from("students")
     .select("id, full_name, list_num, group_id")
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   // Get ALL grades for all students (paginated to avoid Supabase 1000-row limit)
   const studentIds = (students || []).map((s) => s.id);

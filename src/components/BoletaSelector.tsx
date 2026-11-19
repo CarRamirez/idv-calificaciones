@@ -34,7 +34,7 @@ export default function BoletaSelector({ groups }: Props) {
       .select("id, full_name, list_num")
       .eq("group_id", selectedGroup)
       .eq("status", "activo")
-      .order("list_num")
+      .order("full_name")
       .then(({ data }) => {
         setStudents(data || []);
         setLoading(false);

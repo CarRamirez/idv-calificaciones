@@ -60,7 +60,7 @@ export default async function ConcentradoPage({ params }: Props) {
     .select("id, full_name, list_num, curp")
     .eq("group_id", params.groupId)
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   const studentIds = (students || []).map((s) => s.id);
   const allGrades = studentIds.length > 0

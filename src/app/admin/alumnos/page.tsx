@@ -119,7 +119,7 @@ export default function AdminAlumnosPage() {
       .from("students")
       .select("*")
       .eq("group_id", selectedGroup)
-      .order("list_num");
+      .order("full_name");
     setStudents(data || []);
   }, [selectedGroup]);
 

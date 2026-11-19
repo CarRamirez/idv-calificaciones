@@ -57,7 +57,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     .select("id, full_name, list_num")
     .eq("group_id", params.groupId)
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   const studentIds = (students || []).map((s) => s.id);
   const allGrades = studentIds.length > 0

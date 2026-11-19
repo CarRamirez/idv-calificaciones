@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Tutorial from "@/components/Tutorial";
 import Sidebar from "@/components/Sidebar";
-import { useTheme, SKIN_LABELS, SKIN_DOT, type ThemeMode, type ThemeColor } from "@/components/ThemeProvider";
+import { useTheme, SKINS, SKIN_LABELS, SKIN_DOT, type ThemeMode, type Skin } from "@/components/ThemeProvider";
 import { Menu } from "lucide-react";
 
 type Props = {
@@ -350,16 +350,10 @@ export default function Navbar({ userName, userRole, children }: Props) {
       <div className="flex min-w-0 flex-1 flex-col">
         {/* ═══ TOP BAR ═══ */}
         <header
-          className="barra-superior sticky top-0 z-30 border-b print:hidden"
-          style={{
-            background: "var(--nav-bg)",
-            backdropFilter: "blur(20px) saturate(180%)",
-            WebkitBackdropFilter: "blur(20px) saturate(180%)",
-            borderColor: "var(--nav-border)",
-          }}
+          className="barra-superior sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl print:hidden"
         >
         {/* Thin gradient accent bar */}
-        <div className="h-[3px] w-full" style={{ background: "var(--skin-accent-bar, linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee))" }} />
+        <div className="h-[3px] w-full bg-gradient-to-r from-primary-400 via-primary-600 to-primary-800" />
 
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between gap-4">
@@ -377,7 +371,7 @@ export default function Navbar({ userName, userRole, children }: Props) {
 
               <Link href="/dashboard" className="flex items-center gap-2.5 group lg:hidden">
                 <Image src="/logo-idv.png" alt="Instituto Don Vasco" width={32} height={32} className="rounded-lg shadow-sm" />
-                <span className="text-sm font-bold bg-clip-text text-transparent" style={{ backgroundImage: "var(--skin-gradient)", fontFamily: "var(--font-display)" }}>
+                <span className="text-sm font-bold texto-marca">
                   Mnemósine
                 </span>
               </Link>
@@ -462,7 +456,7 @@ export default function Navbar({ userName, userRole, children }: Props) {
                                 onlineUsers.map((u) => (
                                   <div key={u.id} className="flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition-colors">
                                     <div className="relative">
-                                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold" style={{ background: "var(--skin-gradient)", color: "white" }}>
+                                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold bg-marca text-white">
                                         {u.full_name.charAt(0).toUpperCase()}
                                       </div>
                                       <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border border-white" />
@@ -543,28 +537,32 @@ export default function Navbar({ userName, userRole, children }: Props) {
                     {/* Color skin */}
                     <div className="px-3">
                       <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2">Color</p>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {(Object.keys(SKIN_LABELS) as ThemeColor[]).map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => setColor(c)}
-                            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all duration-200 ${
-                              color === c
-                                ? "bg-slate-100 ring-1 ring-slate-200"
-                                : "hover:bg-slate-50"
-                            }`}
-                          >
-                            <span
-                              className="w-5 h-5 rounded-full border-2 transition-transform duration-200"
-                              style={{
-                                background: SKIN_DOT[c],
-                                borderColor: color === c ? SKIN_DOT[c] : "transparent",
-                                transform: color === c ? "scale(1.15)" : "scale(1)",
-                              }}
-                            />
-                            <span className="text-slate-600">{SKIN_LABELS[c]}</span>
-                          </button>
-                        ))}
+                      <div className="space-y-2">
+                        {(["Clásicos", "Metálicos", "Llamativos"] as const).map((grupo) => {
+                          const skinsGrupo = SKINS.filter(s => s.grupo === grupo);
+                          if (!skinsGrupo.length) return null;
+                          return (
+                            <div key={grupo}>
+                              <p className="text-[10px] text-slate-400 mb-1">{grupo}</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {skinsGrupo.map((s) => (
+                                  <button
+                                    key={s.id}
+                                    onClick={() => setColor(s.id)}
+                                    title={s.nombre}
+                                    className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
+                                      color === s.id ? "scale-110 shadow-sm" : "hover:scale-105"
+                                    }`}
+                                    style={{
+                                      background: s.color,
+                                      borderColor: color === s.id ? s.color : "transparent",
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <div className="border-t border-slate-200 my-2" />
@@ -596,7 +594,7 @@ export default function Navbar({ userName, userRole, children }: Props) {
               {/* User dropdown */}
               <div className="relative pl-3 border-l border-slate-200" ref={dropdownRef}>
                 <button onClick={() => setUserDropdown(!userDropdown)} className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-50 transition-all duration-200">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white" style={{ background: "var(--skin-gradient, linear-gradient(135deg, #5c7cfa, #7c3aed))" }}>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white bg-marca">
                     {firstName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-left hidden md:block">

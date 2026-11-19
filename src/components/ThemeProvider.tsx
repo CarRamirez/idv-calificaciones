@@ -4,138 +4,57 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, Re
 import { createClient } from "@/lib/supabase/client";
 
 export type ThemeMode = "light" | "dark" | "auto";
-export type ThemeColor = "indigo" | "blue" | "emerald" | "rose" | "amber" | "cyan" | "silver" | "gold" | "bronze" | "graphite";
+// Tipos de Modo y Skin compatibles con SIGEFCP
+export type Modo = ThemeMode;
+export type Skin =
+  | "azul" | "verde" | "guinda" | "violeta" | "indigo"
+  | "oro" | "plata" | "naranja" | "turquesa" | "rojo" | "rosa" | "fucsia" | "lima";
 
-type ThemeCtx = {
-  mode: ThemeMode;
-  color: ThemeColor;
-  vidrio: boolean;
-  resolved: "light" | "dark";
-  setMode: (m: ThemeMode) => void;
-  setColor: (c: ThemeColor) => void;
-  setVidrio: (v: boolean) => void;
+// Alias: Mnemósine usaba ThemeColor con nombres en inglés
+export type ThemeColor = Skin;
+
+export type SkinInfo = { id: Skin; nombre: string; color: string; grupo: "Clásicos" | "Metálicos" | "Llamativos" };
+
+export const SKINS: SkinInfo[] = [
+  { id: "azul",      nombre: "Azul",       color: "#2563eb", grupo: "Clásicos" },
+  { id: "verde",     nombre: "Verde",      color: "#059669", grupo: "Clásicos" },
+  { id: "guinda",    nombre: "Guinda",     color: "#9f2242", grupo: "Clásicos" },
+  { id: "violeta",   nombre: "Violeta",    color: "#7c3aed", grupo: "Clásicos" },
+  { id: "indigo",    nombre: "Índigo",     color: "#4f46e5", grupo: "Clásicos" },
+  { id: "oro",       nombre: "Dorado",     color: "#b8860b", grupo: "Metálicos" },
+  { id: "plata",     nombre: "Plata",      color: "#64748b", grupo: "Metálicos" },
+  { id: "naranja",   nombre: "Naranja",    color: "#ea580c", grupo: "Llamativos" },
+  { id: "turquesa",  nombre: "Turquesa",   color: "#0891b2", grupo: "Llamativos" },
+  { id: "rojo",      nombre: "Rojo",       color: "#dc2626", grupo: "Llamativos" },
+  { id: "rosa",      nombre: "Rosa",       color: "#db2777", grupo: "Llamativos" },
+  { id: "fucsia",    nombre: "Fucsia",     color: "#c026d3", grupo: "Llamativos" },
+  { id: "lima",      nombre: "Lima",       color: "#65a30d", grupo: "Llamativos" },
+];
+
+// Backward compatibility exports
+export const SKIN_LABELS: Record<string, string> = Object.fromEntries(SKINS.map(s => [s.id, s.nombre]));
+export const SKIN_DOT: Record<string, string> = Object.fromEntries(SKINS.map(s => [s.id, s.color]));
+
+// Map old Mnemósine color names → new skin names
+const LEGACY_MAP: Record<string, Skin> = {
+  blue: "azul", emerald: "verde", rose: "rosa", amber: "oro",
+  cyan: "turquesa", silver: "plata", gold: "oro", bronze: "naranja", graphite: "plata",
 };
 
-const ThemeContext = createContext<ThemeCtx>({
-  mode: "light",
-  color: "indigo",
-  vidrio: false,
-  resolved: "light",
-  setMode: () => {},
-  setColor: () => {},
-  setVidrio: () => {},
-});
+function migrateSkin(raw: string | null): Skin {
+  if (!raw) return "azul";
+  if (SKINS.some(s => s.id === raw)) return raw as Skin;
+  return LEGACY_MAP[raw] || "azul";
+}
 
-export const useTheme = () => useContext(ThemeContext);
-
-const COLOR_VARS: Record<ThemeColor, Record<string, string>> = {
-  indigo: {
-    "--skin-primary": "#5c7cfa",
-    "--skin-secondary": "#7c3aed",
-    "--skin-gradient": "linear-gradient(135deg, #5c7cfa 0%, #7c3aed 100%)",
-    "--skin-ring": "rgba(92, 124, 250, 0.5)",
-    "--skin-shadow": "rgba(92, 124, 250, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #5c7cfa, #7c3aed, #ff9800, #2ba672, #22d3ee)",
-  },
-  blue: {
-    "--skin-primary": "#2563eb",
-    "--skin-secondary": "#3b82f6",
-    "--skin-gradient": "linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%)",
-    "--skin-ring": "rgba(37, 99, 235, 0.5)",
-    "--skin-shadow": "rgba(37, 99, 235, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #2563eb, #0ea5e9, #06b6d4, #3b82f6, #60a5fa)",
-  },
-  emerald: {
-    "--skin-primary": "#059669",
-    "--skin-secondary": "#10b981",
-    "--skin-gradient": "linear-gradient(135deg, #059669 0%, #34d399 100%)",
-    "--skin-ring": "rgba(5, 150, 105, 0.5)",
-    "--skin-shadow": "rgba(5, 150, 105, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #059669, #10b981, #34d399, #6ee7b7, #a7f3d0)",
-  },
-  rose: {
-    "--skin-primary": "#e11d48",
-    "--skin-secondary": "#f43f5e",
-    "--skin-gradient": "linear-gradient(135deg, #e11d48 0%, #fb7185 100%)",
-    "--skin-ring": "rgba(225, 29, 72, 0.5)",
-    "--skin-shadow": "rgba(225, 29, 72, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #e11d48, #f43f5e, #fb7185, #fda4af, #fecdd3)",
-  },
-  amber: {
-    "--skin-primary": "#d97706",
-    "--skin-secondary": "#f59e0b",
-    "--skin-gradient": "linear-gradient(135deg, #d97706 0%, #fbbf24 100%)",
-    "--skin-ring": "rgba(217, 119, 6, 0.5)",
-    "--skin-shadow": "rgba(217, 119, 6, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #d97706, #f59e0b, #fbbf24, #fde68a, #fef3c7)",
-  },
-  cyan: {
-    "--skin-primary": "#0891b2",
-    "--skin-secondary": "#06b6d4",
-    "--skin-gradient": "linear-gradient(135deg, #0891b2 0%, #22d3ee 100%)",
-    "--skin-ring": "rgba(8, 145, 178, 0.5)",
-    "--skin-shadow": "rgba(8, 145, 178, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #0891b2, #06b6d4, #22d3ee, #67e8f9, #a5f3fc)",
-  },
-  silver: {
-    "--skin-primary": "#94a3b8",
-    "--skin-secondary": "#cbd5e1",
-    "--skin-gradient": "linear-gradient(135deg, #94a3b8 0%, #cbd5e1 50%, #e2e8f0 100%)",
-    "--skin-ring": "rgba(148, 163, 184, 0.5)",
-    "--skin-shadow": "rgba(148, 163, 184, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #64748b, #94a3b8, #cbd5e1, #e2e8f0, #f1f5f9)",
-  },
-  gold: {
-    "--skin-primary": "#b8860b",
-    "--skin-secondary": "#daa520",
-    "--skin-gradient": "linear-gradient(135deg, #b8860b 0%, #daa520 50%, #f0d060 100%)",
-    "--skin-ring": "rgba(184, 134, 11, 0.5)",
-    "--skin-shadow": "rgba(184, 134, 11, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #8b6914, #b8860b, #daa520, #f0d060, #fdf0b0)",
-  },
-  bronze: {
-    "--skin-primary": "#a0522d",
-    "--skin-secondary": "#cd7f32",
-    "--skin-gradient": "linear-gradient(135deg, #a0522d 0%, #cd7f32 50%, #dea06c 100%)",
-    "--skin-ring": "rgba(205, 127, 50, 0.5)",
-    "--skin-shadow": "rgba(205, 127, 50, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #8b4513, #a0522d, #cd7f32, #dea06c, #f0c8a0)",
-  },
-  graphite: {
-    "--skin-primary": "#374151",
-    "--skin-secondary": "#4b5563",
-    "--skin-gradient": "linear-gradient(135deg, #1f2937 0%, #374151 50%, #6b7280 100%)",
-    "--skin-ring": "rgba(55, 65, 81, 0.5)",
-    "--skin-shadow": "rgba(55, 65, 81, 0.35)",
-    "--skin-accent-bar": "linear-gradient(90deg, #111827, #1f2937, #374151, #4b5563, #6b7280)",
-  },
+type Ctx = {
+  mode: ThemeMode; color: Skin; vidrio: boolean; resolved: "light" | "dark";
+  setMode: (m: ThemeMode) => void; setColor: (s: Skin) => void; setVidrio: (v: boolean) => void;
+  // SIGEFCP-compatible aliases
+  modo: ThemeMode; skin: Skin; setModo: (m: ThemeMode) => void; setSkin: (s: Skin) => void;
 };
 
-export const SKIN_LABELS: Record<ThemeColor, string> = {
-  indigo: "Índigo",
-  blue: "Azul",
-  emerald: "Esmeralda",
-  rose: "Rosa",
-  amber: "Ámbar",
-  cyan: "Cian",
-  silver: "Plata",
-  gold: "Oro",
-  bronze: "Bronce",
-  graphite: "Grafito",
-};
-
-export const SKIN_DOT: Record<ThemeColor, string> = {
-  indigo: "#5c7cfa",
-  blue: "#2563eb",
-  emerald: "#059669",
-  rose: "#e11d48",
-  amber: "#d97706",
-  cyan: "#0891b2",
-  silver: "#94a3b8",
-  gold: "#daa520",
-  bronze: "#cd7f32",
-  graphite: "#374151",
-};
+const ThemeCtx = createContext<Ctx | null>(null);
 
 function resolveMode(mode: ThemeMode): "light" | "dark" {
   if (mode !== "auto") return mode;
@@ -143,100 +62,111 @@ function resolveMode(mode: ThemeMode): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function applyToDOM(m: ThemeMode, c: ThemeColor, v: boolean) {
-  const r = resolveMode(m);
-  document.documentElement.setAttribute("data-theme", r);
-  document.documentElement.classList.toggle("glass", v);
-  const vars = COLOR_VARS[c] || COLOR_VARS.indigo;
-  for (const [key, val] of Object.entries(vars)) {
-    document.documentElement.style.setProperty(key, val);
-  }
-  return r;
+function applyToDOM(modo: ThemeMode, skin: Skin, vidrio: boolean) {
+  const oscuro = modo === "dark" || (modo === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark", oscuro);
+  document.documentElement.classList.toggle("glass", vidrio);
+  document.documentElement.dataset.skin = skin;
+  document.documentElement.setAttribute("data-theme", oscuro ? "dark" : "light");
+  return oscuro ? "dark" as const : "light" as const;
 }
 
-// Read per-user keys from localStorage
-function readUserPref(userId: string): { mode: ThemeMode; color: ThemeColor; vidrio: boolean } {
+/** Script anti-parpadeo que corre antes de pintar */
+export const SCRIPT_TEMA = `(function(){try{var m=localStorage.getItem('tema-modo')||localStorage.getItem('theme-mode')||'light';if(m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('dark');else if(m==='dark')document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme',document.documentElement.classList.contains('dark')?'dark':'light');var s=localStorage.getItem('tema-skin')||localStorage.getItem('theme-color')||'azul';var map={blue:'azul',emerald:'verde',rose:'rosa',amber:'oro',cyan:'turquesa',silver:'plata',gold:'oro',bronze:'naranja',graphite:'plata'};s=map[s]||s;document.documentElement.dataset.skin=s;if((localStorage.getItem('tema-vidrio')||localStorage.getItem('theme-vidrio'))==='1')document.documentElement.classList.add('glass');}catch(e){}})();`;
+
+function readPref(userId: string): { mode: ThemeMode; skin: Skin; vidrio: boolean } {
   try {
-    const mode = (localStorage.getItem(`theme-mode-${userId}`) as ThemeMode) || "light";
-    const color = (localStorage.getItem(`theme-color-${userId}`) as ThemeColor) || "indigo";
-    const vidrio = localStorage.getItem(`theme-vidrio-${userId}`) === "1";
-    return { mode, color, vidrio };
+    // Try new keys first, then legacy
+    const mode = (localStorage.getItem(`tema-modo-${userId}`) || localStorage.getItem(`theme-mode-${userId}`) || localStorage.getItem("tema-modo") || "light") as ThemeMode;
+    const rawSkin = localStorage.getItem(`tema-skin-${userId}`) || localStorage.getItem(`theme-color-${userId}`) || localStorage.getItem("tema-skin") || "azul";
+    const vidrio = (localStorage.getItem(`tema-vidrio-${userId}`) || localStorage.getItem(`theme-vidrio-${userId}`) || localStorage.getItem("tema-vidrio")) === "1";
+    return { mode, skin: migrateSkin(rawSkin), vidrio };
   } catch {
-    return { mode: "light", color: "indigo", vidrio: false };
+    return { mode: "light", skin: "azul", vidrio: false };
   }
 }
 
-function writeUserPref(userId: string, mode: ThemeMode, color: ThemeColor, vidrio: boolean) {
+function writePref(userId: string, mode: ThemeMode, skin: Skin, vidrio: boolean) {
   try {
-    localStorage.setItem(`theme-mode-${userId}`, mode);
-    localStorage.setItem(`theme-color-${userId}`, color);
-    localStorage.setItem(`theme-vidrio-${userId}`, vidrio ? "1" : "0");
-    // Also write generic keys for the flash-prevention script in layout.tsx
-    localStorage.setItem("theme-mode", mode);
-    localStorage.setItem("theme-color", color);
-    localStorage.setItem("theme-vidrio", vidrio ? "1" : "0");
+    localStorage.setItem(`tema-modo-${userId}`, mode);
+    localStorage.setItem(`tema-skin-${userId}`, skin);
+    localStorage.setItem(`tema-vidrio-${userId}`, vidrio ? "1" : "0");
+    // Global keys for the flash-prevention script
+    localStorage.setItem("tema-modo", mode);
+    localStorage.setItem("tema-skin", skin);
+    localStorage.setItem("tema-vidrio", vidrio ? "1" : "0");
   } catch {}
 }
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>("light");
-  const [color, setColorState] = useState<ThemeColor>("indigo");
+  const [skin, setSkinState] = useState<Skin>("azul");
   const [vidrio, setVidrioState] = useState(false);
   const [resolved, setResolved] = useState<"light" | "dark">("light");
   const userIdRef = useRef<string | null>(null);
 
-  // On mount: get user ID, then load their specific preferences
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return;
       userIdRef.current = user.id;
-      const pref = readUserPref(user.id);
+      const pref = readPref(user.id);
       setModeState(pref.mode);
-      setColorState(pref.color);
+      setSkinState(pref.skin);
       setVidrioState(pref.vidrio);
-      const r = applyToDOM(pref.mode, pref.color, pref.vidrio);
+      const r = applyToDOM(pref.mode, pref.skin, pref.vidrio);
       setResolved(r);
-      writeUserPref(user.id, pref.mode, pref.color, pref.vidrio);
+      writePref(user.id, pref.mode, pref.skin, pref.vidrio);
     });
   }, []);
 
-  // Re-apply when mode, color, or vidrio changes
   useEffect(() => {
-    const r = applyToDOM(mode, color, vidrio);
+    const r = applyToDOM(mode, skin, vidrio);
     setResolved(r);
-  }, [mode, color, vidrio]);
+  }, [mode, skin, vidrio]);
 
-  // Listen for system theme changes when in auto mode
   useEffect(() => {
     if (mode !== "auto") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      const r = applyToDOM("auto", color, vidrio);
-      setResolved(r);
-    };
+    const handler = () => { const r = applyToDOM("auto", skin, vidrio); setResolved(r); };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, [mode, color, vidrio]);
+  }, [mode, skin, vidrio]);
 
   const setMode = useCallback((m: ThemeMode) => {
     setModeState(m);
-    if (userIdRef.current) writeUserPref(userIdRef.current, m, color, vidrio);
-  }, [color, vidrio]);
+    if (userIdRef.current) writePref(userIdRef.current, m, skin, vidrio);
+  }, [skin, vidrio]);
 
-  const setColor = useCallback((c: ThemeColor) => {
-    setColorState(c);
-    if (userIdRef.current) writeUserPref(userIdRef.current, mode, c, vidrio);
+  const setColor = useCallback((s: Skin) => {
+    setSkinState(s);
+    if (userIdRef.current) writePref(userIdRef.current, mode, s, vidrio);
   }, [mode, vidrio]);
 
   const setVidrio = useCallback((v: boolean) => {
     setVidrioState(v);
-    if (userIdRef.current) writeUserPref(userIdRef.current, mode, color, v);
-  }, [mode, color]);
+    if (userIdRef.current) writePref(userIdRef.current, mode, skin, v);
+  }, [mode, skin]);
 
-  return (
-    <ThemeContext.Provider value={{ mode, color, vidrio, resolved, setMode, setColor, setVidrio }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  const ctx: Ctx = {
+    mode, color: skin, vidrio, resolved,
+    setMode, setColor: setColor, setVidrio,
+    // SIGEFCP-compatible aliases
+    modo: mode, skin, setModo: setMode, setSkin: setColor,
+  };
+
+  return <ThemeCtx.Provider value={ctx}>{children}</ThemeCtx.Provider>;
 }
+
+/** Hook principal — compatible con ambas APIs */
+export function useTheme() {
+  const c = useContext(ThemeCtx);
+  if (!c) throw new Error("useTheme fuera de ThemeProvider");
+  return c;
+}
+
+/** Alias SIGEFCP */
+export const useTema = useTheme;
+
+// Re-export ThemeProvider as named export too
+export { ThemeProvider };

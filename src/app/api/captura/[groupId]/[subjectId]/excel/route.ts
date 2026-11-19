@@ -44,7 +44,7 @@ export async function GET(
       .select("id, full_name, list_num")
       .eq("group_id", params.groupId)
       .eq("status", "activo")
-      .order("list_num"),
+      .order("full_name"),
   ]);
 
   const group = groupRes.data;

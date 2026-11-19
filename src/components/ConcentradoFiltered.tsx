@@ -71,7 +71,7 @@ export default function ConcentradoFiltered({ groups, allSubjects, allStudents, 
     [selectedGroup, allSubjects]
   );
   const studentsForGroup = useMemo(
-    () => allStudents.filter((s) => s.group_id === selectedGroupId).sort((a, b) => a.list_num - b.list_num),
+    () => allStudents.filter((s) => s.group_id === selectedGroupId).sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "")),
     [selectedGroupId, allStudents]
   );
 

@@ -40,7 +40,7 @@ export default async function ListaPage({ params }: Props) {
     .select("id, full_name, list_num, curp")
     .eq("group_id", params.groupId)
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   return (
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>

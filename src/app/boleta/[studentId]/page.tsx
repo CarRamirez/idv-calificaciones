@@ -52,7 +52,7 @@ export default async function BoletaDetailPage({ params }: Props) {
     .select("id, full_name, list_num")
     .eq("group_id", student.group_id)
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   const classmates = classmatesRaw || [];
   const currentIndex = classmates.findIndex((s) => s.id === student.id);
@@ -93,7 +93,7 @@ export default async function BoletaDetailPage({ params }: Props) {
       .select("id, group_id, list_num")
       .in("group_id", groupIds)
       .eq("status", "activo")
-      .order("list_num");
+      .order("full_name");
     (firstStudents || []).forEach((s) => {
       if (!groupFirstStudent[s.group_id]) {
         groupFirstStudent[s.group_id] = s.id;

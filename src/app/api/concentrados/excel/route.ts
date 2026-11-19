@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     .select("id, full_name, list_num")
     .eq("group_id", groupId)
     .eq("status", "activo")
-    .order("list_num");
+    .order("full_name");
 
   const subs = (allSubjects || []);
   const studs = students || [];
