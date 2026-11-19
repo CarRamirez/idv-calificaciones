@@ -278,7 +278,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   </th>
                 ))}
                 <th rowSpan={2} className={`final-col ${th} w-10 text-center sm:w-16 print:w-16`}>Final</th>
-                <th rowSpan={2} className={`col-ia ${th} w-8 text-center sm:w-12 print:w-12`}>IA</th>
+                <th rowSpan={2} className={`col-ia ${th} w-8 text-center sm:w-12 print:w-12 hidden`}>IA</th>
               </tr>
               <tr className="text-[10px] sm:text-[11px]">
                 {TRIMESTERS.map((t) => (
@@ -329,7 +329,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                         <Valor v={final} decimal />
                       )}
                     </td>
-                    <td className={`col-ia ${td} text-center text-xs tabular-nums muted`}>
+                    <td className={`col-ia ${td} text-center text-xs tabular-nums muted hidden`}>
                       {getTotalAbsences(s.id) || "—"}
                     </td>
                   </tr>
@@ -380,7 +380,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                             <Valor v={final} decimal />
                           )}
                         </td>
-                        <td className={`col-ia ${td} text-center text-xs tabular-nums muted`}>
+                        <td className={`col-ia ${td} text-center text-xs tabular-nums muted hidden`}>
                           {getTotalAbsences(s.id) || "—"}
                         </td>
                       </tr>
@@ -405,7 +405,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                   );
                 })}
                 <td className={`final-col ${td} text-center`}><Valor v={generalAvg} decimal /></td>
-                <td className={`col-ia ${td}`} />
+                <td className={`col-ia ${td} hidden`} />
               </tr>
             </tfoot>
           </table>
@@ -451,7 +451,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                 <tr className="bg-slate-100 dark:bg-slate-800">
                   <th className={`${th} text-left text-xs uppercase min-w-[180px]`}>Asignatura</th>
                   <th className={`${th} text-center text-xs uppercase w-20`}>Calificaci&oacute;n</th>
-                  <th className={`${th} text-center text-xs uppercase w-16`}>IA</th>
+                  <th className={`${th} text-center text-xs uppercase w-16 hidden`}>IA</th>
                 </tr>
               </thead>
               <tbody>
@@ -468,7 +468,7 @@ export default function BoletaView({ student, group, subjects, gradeMap }: Props
                       <td className={`${td} text-center`}>
                         <Valor v={julioScore} />
                       </td>
-                      <td className={`${td} text-center text-sm tabular-nums muted`}>
+                      <td className={`${td} text-center text-sm tabular-nums muted hidden`}>
                         {julioAbs || "—"}
                       </td>
                     </tr>

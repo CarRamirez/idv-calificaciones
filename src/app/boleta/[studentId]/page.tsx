@@ -4,6 +4,7 @@ import { getEffectiveProfile } from "@/lib/impersonation";
 import Navbar from "@/components/Navbar";
 import BoletaView from "@/components/BoletaView";
 import Link from "next/link";
+import StudentDropdown from "@/components/StudentDropdown";
 
 type Props = {
   params: { studentId: string };
@@ -55,9 +56,7 @@ export default async function BoletaDetailPage({ params }: Props) {
     .order("full_name");
 
   const classmates = classmatesRaw || [];
-  const currentIndex = classmates.findIndex((s) => s.id === student.id);
-  const prevStudent = currentIndex > 0 ? classmates[currentIndex - 1] : null;
-  const nextStudent = currentIndex < classmates.length - 1 ? classmates[currentIndex + 1] : null;
+  // classmates list passed to StudentDropdown component
 
   // ── Todos los grupos (para selector de grupo) ──
   let allGroups: { id: string; grade: number; letter: string }[] = [];
@@ -161,52 +160,8 @@ export default async function BoletaDetailPage({ params }: Props) {
 
         {/* ── Navegación entre alumnos y grupos ── */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 print:hidden">
-          {/* Anterior / Siguiente alumno */}
-          <div className="flex items-center gap-2">
-            {prevStudent ? (
-              <Link
-                href={`/boleta/${prevStudent.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                title={prevStudent.full_name}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="hidden sm:inline">Anterior</span>
-              </Link>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-300 bg-slate-50 border border-slate-200 rounded-lg cursor-not-allowed">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="hidden sm:inline">Anterior</span>
-              </span>
-            )}
-
-            <span className="text-xs text-slate-400 tabular-nums">
-              {currentIndex + 1} / {classmates.length}
-            </span>
-
-            {nextStudent ? (
-              <Link
-                href={`/boleta/${nextStudent.id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                title={nextStudent.full_name}
-              >
-                <span className="hidden sm:inline">Siguiente</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-300 bg-slate-50 border border-slate-200 rounded-lg cursor-not-allowed">
-                <span className="hidden sm:inline">Siguiente</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            )}
-          </div>
+          {/* Dropdown de alumno */}
+          <StudentDropdown classmates={classmates} currentId={student.id} />
 
           {/* Selector de grupo */}
           {allGroups.length > 1 && (

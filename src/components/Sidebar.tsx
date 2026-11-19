@@ -26,6 +26,10 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Award,
+  Link2,
+  Eye,
+  FolderOpen,
+  Mail,
   type LucideIcon,
 } from "lucide-react";
 
@@ -52,7 +56,7 @@ type Props = {
   onAlternar?: () => void;
 };
 
-/* ── Secciones del menú ── */
+/* ── Secciones del menú (estructura SIGEFCP) ── */
 function buildSecciones(userRole: string): NavSection[] {
   const isAdmin = ["admin", "directora_anita"].includes(userRole);
 
@@ -68,10 +72,10 @@ function buildSecciones(userRole: string): NavSection[] {
       items: [
         { label: "Captura", href: "/captura", icon: PenLine, perm: ["calificaciones", "captura"] },
         { label: "Avance", href: "/avance", icon: TrendingUp, perm: "captura" },
-        { label: "Calificaciones", href: "/calificaciones", icon: FileText, perm: ["calificaciones", "captura"] },
-        { label: "Boletas", href: "/boleta", icon: BookOpen, perm: "boleta", roleOnly: "teacher" },
+        { label: "Boletas", href: "/boleta", icon: BookOpen, perm: "boleta" },
         { label: "Concentrados", href: "/concentrados", icon: ClipboardList, perm: "concentrado" },
         { label: "Rendimiento", href: "/rendimiento", icon: BarChart3, perm: "rendimiento" },
+        { label: "Periodos", href: "/periodos", icon: Calendar, perm: "periodos" },
       ],
     },
   ];
@@ -80,11 +84,11 @@ function buildSecciones(userRole: string): NavSection[] {
     secciones.push({
       titulo: "ESCUELA",
       items: [
-        { label: "Usuarios", href: "/usuarios", icon: Users, perm: ["admin_profesores", "admin_alumnos"] },
-        { label: "Profesores", href: "/admin/profesores", icon: GraduationCap, perm: "admin_profesores" },
-        { label: "Alumnos", href: "/admin/alumnos", icon: UserCog, perm: "admin_alumnos" },
         { label: "Grupos", href: "/lista", icon: Layers, perm: "admin_grupos" },
         { label: "Materias", href: "/admin/materias", icon: BookMarked, perm: "admin_materias" },
+        { label: "Profesores", href: "/admin/profesores", icon: GraduationCap, perm: "admin_profesores" },
+        { label: "Asignar", href: "/asignar", icon: Link2, perm: ["admin_profesores", "admin_materias"] },
+        { label: "Alumnos", href: "/admin/alumnos", icon: UserCog, perm: "admin_alumnos" },
         { label: "Directorio", href: "/directorio", icon: Contact },
         { label: "Servicios Escolares", href: "/servicios-escolares", icon: Briefcase },
       ],
@@ -92,13 +96,11 @@ function buildSecciones(userRole: string): NavSection[] {
     secciones.push({
       titulo: "ADMINISTRACIÓN",
       items: [
-        { label: "Periodos", href: "/periodos", icon: Calendar, perm: "periodos" },
-        { label: "Horario", href: "/horario", icon: Clock },
         { label: "Ciclo Escolar", href: "/admin/ciclo", icon: Award },
+        { label: "Usuarios", href: "/usuarios", icon: Users, perm: ["admin_profesores", "admin_alumnos"] },
         { label: "Roles", href: "/admin/roles", icon: Shield, perm: "admin_roles" },
         { label: "Sesiones", href: "/admin/sesiones", icon: Clock, perm: "admin_sesiones" },
         { label: "Auditoría", href: "/admin/auditoria", icon: ClipboardList, perm: "admin_sesiones" },
-        { label: "Tareas", href: "/tareas", icon: ClipboardList },
       ],
     });
   } else {

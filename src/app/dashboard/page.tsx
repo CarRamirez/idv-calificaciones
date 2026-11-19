@@ -9,6 +9,7 @@ import CaptureAlerts from "@/components/CaptureAlerts";
 import PerformanceStats from "@/components/PerformanceStats";
 import PeriodsTimeline from "@/components/PeriodsTimeline";
 import PeriodBanner from "@/components/PeriodBanner";
+import TablaGrupos, { type FilaGrupo } from "@/components/TablaGrupos";
 
 /* ── SVG Icon helpers ── */
 function IconUsers({ className = "w-6 h-6" }: { className?: string }) {
@@ -274,7 +275,9 @@ export default async function DashboardPage() {
   let totalStudents = 0;
   let totalTeachers = 0;
   let totalSubjects = 0;
+  let sinMaestroCount = 0;
   const groupStudentCounts: Record<string, number> = {};
+  let groupStats: FilaGrupo[] = [];
 
   if (dashboardView === "admin") {
     const { data } = await supabase
@@ -308,7 +311,32 @@ export default async function DashboardPage() {
       .select("id");
     totalSubjects = subjectRows?.length || 0;
 
+    // "Sin maestro" count — group×subject combos without teacher assignment
+    {
+      const { data: allSubjects } = await supabase
+        .from("subjects")
+        .select("id, grade");
+      const { data: assignments } = await supabase
+        .from("teacher_assignments")
+        .select("group_id, subject_id");
+      const assignedSet = new Set(
+        (assignments || []).map((a: any) => `${a.group_id}:${a.subject_id}`)
+      );
+      let missing = 0;
+      for (const g of groups) {
+        const gradeSubs = (allSubjects || []).filter((s: any) => s.grade === g.grade);
+        for (const s of gradeSubs) {
+          if (!assignedSet.has(`${g.id}:${s.id}`)) missing++;
+        }
+      }
+      sinMaestroCount = missing;
+    }
+
     // Active period loaded below (shared)
+
+    // Group stats: average and at-risk count per group (for TablaGrupos)
+    // We'll compute these after we know the active period
+    // (moved to after active period detection)
 
     // Capture progress: count grades entered vs total possible
     // Total possible = active students × subjects that count for avg (per grade) × open period
@@ -387,6 +415,79 @@ export default async function DashboardPage() {
       }
       recentActivity = Array.from(activityMap.values()).slice(0, 5);
     }
+
+    // Group stats for TablaGrupos: average and at-risk count
+    if (activePeriod && students && students.length > 0) {
+      const adminDb = createAdminClient();
+      // Fetch all grades for active period to compute per-group averages
+      const { data: allGrades } = await adminDb
+        .from("grades")
+        .select("student_id, subject_id, score")
+        .eq("period", activePeriod.period_number)
+        .not("score", "is", null);
+
+      // Get subjects that count for avg
+      const { data: avgSubjects } = await adminDb
+        .from("subjects")
+        .select("id")
+        .eq("counts_for_avg", true);
+      const avgSubjectIds = new Set((avgSubjects || []).map((s: any) => s.id));
+
+      // Build student → group mapping
+      const studentToGroup: Record<string, string> = {};
+      (students || []).forEach((s: any) => {
+        studentToGroup[s.id] = s.group_id;
+      });
+
+      // Compute per-student averages (only subjects that count)
+      const studentAvgs: Record<string, { sum: number; count: number; groupId: string }> = {};
+      (allGrades || []).forEach((g: any) => {
+        if (!avgSubjectIds.has(g.subject_id)) return;
+        const groupId = studentToGroup[g.student_id];
+        if (!groupId) return;
+        if (!studentAvgs[g.student_id]) {
+          studentAvgs[g.student_id] = { sum: 0, count: 0, groupId };
+        }
+        studentAvgs[g.student_id].sum += g.score;
+        studentAvgs[g.student_id].count++;
+      });
+
+      // Aggregate per group
+      const groupAvgData: Record<string, { totalAvg: number; studentCount: number; atRisk: number }> = {};
+      Object.values(studentAvgs).forEach(({ sum, count, groupId }) => {
+        const avg = sum / count;
+        if (!groupAvgData[groupId]) {
+          groupAvgData[groupId] = { totalAvg: 0, studentCount: 0, atRisk: 0 };
+        }
+        groupAvgData[groupId].totalAvg += avg;
+        groupAvgData[groupId].studentCount++;
+        if (avg < 6) groupAvgData[groupId].atRisk++;
+      });
+
+      groupStats = groups.map((g: any) => {
+        const stats = groupAvgData[g.id];
+        return {
+          id: g.id,
+          grado: g.grade,
+          letra: g.letter,
+          alumnos: groupStudentCounts[g.id] || 0,
+          promedio: stats && stats.studentCount > 0
+            ? Math.round((stats.totalAvg / stats.studentCount) * 10) / 10
+            : null,
+          enRiesgo: stats?.atRisk || 0,
+        };
+      });
+    } else {
+      // No active period — just show student counts
+      groupStats = groups.map((g: any) => ({
+        id: g.id,
+        grado: g.grade,
+        letra: g.letter,
+        alumnos: groupStudentCounts[g.id] || 0,
+        promedio: null,
+        enRiesgo: 0,
+      }));
+    }
   }
 
   // Time ago helper
@@ -409,78 +510,22 @@ export default async function DashboardPage() {
       <Navbar userName={effectiveProfile.full_name} userRole={effectiveProfile.role}>
 
       <main className="page-content animate-fade-in">
-        {/* Header con periodo activo */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div>
+        {/* Header — Panel escolar (estilo SIGEFCP) */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
             <h1 className="text-xl font-extrabold text-slate-900">
-              Bienvenido, {effectiveProfile.full_name.split(" ")[0]}
+              Panel escolar
             </h1>
-            <p className="text-sm text-slate-400">
-              Ciclo escolar 2026-2027
-            </p>
+            {activePeriod && (
+              <span className="badge badge-mint">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                {activePeriod.name}
+              </span>
+            )}
           </div>
-          {activePeriod && (
-            <span className="badge badge-mint">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              {activePeriod.name}
-            </span>
-          )}
-        </div>
-
-        {/* Quick access — visible to all roles */}
-        <div className="mb-6 flex flex-wrap gap-3">
-          <Link
-            href="/horario"
-            className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-              <IconCalendar className="w-5 h-5 text-primary-600" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors duration-200">
-                Horario Escolar
-              </p>
-              <p className="text-[11px] text-slate-400">Ver horario semanal de clases</p>
-            </div>
-          </Link>
-          <Link
-            href="/directorio"
-            className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-              <IconUsers className="w-5 h-5 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-800 group-hover:text-orange-600 transition-colors duration-200">
-                Directorio
-              </p>
-              <p className="text-[11px] text-slate-400">Contactos del personal</p>
-            </div>
-          </Link>
-          {/* Servicios Escolares */}
-          <Link href="/servicios-escolares" className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group">
-            <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-              <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-800 group-hover:text-primary-600 transition-colors duration-200">Servicios Escolares</p>
-              <p className="text-[11px] text-slate-400">Constancias y documentos</p>
-            </div>
-          </Link>
-          {/* WiFi Docentes */}
-          <div className="card-interactive inline-flex items-center gap-3 px-5 py-3.5 group cursor-default">
-            <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-800">WiFi Docentes</p>
-              <p className="text-[11px] text-slate-400 font-mono">_IDV-DOCENTES · DVasco2026</p>
-            </div>
-          </div>
+          <p className="text-sm text-slate-400">
+            {new Date().toLocaleDateString("es-MX", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </p>
         </div>
 
 
@@ -677,173 +722,146 @@ export default async function DashboardPage() {
         {/* ════════════ ADMIN / VIEWER DASHBOARD ════════════ */}
         {dashboardView === "admin" && (
           <div className="space-y-6">
-            {/* ── Stat Cards ── */}
-            {(effectiveProfile.role === "admin" || (dashboardView === "admin" && effectiveProfile.role !== "viewer")) && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <Link
-                  href="/admin/alumnos"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                      <IconUsers className="w-5 h-5 text-primary-600" />
-                    </div>
-                    <span className="text-2xl font-extrabold text-primary-600">
-                      {totalStudents}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Alumnos
-                  </p>
-                  <p className="text-xs text-slate-400">activos</p>
+            {/* ── Accesos directos (estilo SIGEFCP) ── */}
+            <nav aria-label="Accesos directos" className="space-y-2.5">
+              {/* Principales: 2 acciones destacadas */}
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <Link href="/captura" className="group flex min-h-[72px] items-center gap-3 rounded-xl p-3.5 shadow-md bg-primary-600 text-white transition hover:brightness-110">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white/15">
+                    <IconPencil className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold leading-tight">Captura de calificaciones</span>
+                    <span className="block truncate text-[13px] text-white/85">{activePeriod ? `${activePeriod.name} abierto` : "Calificar por grupo y materia"}</span>
+                  </span>
+                  <svg className="w-5 h-5 shrink-0 opacity-70 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                 </Link>
-                <Link
-                  href="/admin/profesores"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-mint-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                      <IconTeacher className="w-5 h-5 text-mint-600" />
-                    </div>
-                    <span className="text-2xl font-extrabold text-primary-600">
-                      {totalTeachers}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Profesores
-                  </p>
-                  <p className="text-xs text-slate-400">registrados</p>
-                </Link>
-                <Link
-                  href="/admin/ciclo"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-accent-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
-                      <IconGroups className="w-5 h-5 text-accent-600" />
-                    </div>
-                    <span className="text-2xl font-extrabold text-accent-600">
-                      {groups.length}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Grupos
-                  </p>
-                  <p className="text-xs text-slate-400">ciclo actual</p>
-                </Link>
-                <Link
-                  href="/admin/materias"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                      <IconSubjects className="w-5 h-5 text-violet-600" />
-                    </div>
-                    <span className="text-2xl font-extrabold text-violet-600">
-                      {totalSubjects}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Materias
-                  </p>
-                  <p className="text-xs text-slate-400">registradas</p>
-                </Link>
-                <Link
-                  href="/captura"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-coral-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
-                      <IconPencil className="w-5 h-5 text-coral-600" />
-                    </div>
-                    <span className="text-lg font-bold text-coral-600">→</span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Captura
-                  </p>
-                  <p className="text-xs text-slate-400">ir a calificar</p>
-                </Link>
-                <Link
-                  href="/tareas"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
-                      <IconMail className="w-5 h-5 text-violet-600" />
-                    </div>
-                    <span className="text-lg font-bold text-violet-600">→</span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Tareas
-                  </p>
-                  <p className="text-xs text-slate-400">notificar padres</p>
-                </Link>
-                <Link
-                  href="/admin/auditoria"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                      <IconDocument className="w-5 h-5 text-slate-600" />
-                    </div>
-                    <span className="text-lg font-bold text-slate-600">→</span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Auditoría
-                  </p>
-                  <p className="text-xs text-slate-400">log de cambios</p>
-                </Link>
-                <Link
-                  href="/concentrados"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center group-hover:bg-teal-200 transition-colors">
-                      <IconBook className="w-5 h-5 text-teal-600" />
-                    </div>
-                    <span className="text-lg font-bold text-teal-600">→</span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Concentrados
-                  </p>
-                  <p className="text-xs text-slate-400">filtrar y descargar</p>
-                </Link>
-                <Link
-                  href="/avance"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                      <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                      </svg>
-                    </div>
-                    <span className="text-lg font-bold text-emerald-600">→</span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Avance
-                  </p>
-                  <p className="text-xs text-slate-400">captura por profesor</p>
-                </Link>
-                <Link
-                  href="/rendimiento"
-                  className="card-interactive p-5 group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-11 h-11 rounded-xl bg-rose-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
-                      <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
-                      </svg>
-                    </div>
-                    <span className="text-lg font-bold text-rose-600">→</span>
-                  </div>
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-primary-600 transition-colors duration-200">
-                    Rendimiento
-                  </p>
-                  <p className="text-xs text-slate-400">por grupo detallado</p>
+                <Link href="/rendimiento" className="group flex min-h-[72px] items-center gap-3 rounded-xl p-3.5 shadow-md bg-emerald-600 text-white transition hover:brightness-110">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-white/15">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" /></svg>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold leading-tight">Reportes</span>
+                    <span className="block truncate text-[13px] text-white/85">Rendimiento, riesgo y primeros lugares</span>
+                  </span>
+                  <svg className="w-5 h-5 shrink-0 opacity-70 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                 </Link>
               </div>
-            )}
+              {/* Secundarios: accesos compactos */}
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 2xl:grid-cols-6">
+                <Link href="/boletas" className="card-interactive flex min-h-[64px] items-center gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg sm:h-10 sm:w-10 text-orange-600 bg-orange-50">
+                    <IconDocument className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[13.5px] font-semibold leading-tight sm:text-sm">Boletas</span>
+                    <span className="hidden truncate text-xs text-slate-400 sm:block">Individual o por grupo</span>
+                  </span>
+                </Link>
+                <Link href="/concentrados" className="card-interactive flex min-h-[64px] items-center gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg sm:h-10 sm:w-10 text-teal-600 bg-teal-50">
+                    <IconBook className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[13.5px] font-semibold leading-tight sm:text-sm">Concentrados</span>
+                    <span className="hidden truncate text-xs text-slate-400 sm:block">Imprimir y descargar</span>
+                  </span>
+                </Link>
+                <Link href="/avance" className="card-interactive flex min-h-[64px] items-center gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg sm:h-10 sm:w-10 text-indigo-600 bg-indigo-50">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[13.5px] font-semibold leading-tight sm:text-sm">Avance</span>
+                    <span className="hidden truncate text-xs text-slate-400 sm:block">Captura por profesor</span>
+                  </span>
+                </Link>
+                <Link href="/admin/alumnos" className="card-interactive flex min-h-[64px] items-center gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg sm:h-10 sm:w-10 text-sky-600 bg-sky-50">
+                    <IconUsers className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[13.5px] font-semibold leading-tight sm:text-sm">Alumnos</span>
+                    <span className="hidden truncate text-xs text-slate-400 sm:block">Altas, bajas y cambios</span>
+                  </span>
+                </Link>
+                <Link href="/admin/grupos" className="card-interactive flex min-h-[64px] items-center gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg sm:h-10 sm:w-10 text-violet-600 bg-violet-50">
+                    <IconGroups className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[13.5px] font-semibold leading-tight sm:text-sm">Grupos</span>
+                    <span className="hidden truncate text-xs text-slate-400 sm:block">Organización escolar</span>
+                  </span>
+                </Link>
+                <Link href="/directorio" className="card-interactive flex min-h-[64px] items-center gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg sm:h-10 sm:w-10 text-amber-600 bg-amber-50">
+                    <IconUsers className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[13.5px] font-semibold leading-tight sm:text-sm">Directorio</span>
+                    <span className="hidden truncate text-xs text-slate-400 sm:block">Personal de la escuela</span>
+                  </span>
+                </Link>
+              </div>
+            </nav>
+
+            {/* ── Resumen escolar (cifras) ── */}
+            <section className="card p-4 sm:p-5">
+              <h2 className="flex items-center gap-2 text-base font-bold text-slate-800 mb-3">
+                <svg className="w-[18px] h-[18px] text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                Resumen escolar
+              </h2>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
+                <Link href="/admin/alumnos" className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-primary-300 hover:bg-primary-50/40">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-blue-600 bg-blue-50">
+                    <IconUsers className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="block text-2xl font-extrabold leading-none tabular-nums">{totalStudents}</span>
+                    <span className="mt-1 block text-xs font-medium leading-tight text-slate-500">Alumnos activos</span>
+                  </span>
+                </Link>
+                <Link href="/admin/grupos" className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-primary-300 hover:bg-primary-50/40">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-violet-600 bg-violet-50">
+                    <IconGroups className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="block text-2xl font-extrabold leading-none tabular-nums">{groups.length}</span>
+                    <span className="mt-1 block text-xs font-medium leading-tight text-slate-500">Grupos</span>
+                  </span>
+                </Link>
+                <Link href="/admin/materias" className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-primary-300 hover:bg-primary-50/40">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-sky-600 bg-sky-50">
+                    <IconSubjects className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="block text-2xl font-extrabold leading-none tabular-nums">{totalSubjects}</span>
+                    <span className="mt-1 block text-xs font-medium leading-tight text-slate-500">Materias</span>
+                  </span>
+                </Link>
+                <Link href="/admin/profesores" className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-primary-300 hover:bg-primary-50/40">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-emerald-600 bg-emerald-50">
+                    <IconTeacher className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="block text-2xl font-extrabold leading-none tabular-nums">{totalTeachers}</span>
+                    <span className="mt-1 block text-xs font-medium leading-tight text-slate-500">Profesores</span>
+                  </span>
+                </Link>
+                <Link href="/asignar" className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 transition hover:border-red-300 hover:bg-red-50/40">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-red-600 bg-red-50">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                  </span>
+                  <span>
+                    <span className="block text-2xl font-extrabold leading-none tabular-nums">{sinMaestroCount}</span>
+                    <span className="mt-1 block text-xs font-medium leading-tight text-slate-500">Sin maestro</span>
+                  </span>
+                </Link>
+              </div>
+            </section>
 
             {/* ── Progress bar ── */}
             {activePeriod && captureProgress.total > 0 && (
@@ -884,55 +902,14 @@ export default async function DashboardPage() {
             {/* ── Performance Stats ── */}
             <PerformanceStats />
 
-            {/* ── Group cards ── */}
-            <div>
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                Concentrado por grupo
+            {/* ── Grupos y rendimiento (tabla estilo SIGEFCP) ── */}
+            <section className="card p-4 sm:p-5">
+              <h2 className="flex items-center gap-2 text-base font-bold text-slate-800 mb-3">
+                <IconGroups className="w-[18px] h-[18px] text-primary-600" />
+                Grupos y rendimiento
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {groups.map((g: any) => {
-                  const count = groupStudentCounts[g.id] || 0;
-                  const colors = GRADE_COLORS[g.grade as number] || GRADE_COLORS[1];
-                  return (
-                    <div
-                      key={g.id}
-                      className={`card overflow-hidden border ${colors.border} hover:shadow-md transition-all group`}
-                    >
-                      <div className={`${colors.header} px-3 py-2`}>
-                        <p className="text-lg font-bold text-white text-center">
-                          {g.grade}° {g.letter}
-                        </p>
-                      </div>
-                      <div className="p-3 text-center">
-                        <p className="text-xs text-slate-500 mb-2">
-                          {count} alumno{count !== 1 ? "s" : ""}
-                        </p>
-                        <div className="flex flex-col gap-1">
-                          <Link
-                            href="/concentrados"
-                            className={`text-[11px] font-medium px-1.5 py-1 rounded-md text-center ${colors.badge} hover:opacity-80 transition-opacity`}
-                          >
-                            Concentrado
-                          </Link>
-                          <Link
-                            href={`/boleta/${g.id}`}
-                            className="text-[11px] font-medium px-1.5 py-1 rounded-md text-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                          >
-                            Boleta
-                          </Link>
-                          <Link
-                            href={`/lista/${g.id}`}
-                            className="text-[11px] font-medium px-1.5 py-1 rounded-md text-center bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                          >
-                            Lista
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+              <TablaGrupos grupos={groupStats} />
+            </section>
 
             {/* ── Recent activity ── */}
             {recentActivity.length > 0 && (

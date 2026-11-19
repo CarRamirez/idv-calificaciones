@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Tutorial from "@/components/Tutorial";
 import Sidebar from "@/components/Sidebar";
+import Buscador from "@/components/Buscador";
 import { useTheme, SKINS, SKIN_LABELS, SKIN_DOT, type ThemeMode, type Skin } from "@/components/ThemeProvider";
 import { Menu } from "lucide-react";
 
@@ -90,12 +91,6 @@ export default function Navbar({ userName, userRole, children }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [userDropdown, setUserDropdown] = useState(false);
   const [permissions, setPermissions] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; type: string; detail: string; href: string }>>([]);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState("");
   const [weather, setWeather] = useState<{ temp: number; desc: string; icon: string } | null>(null);
   const [showTimeout, setShowTimeout] = useState(false);
@@ -103,12 +98,10 @@ export default function Navbar({ userName, userRole, children }: Props) {
   const [onlineCount, setOnlineCount] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [onlineDropdown, setOnlineDropdown] = useState(false);
-  const [themeDropdown, setThemeDropdown] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const sessionExpiry = useRef(Date.now() + SESSION_DURATION);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const onlineRef = useRef<HTMLDivElement>(null);
-  const themeRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = ADMIN_ROLES.includes(userRole);
 
@@ -206,7 +199,6 @@ export default function Navbar({ userName, userRole, children }: Props) {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setUserDropdown(false);
       if (onlineRef.current && !onlineRef.current.contains(e.target as Node)) setOnlineDropdown(false);
-      if (themeRef.current && !themeRef.current.contains(e.target as Node)) setThemeDropdown(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -227,33 +219,6 @@ export default function Navbar({ userName, userRole, children }: Props) {
     if (code <= 82) return { desc: "Aguacero", icon: "🌧️" };
     if (code <= 86) return { desc: "Nevada", icon: "❄️" };
     return { desc: "Tormenta", icon: "⛈️" };
-  }
-
-  useEffect(() => {
-    if (searchQuery.trim().length < 2) { setSearchResults([]); setSearchLoading(false); return; }
-    setSearchLoading(true);
-    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        const data = await res.json();
-        setSearchResults(data.results || []);
-      } catch { setSearchResults([]); }
-      finally { setSearchLoading(false); }
-    }, 150);
-    return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
-  }, [searchQuery]);
-
-  useEffect(() => {
-    function h(e: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
-    }
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
-  }, []);
-
-  function handleSearchSelect(href: string) {
-    setSearchOpen(false); setSearchQuery(""); setSearchResults([]); router.push(href);
   }
 
   const firstName = userName.split(" ")[0];
@@ -377,38 +342,9 @@ export default function Navbar({ userName, userRole, children }: Props) {
               </Link>
             </div>
 
-            {/* Center: search */}
-            <div className="relative flex-1 max-w-md" ref={searchRef}>
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:shadow-glow focus-within:bg-white focus-within:border-primary-300 transition-all duration-200">
-                <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input type="text" placeholder="Buscar alumno o profesor..." value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
-                  onFocus={() => setSearchOpen(true)}
-                  className="bg-transparent border-none outline-none text-xs text-slate-700 placeholder-slate-400 ml-2 w-full"
-                />
-                {searchLoading && <div className="w-3 h-3 border-2 border-primary-400 border-t-transparent rounded-full animate-spin ml-1" />}
-              </div>
-              {searchOpen && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-float border border-slate-200 py-2 z-50 max-h-80 overflow-y-auto animate-slide-down">
-                  {searchResults.map((r) => (
-                    <button key={`${r.type}-${r.id}`} onClick={() => handleSearchSelect(r.href)}
-                      className="w-full text-left px-3 py-2.5 hover:bg-slate-50 flex items-center gap-3 transition-colors rounded-lg mx-1" style={{ width: "calc(100% - 8px)" }}>
-                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${r.type === "student" ? "bg-primary-100 text-primary-600" : "bg-mint-100 text-mint-600"}`}>
-                        {r.name.charAt(0)}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-slate-900 truncate">{r.name}</p>
-                        <p className="text-[10px] text-slate-400">{r.type === "student" ? "Alumno" : "Profesor"} · {r.detail}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {searchOpen && searchQuery.trim().length >= 2 && !searchLoading && searchResults.length === 0 && (
-                <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-float border border-slate-200 py-4 z-50 text-center text-xs text-slate-400 animate-slide-down">Sin resultados</div>
-              )}
+            {/* Center: search — client-side fast search like SIGEFCP */}
+            <div className="flex-1 max-w-md">
+              <Buscador />
             </div>
 
             {/* Right: time/weather/online + theme + user */}
@@ -500,105 +436,14 @@ export default function Navbar({ userName, userRole, children }: Props) {
                 )}
               </div>
 
-              {/* Theme switcher */}
-              <div className="relative" ref={themeRef}>
-                <button
-                  onClick={() => setThemeDropdown(!themeDropdown)}
-                  className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg transition duration-150"
-                  title="Personalizar tema"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
-                  </svg>
-                </button>
-                {themeDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-float border border-slate-200 py-3 z-50 animate-slide-down">
-                    {/* Mode selector */}
-                    <div className="px-3 mb-2">
-                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2">Modo</p>
-                      <div className="flex gap-1">
-                        {(["light", "dark", "auto"] as ThemeMode[]).map((m) => (
-                          <button
-                            key={m}
-                            onClick={() => setMode(m)}
-                            className={`flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all duration-200 ${
-                              mode === m
-                                ? "bg-slate-100 text-slate-900 ring-1 ring-slate-200"
-                                : "text-slate-500 hover:bg-slate-50"
-                            }`}
-                          >
-                            <span className="text-sm">{MODE_ICONS[m]}</span>
-                            <span>{MODE_LABELS[m]}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="border-t border-slate-200 my-2" />
-                    {/* Color skin */}
-                    <div className="px-3">
-                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] mb-2">Color</p>
-                      <div className="space-y-2">
-                        {(["Clásicos", "Metálicos", "Llamativos"] as const).map((grupo) => {
-                          const skinsGrupo = SKINS.filter(s => s.grupo === grupo);
-                          if (!skinsGrupo.length) return null;
-                          return (
-                            <div key={grupo}>
-                              <p className="text-[10px] text-slate-400 mb-1">{grupo}</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {skinsGrupo.map((s) => (
-                                  <button
-                                    key={s.id}
-                                    onClick={() => setColor(s.id)}
-                                    title={s.nombre}
-                                    className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
-                                      color === s.id ? "scale-110 shadow-sm" : "hover:scale-105"
-                                    }`}
-                                    style={{
-                                      background: s.color,
-                                      borderColor: color === s.id ? s.color : "transparent",
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className="border-t border-slate-200 my-2" />
-                    {/* Glass toggle */}
-                    <div className="px-3">
-                      <label className="flex items-center justify-between cursor-pointer group">
-                        <div>
-                          <p className="text-xs font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Estilo vidrio</p>
-                          <p className="text-[10px] text-slate-400 leading-tight">Paneles translúcidos</p>
-                        </div>
-                        <button
-                          role="switch"
-                          aria-checked={vidrio}
-                          onClick={() => setVidrio(!vidrio)}
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${
-                            vidrio ? "bg-green-500" : "bg-slate-200"
-                          }`}
-                        >
-                          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                            vidrio ? "translate-x-[18px]" : "translate-x-[3px]"
-                          }`} />
-                        </button>
-                      </label>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* User dropdown */}
-              <div className="relative pl-3 border-l border-slate-200" ref={dropdownRef}>
-                <button onClick={() => setUserDropdown(!userDropdown)} className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-50 transition-all duration-200">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white bg-marca">
+              {/* User dropdown — unified like SIGEFCP MenuUsuario */}
+              <div className="relative pl-3 border-l border-slate-200 dark:border-slate-700" ref={dropdownRef}>
+                <button onClick={() => setUserDropdown(!userDropdown)} className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white bg-marca">
                     {firstName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-left hidden md:block">
-                    <p className="text-xs font-semibold text-slate-800 leading-tight">{firstName}</p>
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-tight">{firstName}</p>
                     <p className="text-[10px] text-slate-400 leading-tight">{ROLE_LABELS[userRole] || userRole}</p>
                   </div>
                   <svg className={`w-3 h-3 text-slate-400 transition-transform duration-200 hidden md:block ${userDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,28 +451,107 @@ export default function Navbar({ userName, userRole, children }: Props) {
                   </svg>
                 </button>
                 {userDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-float border border-slate-200 py-2 z-50 animate-slide-down">
-                    <div className="px-4 py-3 border-b border-slate-200">
-                      <p className="text-sm font-semibold text-slate-900">{userName}</p>
+                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-xl shadow-float border border-slate-200 dark:border-slate-700 py-0 z-50 animate-slide-down overflow-hidden">
+                    {/* Header */}
+                    <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{userName}</p>
                       <span className={`inline-flex mt-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold ${ROLE_COLORS[userRole] || "bg-slate-100 text-slate-600"}`}>
                         {ROLE_LABELS[userRole] || userRole}
                       </span>
                     </div>
-                    {userId && (
-                      <Link href={`/perfil/${userId}`} onClick={() => setUserDropdown(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" /></svg>
-                        Mi perfil
+                    <div className="max-h-[70vh] overflow-y-auto p-2">
+                      {/* Links */}
+                      {userId && (
+                        <Link href={`/perfil/${userId}`} onClick={() => setUserDropdown(false)} className="flex min-h-[40px] items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" /></svg>
+                          Mi perfil
+                        </Link>
+                      )}
+                      <Link href="/aviso-privacidad" onClick={() => setUserDropdown(false)} className="flex min-h-[40px] items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+                        Aviso de privacidad
                       </Link>
-                    )}
-                    <button onClick={() => { setShowTutorial(true); setUserDropdown(false); }} className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>
-                      Tutorial
-                    </button>
-                    <div className="border-t border-slate-200 my-1" />
-                    <button onClick={handleLogout} className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-coral-600 hover:bg-coral-50 transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
-                      Cerrar sesión
-                    </button>
+                      <button onClick={() => { setShowTutorial(true); setUserDropdown(false); }} className="flex min-h-[40px] items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>
+                        Tutorial
+                      </button>
+
+                      {/* Apariencia section */}
+                      <p className="mt-3 flex items-center gap-1.5 px-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" /></svg>
+                        Apariencia
+                      </p>
+                      {/* Mode selector */}
+                      <div className="mx-1 mt-1.5 grid grid-cols-3 gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+                        {(["light", "dark", "auto"] as ThemeMode[]).map((m) => (
+                          <button
+                            key={m}
+                            onClick={() => setMode(m)}
+                            className={`flex min-h-[34px] items-center justify-center gap-1 rounded-md text-xs font-semibold transition-all ${
+                              mode === m
+                                ? "bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-slate-100"
+                                : "text-slate-500 dark:text-slate-400"
+                            }`}
+                          >
+                            <span className="text-sm">{MODE_ICONS[m]}</span>
+                            <span>{MODE_LABELS[m]}</span>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Glass toggle */}
+                      <label className="mx-1 mt-2 flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-slate-700 dark:text-slate-200">Estilo vidrio</span>
+                          <span className="block text-[10px] text-slate-400 leading-tight">Paneles translúcidos</span>
+                        </span>
+                        <button
+                          role="switch"
+                          aria-checked={vidrio}
+                          onClick={() => setVidrio(!vidrio)}
+                          className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                            vidrio ? "bg-green-500" : "bg-slate-300 dark:bg-slate-600"
+                          }`}
+                        >
+                          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                            vidrio ? "translate-x-[18px]" : "translate-x-[3px]"
+                          }`} />
+                        </button>
+                      </label>
+                      {/* Color skins */}
+                      {(["Clásicos", "Metálicos", "Llamativos"] as const).map((grupo) => {
+                        const skinsGrupo = SKINS.filter(s => s.grupo === grupo);
+                        if (!skinsGrupo.length) return null;
+                        return (
+                          <div key={grupo} className="mt-2 px-2.5">
+                            <p className="text-[10px] font-semibold text-slate-400 mb-1">{grupo}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {skinsGrupo.map((s) => (
+                                <button
+                                  key={s.id}
+                                  onClick={() => setColor(s.id)}
+                                  title={s.nombre}
+                                  className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
+                                    color === s.id ? "scale-110 shadow-sm ring-2 ring-slate-400 ring-offset-1" : "hover:scale-105"
+                                  }`}
+                                  style={{
+                                    background: s.color,
+                                    borderColor: color === s.id ? s.color : "transparent",
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Logout */}
+                      <div className="mt-3 border-t border-slate-200 dark:border-slate-800 pt-2">
+                        <button onClick={handleLogout} className="flex min-h-[40px] items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 text-sm font-medium text-coral-600 hover:bg-coral-50 dark:hover:bg-red-500/10 transition-colors">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                          Cerrar sesión
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
