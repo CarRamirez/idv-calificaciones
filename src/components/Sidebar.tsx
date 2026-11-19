@@ -18,6 +18,7 @@ import {
   Layers,
   BookMarked,
   Shield,
+  ShieldCheck,
   Calendar,
   Clock,
   Contact,
@@ -101,6 +102,7 @@ function buildSecciones(userRole: string): NavSection[] {
         { label: "Roles", href: "/admin/roles", icon: Shield, perm: "admin_roles" },
         { label: "Sesiones", href: "/admin/sesiones", icon: Clock, perm: "admin_sesiones" },
         { label: "Auditoría", href: "/admin/auditoria", icon: ClipboardList, perm: "admin_sesiones" },
+        { label: "Permisos", href: "/admin/permisos", icon: ShieldCheck },
       ],
     });
   } else {

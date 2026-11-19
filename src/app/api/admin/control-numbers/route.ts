@@ -8,11 +8,9 @@ export const dynamic = "force-dynamic";
  * GET — returns students with their control numbers
  * POST — generates control numbers for all students that don't have one
  *
- * Format: IDV-GGLL-NNNN
- *   IDV = Instituto Don Vasco prefix
- *   GG  = grade (01, 02, 03)
- *   LL  = letter (A, B, C…)
- *   NNNN = sequential per group, zero-padded
+ * Format: YYYYNNN
+ *   YYYY = current year
+ *   NNN  = sequential, zero-padded (001, 002, … 999)
  */
 export async function GET() {
   const supabase = createServerSupabaseClient();
@@ -56,77 +54,62 @@ export async function POST() {
   }
 
   const admin = createAdminClient();
+  const year = new Date().getFullYear();
+  const prefix = String(year);
 
-  // First check if the column exists by trying a select
-  const { error: colCheck } = await admin
+  // Find the highest existing number for this year
+  const { data: maxRow } = await admin
     .from("students")
     .select("control_number")
+    .like("control_number", `${prefix}%`)
+    .order("control_number", { ascending: false })
     .limit(1);
 
-  if (colCheck) {
-    // Column doesn't exist, need to add it via raw SQL
-    // We'll use the Supabase admin client's rpc or a direct query
-    // Since we can't run raw SQL from the JS client easily,
-    // let's try a different approach - use rpc
-    const { error: alterErr } = await admin.rpc("exec_sql", {
-      query: "ALTER TABLE students ADD COLUMN IF NOT EXISTS control_number TEXT;",
-    });
-    // If rpc doesn't exist, try alternative
-    if (alterErr) {
-      // The column might already exist or we need a migration
-      // Let's try to continue anyway - the POST body handles both cases
-      console.warn("Could not add column via rpc:", alterErr.message);
-    }
+  let nextSeq = 1;
+  if (maxRow && maxRow.length > 0 && maxRow[0].control_number) {
+    const numPart = maxRow[0].control_number.replace(prefix, "");
+    nextSeq = parseInt(numPart, 10) + 1;
   }
 
-  // Fetch all groups and students
-  const { data: groups } = await admin
-    .from("groups")
-    .select("id, grade, letter")
-    .order("grade")
-    .order("letter");
-  if (!groups) return NextResponse.json({ error: "No se pudieron cargar grupos" }, { status: 500 });
-
+  // Fetch students without control number, sorted by grade > letter > list_num > name
   const { data: students } = await admin
     .from("students")
-    .select("id, full_name, group_id, control_number, list_num, status")
+    .select("id, full_name, group_id, list_num, status, control_number, groups!inner(grade, letter)")
+    .is("control_number", null)
+    .eq("status", "activo")
     .order("full_name");
-  if (!students) return NextResponse.json({ error: "No se pudieron cargar alumnos" }, { status: 500 });
 
-  const groupMap = new Map(groups.map((g) => [g.id, g]));
-  let assigned = 0;
-
-  // Group students by group_id
-  const byGroup = new Map<number, typeof students>();
-  for (const s of students) {
-    if (!byGroup.has(s.group_id)) byGroup.set(s.group_id, []);
-    byGroup.get(s.group_id)!.push(s);
+  if (!students || students.length === 0) {
+    return NextResponse.json({
+      message: "Todos los alumnos activos ya tienen número de control",
+      assigned: 0,
+    });
   }
 
-  // Generate control numbers per group
-  for (const [groupId, groupStudents] of Array.from(byGroup)) {
-    const g = groupMap.get(groupId);
-    if (!g) continue;
+  // Sort by grade, letter, list_num, name
+  const sorted = [...students].sort((a: any, b: any) => {
+    const ga = a.groups?.grade ?? 99;
+    const gb = b.groups?.grade ?? 99;
+    if (ga !== gb) return ga - gb;
+    const la = a.groups?.letter ?? "Z";
+    const lb = b.groups?.letter ?? "Z";
+    if (la !== lb) return la.localeCompare(lb);
+    const na = a.list_num || 999;
+    const nb = b.list_num || 999;
+    if (na !== nb) return na - nb;
+    return a.full_name.localeCompare(b.full_name);
+  });
 
-    // Sort by list_num then by name
-    groupStudents.sort((a: any, b: any) => (a.list_num || 999) - (b.list_num || 999) || a.full_name.localeCompare(b.full_name));
-
-    let seq = 1;
-    for (const s of groupStudents) {
-      if (s.control_number) {
-        seq++;
-        continue;
-      }
-      const grade = String(g.grade).padStart(2, "0");
-      const cn = `IDV-${grade}${g.letter}-${String(seq).padStart(4, "0")}`;
-
-      const { error } = await admin
-        .from("students")
-        .update({ control_number: cn })
-        .eq("id", s.id);
-
-      if (!error) assigned++;
-      seq++;
+  let assigned = 0;
+  for (const s of sorted) {
+    const cn = `${prefix}${String(nextSeq).padStart(3, "0")}`;
+    const { error } = await admin
+      .from("students")
+      .update({ control_number: cn })
+      .eq("id", s.id);
+    if (!error) {
+      assigned++;
+      nextSeq++;
     }
   }
 

@@ -33,7 +33,7 @@ export default function BoletaSelector({ groups }: { groups: Group[] }) {
       .from("students")
       .select("id, full_name, list_num")
       .eq("group_id", grupo)
-      .eq("status", "active")
+      .eq("status", "activo")
       .order("full_name")
       .then(({ data }) => {
         setStudents(data || []);
