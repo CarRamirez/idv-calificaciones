@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getEffectiveProfile } from "@/lib/impersonation";
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 
 export async function POST(req: NextRequest) {
   const supabase = createServerSupabaseClient();

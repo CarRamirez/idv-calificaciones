@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 
 export async function GET() {
   try {
@@ -46,7 +46,7 @@ export async function GET() {
     const { data: teachers } = await admin
       .from("profiles")
       .select("id, full_name, email")
-      .eq("role", "teacher")
+      .eq("role", "visor")
       .order("full_name");
 
     // 2. Get all teacher assignments (teacher -> group -> subject)

@@ -37,7 +37,7 @@ export async function GET() {
   if (!profile) return NextResponse.json({ error: "No profile" }, { status: 401 });
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  const isAdmin = effectiveProfile.role === "admin" || effectiveProfile.role === "directora_anita" || effectiveProfile.role === "viewer";
+  const isAdmin = ["superadmin", "admin"].includes(effectiveProfile.role) || effectiveProfile.role === "direccion" || effectiveProfile.role === "visor";
 
   if (!isAdmin) return NextResponse.json({ error: "No access" }, { status: 403 });
 

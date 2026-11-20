@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 
 export async function GET() {
   try {

@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     .eq("id", user.id)
     .single();
 
-  const ADMIN_ROLES = ["admin", "directora_anita"];
+  const ADMIN_ROLES = ["superadmin", "admin"];
   const isAdmin = profile && ADMIN_ROLES.includes(profile.role);
 
   const formData = await request.formData();

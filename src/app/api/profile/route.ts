@@ -48,7 +48,7 @@ export async function PUT(req: Request) {
 
   // Allow if: admin, or editing own profile, or has admin_profesores permission
   let allowed = false;
-  if (callerProfile.role === "admin" || user.id === id) {
+  if (["superadmin", "admin"].includes(callerProfile.role) || user.id === id) {
     allowed = true;
   } else {
     // Check if custom role has admin_profesores permission
@@ -71,7 +71,7 @@ export async function PUT(req: Request) {
       .select("role")
       .eq("id", id)
       .single();
-    if (targetProfile?.role === "admin") {
+    if (["superadmin", "admin"].includes(targetProfile?.role ?? "")) {
       return NextResponse.json({ error: "No puedes editar administradores" }, { status: 403 });
     }
   }

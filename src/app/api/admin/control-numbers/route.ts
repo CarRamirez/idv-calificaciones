@@ -24,7 +24,7 @@ export async function GET() {
     .select("role")
     .eq("id", user.id)
     .single();
-  if (!profile || !["admin", "directora_anita"].includes(profile.role)) {
+  if (!profile || !["superadmin", "admin"].includes(profile.role)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
@@ -49,7 +49,7 @@ export async function POST() {
     .select("role")
     .eq("id", user.id)
     .single();
-  if (!profile || !["admin", "directora_anita"].includes(profile.role)) {
+  if (!profile || !["superadmin", "admin"].includes(profile.role)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 

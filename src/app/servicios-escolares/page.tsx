@@ -18,7 +18,7 @@ export default async function ServiciosEscolaresPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  const ADMIN_ROLES = ["admin", "directora_anita"];
+  const ADMIN_ROLES = ["superadmin", "admin"];
   if (!ADMIN_ROLES.includes(effectiveProfile.role)) {
     redirect("/dashboard");
   }

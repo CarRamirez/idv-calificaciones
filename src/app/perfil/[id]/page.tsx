@@ -41,16 +41,16 @@ export default async function PerfilPage({ params }: { params: { id: string } })
     .single();
 
   const roleLabel = roleInfo?.display_name || (
-    profile.role === "admin" ? "Administrador" :
-    profile.role === "teacher" ? "Profesor" :
-    profile.role === "viewer" ? "Consulta" : profile.role
+    ["superadmin", "admin"].includes(profile.role) ? "Administrador" :
+    profile.role === "visor" ? "Profesor" :
+    profile.role === "visor" ? "Consulta" : profile.role
   );
 
   // Determine permissions
   const isStudent = false; // Profiles are never students in this system
   // Can edit: admin, own profile, or has admin_profesores
   let canEditContact = false;
-  if (myProfile.role === "admin" || user.id === params.id) {
+  if (["superadmin", "admin"].includes(myProfile.role) || user.id === params.id) {
     canEditContact = true;
   } else {
     const { data: callerRole } = await admin
@@ -63,13 +63,13 @@ export default async function PerfilPage({ params }: { params: { id: string } })
     }
   }
   // Don't allow non-admins to edit admin contact
-  if (canEditContact && myProfile.role !== "admin" && profile.role === "admin") {
+  if (canEditContact && myProfile.role !== "admin" && ["superadmin", "admin"].includes(profile.role)) {
     canEditContact = false;
   }
 
   // Admin can impersonate other users (not themselves)
   const isOwnProfile = user.id === params.id;
-  const canImpersonate = myProfile.role === "admin" && user.id !== params.id;
+  const canImpersonate = ["superadmin", "admin"].includes(myProfile.role) && user.id !== params.id;
 
   // Fetch teacher assignments
   const { data: assignments } = await admin
@@ -141,8 +141,8 @@ export default async function PerfilPage({ params }: { params: { id: string } })
               <h1 className="text-xl font-extrabold text-slate-900">{profile.full_name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                  profile.role === "admin" ? "bg-purple-100 text-purple-700" :
-                  profile.role === "teacher" ? "bg-blue-100 text-blue-700" :
+                  ["superadmin", "admin"].includes(profile.role) ? "bg-purple-100 text-purple-700" :
+                  profile.role === "visor" ? "bg-blue-100 text-blue-700" :
                   "bg-amber-100 text-amber-700"
                 }`}>
                   {roleLabel}
@@ -174,7 +174,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
         />
 
         {/* Avatar upload — own profile or admin */}
-        {(isOwnProfile || myProfile.role === "admin") && (
+        {(isOwnProfile || ["superadmin", "admin"].includes(myProfile.role)) && (
           <ProfileAvatarSection
             profileId={profile.id}
             currentUrl={profile.avatar_url}

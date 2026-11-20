@@ -22,7 +22,7 @@ async function verifyTeacherAdmin() {
 
   let effectiveRole = profile.role;
 
-  if (impersonateAs && impersonateAdminId === user.id && profile.role === "admin") {
+  if (impersonateAs && impersonateAdminId === user.id && ["superadmin", "admin"].includes(profile.role)) {
     // Admin is impersonating someone — use target user's role
     const admin = createAdminClient();
     const { data: targetProfile } = await admin
@@ -35,9 +35,9 @@ async function verifyTeacherAdmin() {
     }
   }
 
-  if (effectiveRole === "admin") return { role: "admin", isAdmin: true };
+  if (["superadmin", "admin"].includes(effectiveRole)) return { role: "admin", isAdmin: true };
   // Builtin roles with admin_profesores permission
-  if (effectiveRole === "directora_anita") return { role: effectiveRole, isAdmin: false };
+  if (effectiveRole === "direccion") return { role: effectiveRole, isAdmin: false };
   // Check if custom role has admin_profesores permission
   const adminClient = createAdminClient();
   const { data: roleData } = await adminClient
@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate role — non-admin callers can only create teachers
-  const validRoles = ["admin", "teacher", "directora_anita", "viewer"];
-  let finalRole = validRoles.includes(role) ? role : "teacher";
-  if (!caller.isAdmin && finalRole === "admin") {
-    finalRole = "teacher";
+  const validRoles = ["superadmin", "admin", "direccion", "visor"];
+  let finalRole = validRoles.includes(role) ? role : "visor";
+  if (!caller.isAdmin && ["superadmin", "admin"].includes(finalRole)) {
+    finalRole = "visor";
   }
 
   const admin = createAdminClient();
@@ -124,7 +124,7 @@ export async function PUT(req: NextRequest) {
       .select("role")
       .eq("id", id)
       .single();
-    if (targetProfile?.role === "admin") {
+    if (["superadmin", "admin"].includes(targetProfile?.role ?? "")) {
       return NextResponse.json(
         { error: "No tienes permiso para editar administradores" },
         { status: 403 }
@@ -139,8 +139,8 @@ export async function PUT(req: NextRequest) {
   if (label !== undefined) updates.label = label.trim() || null;
   if (role !== undefined) {
     // Non-admin callers cannot assign admin role
-    if (!caller.isAdmin && role === "admin") {
-      updates.role = "teacher";
+    if (!caller.isAdmin && ["superadmin", "admin"].includes(role)) {
+      updates.role = "visor";
     } else {
       updates.role = role;
     }
@@ -190,7 +190,7 @@ export async function DELETE(req: NextRequest) {
       .select("role")
       .eq("id", id)
       .single();
-    if (targetProfile?.role === "admin") {
+    if (["superadmin", "admin"].includes(targetProfile?.role ?? "")) {
       return NextResponse.json(
         { error: "No tienes permiso para eliminar administradores" },
         { status: 403 }

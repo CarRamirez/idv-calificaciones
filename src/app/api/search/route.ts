@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   const results: Array<{
     id: string;
     name: string;
-    type: "student" | "teacher";
+    type: "student" | "visor";
     detail: string;
     href: string;
   }> = [];
@@ -59,11 +59,11 @@ export async function GET(req: NextRequest) {
     .limit(8);
 
   for (const p of profiles || []) {
-    const roleLabel = p.role === "admin" ? "Admin" : p.role === "teacher" ? "Profesor" : p.label || p.role;
+    const roleLabel = ["superadmin", "admin"].includes(p.role) ? "Admin" : p.role === "visor" ? "Profesor" : p.label || p.role;
     results.push({
       id: p.id,
       name: p.full_name,
-      type: "teacher",
+      type: "visor",
       detail: roleLabel,
       href: `/perfil/${p.id}`,
     });

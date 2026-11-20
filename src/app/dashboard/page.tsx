@@ -123,13 +123,13 @@ export default async function DashboardPage() {
   const { effectiveProfile, impersonatedUserId } = await getEffectiveProfile(user.id, profile);
 
   // ──── Determine dashboard view based on permissions ────
-  let dashboardView: "teacher" | "admin" | "none" = "none";
+  let dashboardView: "visor" | "admin" | "none" = "none";
 
-  if (effectiveProfile.role === "admin") {
+  if (["superadmin", "admin"].includes(effectiveProfile.role)) {
     dashboardView = "admin";
-  } else if (effectiveProfile.role === "teacher") {
-    dashboardView = "teacher";
-  } else if (effectiveProfile.role === "viewer") {
+  } else if (effectiveProfile.role === "visor") {
+    dashboardView = "visor";
+  } else if (effectiveProfile.role === "visor") {
     dashboardView = "admin"; // viewers see the admin/overview dashboard
   } else {
     // Custom role — fetch permissions from roles table (use admin client to bypass RLS)
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
     if (perms.some(p => p.startsWith("admin_") || p === "periodos" || p === "dashboard")) {
       dashboardView = "admin";
     } else if (perms.includes("captura") || perms.includes("calificaciones")) {
-      dashboardView = "teacher";
+      dashboardView = "visor";
     }
   }
 
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
   let teacherGroupIds: string[] = [];
   const teacherStudentCounts: Record<string, number> = {};
 
-  if (dashboardView === "teacher") {
+  if (dashboardView === "visor") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("id, subjects ( id, name, short_name ), groups ( id, grade, letter )")
@@ -212,7 +212,7 @@ export default async function DashboardPage() {
   // Per-group-subject progress: { "groupId:subjectId": { entered, total } }
   const teacherSubjectProgress: Record<string, { entered: number; total: number }> = {};
 
-  if (dashboardView === "teacher" && activePeriod && teacherAssignments.length > 0) {
+  if (dashboardView === "visor" && activePeriod && teacherAssignments.length > 0) {
     // Total expected = sum of students per group for each assignment
     teacherAssignments.forEach((a: any) => {
       const count = teacherStudentCounts[a.groups.id] || 0;
@@ -304,7 +304,7 @@ export default async function DashboardPage() {
     const { data: teachers } = await supabase
       .from("profiles")
       .select("id")
-      .eq("role", "teacher");
+      .eq("role", "visor");
     totalTeachers = teachers?.length || 0;
 
     // Subject count
@@ -537,7 +537,7 @@ export default async function DashboardPage() {
         <div>
 
         {/* ════════════ TEACHER DASHBOARD ════════════ */}
-        {dashboardView === "teacher" && (
+        {dashboardView === "visor" && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div className="stat-card stat-card-blue p-5">

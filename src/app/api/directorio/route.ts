@@ -19,7 +19,7 @@ export async function GET() {
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
 
-  const ALLOWED_ROLES = ["admin", "directora_anita", "teacher", "viewer"];
+  const ALLOWED_ROLES = ["superadmin", "admin", "direccion", "visor"];
   if (!ALLOWED_ROLES.includes(effectiveProfile.role)) {
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
   }

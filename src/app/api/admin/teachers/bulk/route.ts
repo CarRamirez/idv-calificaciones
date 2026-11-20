@@ -12,7 +12,7 @@ async function verifyTeacherAdmin() {
     .eq("id", user.id)
     .single();
   if (!profile) return false;
-  if (profile.role === "admin") return true;
+  if (["superadmin", "admin"].includes(profile.role)) return true;
   const { data: roleData } = await supabase
     .from("roles")
     .select("permissions")
@@ -46,10 +46,10 @@ export async function POST(req: NextRequest) {
     const email = (t.email || "").trim().toLowerCase();
     const full_name = (t.full_name || "").trim().toUpperCase();
     const password = (t.password || "").trim();
-    const VALID_ROLES = ["teacher", "admin", "directora_anita", "viewer"];
+    const VALID_ROLES = ["superadmin", "admin", "direccion", "visor"];
     const role = VALID_ROLES.includes((t.role || "").trim().toLowerCase())
       ? (t.role || "").trim().toLowerCase()
-      : "teacher";
+      : "visor";
     const label = (t.label || "").trim();
 
     if (!email || !full_name || !password) {

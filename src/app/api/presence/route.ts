@@ -34,7 +34,7 @@ export async function GET() {
     .eq("id", user.id)
     .single();
 
-  const ADMIN_ROLES = ["admin", "directora_anita"];
+  const ADMIN_ROLES = ["superadmin", "admin"];
   const isAdmin = callerProfile && ADMIN_ROLES.includes(callerProfile.role);
 
   if (isAdmin) {

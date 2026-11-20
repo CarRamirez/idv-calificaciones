@@ -13,7 +13,7 @@ async function verifyAdmin() {
     .eq("id", user.id)
     .single();
   if (!profile) return null;
-  if (profile.role === "admin") return profile;
+  if (["superadmin", "admin"].includes(profile.role)) return profile;
   // Check custom role permissions
   const admin = createAdminClient();
   const { data: roleData } = await admin

@@ -20,7 +20,7 @@ export default async function PeriodosPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role !== "admin" && effectiveProfile.role !== "directora_anita") {
+  if (effectiveProfile.role !== "admin" && effectiveProfile.role !== "direccion") {
     redirect("/dashboard");
   }
 

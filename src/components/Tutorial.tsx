@@ -140,9 +140,9 @@ export default function Tutorial({ isOpen, onClose, userRole }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps =
-    userRole === "admin"
+    ["superadmin", "admin"].includes(userRole)
       ? ADMIN_STEPS
-      : userRole === "directora_anita"
+      : userRole === "direccion"
       ? ADMIN_STEPS
       : TEACHER_STEPS;
 

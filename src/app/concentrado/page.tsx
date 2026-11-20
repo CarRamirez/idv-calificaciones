@@ -19,7 +19,7 @@ export default async function ConcentradoIndexPage() {
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
 
   // Cargar grupos disponibles
-  const ADMIN_ROLES = ["admin", "directora_anita"];
+  const ADMIN_ROLES = ["superadmin", "admin"];
   let groups: { id: string; grade: number; letter: string }[] = [];
 
   if (ADMIN_ROLES.includes(effectiveProfile.role)) {
@@ -30,7 +30,7 @@ export default async function ConcentradoIndexPage() {
       .order("grade")
       .order("letter");
     groups = data || [];
-  } else if (effectiveProfile.role === "teacher") {
+  } else if (effectiveProfile.role === "visor") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("groups ( id, grade, letter )")
@@ -44,7 +44,7 @@ export default async function ConcentradoIndexPage() {
     });
     groups = groups.filter((g) => g.letter !== "Bajas");
     groups.sort((a, b) => a.grade - b.grade || a.letter.localeCompare(b.letter));
-  } else if (effectiveProfile.role === "viewer") {
+  } else if (effectiveProfile.role === "visor") {
     // Viewer: access via dashboard concentrado links
     const { data } = await supabase
       .from("groups")

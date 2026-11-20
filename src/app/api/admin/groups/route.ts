@@ -11,7 +11,7 @@ async function verifyAdmin() {
     .select("role")
     .eq("id", user.id)
     .single();
-  return profile?.role === "admin";
+  return ["superadmin", "admin"].includes(profile?.role ?? "");
 }
 
 export async function GET() {

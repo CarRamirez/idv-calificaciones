@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 
 function buildReminderHTML(teacherName: string, periodName: string, pendingDetails: string[]): string {
   const detailsHtml = pendingDetails

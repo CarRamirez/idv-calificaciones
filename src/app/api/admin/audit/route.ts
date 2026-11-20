@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getEffectiveProfile } from "@/lib/impersonation";
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 const PAGE_SIZE = 50;
 
 export async function GET(req: NextRequest) {
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   // ── Parse query params ──
   const sp = req.nextUrl.searchParams;
   const page = Math.max(1, parseInt(sp.get("page") || "1"));
-  const teacherId = sp.get("teacher") || null;
+  const teacherId = sp.get("visor") || null;
   const studentId = sp.get("student") || null;
   const period = sp.get("period") ? parseInt(sp.get("period")!) : null;
   const action = sp.get("action") || null;

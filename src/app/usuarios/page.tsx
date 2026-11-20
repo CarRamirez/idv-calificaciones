@@ -18,8 +18,8 @@ export default async function UsuariosPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  const isAdmin = effectiveProfile.role === "admin";
-  const isDireccion = effectiveProfile.role === "directora_anita";
+  const isAdmin = ["superadmin", "admin"].includes(effectiveProfile.role);
+  const isDireccion = effectiveProfile.role === "direccion";
   if (!isAdmin && !isDireccion) redirect("/dashboard");
 
   const allOptions = [

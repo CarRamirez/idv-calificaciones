@@ -32,7 +32,7 @@ export async function GET() {
 
   const admin = createAdminClient();
 
-  const isAdmin = ["admin", "directora_anita"].includes(profile.role);
+  const isAdmin = ["superadmin", "admin"].includes(profile.role);
 
   // Fetch all data in parallel
   const [studentsRes, groupsRes, profilesRes, subjectsRes] = await Promise.all([
@@ -53,7 +53,7 @@ export async function GET() {
       : Promise.resolve({ data: [] }),
   ]);
 
-  const canViewBoleta = ["admin", "directora_anita", "teacher", "viewer"].includes(
+  const canViewBoleta = ["superadmin", "admin", "direccion", "visor"].includes(
     profile.role
   );
 

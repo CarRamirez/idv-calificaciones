@@ -17,7 +17,6 @@ import {
   UserCog,
   Layers,
   BookMarked,
-  Shield,
   ShieldCheck,
   Calendar,
   Clock,
@@ -28,24 +27,31 @@ import {
   ChevronsRight,
   Award,
   Link2,
-  Eye,
-  FolderOpen,
-  Mail,
   type LucideIcon,
 } from "lucide-react";
+import { SECCIONES } from "@/lib/roles";
 
-/* ── Tipos ── */
-type NavItem = {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  perm?: string | string[]; // permiso requerido (string = uno, array = cualquiera)
-  roleOnly?: string;        // solo si userRole NO es este valor
-};
-
-type NavSection = {
-  titulo: string;
-  items: NavItem[];
+/* ── Iconos por módulo ── */
+const ICON_MAP: Record<string, LucideIcon> = {
+  inicio: Home,
+  captura: PenLine,
+  avance: TrendingUp,
+  boleta: BookOpen,
+  concentrado: ClipboardList,
+  reportes: BarChart3,
+  periodos: Calendar,
+  lista: Layers,
+  materias: BookMarked,
+  profesores: GraduationCap,
+  asignar: Link2,
+  alumnos: UserCog,
+  directorio: Contact,
+  servicios_escolares: Briefcase,
+  ciclo: Award,
+  usuarios: Users,
+  sesiones: Clock,
+  auditoria: ClipboardList,
+  permisos: ShieldCheck,
 };
 
 type Props = {
@@ -57,63 +63,31 @@ type Props = {
   onAlternar?: () => void;
 };
 
-/* ── Secciones del menú (estructura SIGEFCP) ── */
-function buildSecciones(userRole: string): NavSection[] {
-  const isAdmin = ["admin", "directora_anita"].includes(userRole);
+/* ── Construir secciones dinámicamente desde permisos ── */
+function buildSecciones(userRole: string, permissions: string[]) {
+  const secciones: { titulo: string; items: { label: string; href: string; icon: LucideIcon; id: string }[] }[] = [];
 
-  const secciones: NavSection[] = [
-    {
-      titulo: "GENERAL",
-      items: [
-        { label: "Inicio", href: "/dashboard", icon: Home },
-      ],
-    },
-    {
-      titulo: "CALIFICACIONES",
-      items: [
-        { label: "Captura", href: "/captura", icon: PenLine, perm: ["calificaciones", "captura"] },
-        { label: "Avance", href: "/avance", icon: TrendingUp, perm: "captura" },
-        { label: "Boletas", href: "/boleta", icon: BookOpen, perm: "boleta" },
-        { label: "Concentrados", href: "/concentrados", icon: ClipboardList, perm: "concentrado" },
-        { label: "Reportes", href: "/rendimiento", icon: BarChart3, perm: "rendimiento" },
-        { label: "Periodos", href: "/periodos", icon: Calendar, perm: "periodos" },
-      ],
-    },
-  ];
+  // GENERAL siempre
+  secciones.push({
+    titulo: "GENERAL",
+    items: [{ label: "Inicio", href: "/dashboard", icon: Home, id: "inicio" }],
+  });
 
-  if (isAdmin) {
-    secciones.push({
-      titulo: "ESCUELA",
-      items: [
-        { label: "Grupos", href: "/lista", icon: Layers, perm: "admin_grupos" },
-        { label: "Materias", href: "/admin/materias", icon: BookMarked, perm: "admin_materias" },
-        { label: "Profesores", href: "/admin/profesores", icon: GraduationCap, perm: "admin_profesores" },
-        { label: "Asignar", href: "/asignar", icon: Link2, perm: ["admin_profesores", "admin_materias"] },
-        { label: "Alumnos", href: "/admin/alumnos", icon: UserCog, perm: "admin_alumnos" },
-        { label: "Directorio", href: "/directorio", icon: Contact },
-        { label: "Servicios Escolares", href: "/servicios-escolares", icon: Briefcase },
-      ],
-    });
-    secciones.push({
-      titulo: "ADMINISTRACIÓN",
-      items: [
-        { label: "Ciclo Escolar", href: "/admin/ciclo", icon: Award },
-        { label: "Usuarios", href: "/usuarios", icon: Users, perm: ["admin_profesores", "admin_alumnos"] },
-        { label: "Roles", href: "/admin/roles", icon: Shield, perm: "admin_roles" },
-        { label: "Sesiones", href: "/admin/sesiones", icon: Clock, perm: "admin_sesiones" },
-        { label: "Auditoría", href: "/admin/auditoria", icon: ClipboardList, perm: "admin_sesiones" },
-        { label: "Permisos", href: "/admin/permisos", icon: ShieldCheck },
-      ],
-    });
-  } else {
-    // Profesor / viewer
-    const escuela: NavItem[] = [
-      { label: "Directorio", href: "/directorio", icon: Contact },
-      { label: "Horario", href: "/horario", icon: Clock },
-      { label: "Servicios Escolares", href: "/servicios-escolares", icon: Briefcase },
-    ];
-    if (escuela.length) {
-      secciones.push({ titulo: "ESCUELA", items: escuela });
+  for (const seccion of SECCIONES) {
+    const items = seccion.rutas
+      .filter((r) => {
+        if (userRole === "superadmin") return true;
+        return permissions.includes(r.id);
+      })
+      .map((r) => ({
+        label: r.label,
+        href: r.href,
+        icon: ICON_MAP[r.id] || FileText,
+        id: r.id,
+      }));
+
+    if (items.length > 0) {
+      secciones.push({ titulo: seccion.titulo.toUpperCase(), items });
     }
   }
 
@@ -125,10 +99,7 @@ export default function Sidebar({ userRole, permissions, colapsado, drawer = fal
   const ruta = usePathname();
   const [tip, setTip] = useState<{ texto: string; top: number; left: number } | null>(null);
 
-  const secciones = buildSecciones(userRole);
-
-  const can = (perm: string) => permissions.includes(perm);
-  const canAny = (...perms: string[]) => perms.some((p) => permissions.includes(p));
+  const secciones = buildSecciones(userRole, permissions);
 
   const mostrar = (el: HTMLElement, texto: string) => {
     if (drawer) return;
@@ -145,13 +116,6 @@ export default function Sidebar({ userRole, permissions, colapsado, drawer = fal
   const activo = (href: string) => {
     if (href === "/dashboard") return ruta === "/dashboard";
     return ruta === href || ruta.startsWith(href + "/");
-  };
-
-  const visible = (item: NavItem): boolean => {
-    if (item.roleOnly && userRole === item.roleOnly) return false;
-    if (!item.perm) return true;
-    if (Array.isArray(item.perm)) return canAny(...item.perm);
-    return can(item.perm);
   };
 
   return (
@@ -189,53 +153,48 @@ export default function Sidebar({ userRole, permissions, colapsado, drawer = fal
         aria-label="Menú principal"
         className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-3 [scrollbar-width:thin]"
       >
-        {secciones.map((s, i) => {
-          const itemsVisibles = s.items.filter(visible);
-          if (!itemsVisibles.length) return null;
-
-          return (
-            <div key={s.titulo} className={i ? "mt-4" : ""}>
-              <p className={`mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 ${soloExpandido}`}>
-                {s.titulo}
-              </p>
-              {!drawer && i > 0 && (
-                <div className={`mx-3 mb-2 h-px bg-white/10 ${colapsado ? "" : "lg:hidden"}`} aria-hidden />
-              )}
-              <ul className="space-y-0.5">
-                {itemsVisibles.map((it) => {
-                  const Icono = it.icon;
-                  const on = activo(it.href);
-                  return (
-                    <li key={it.href}>
-                      <Link
-                        prefetch={false}
-                        href={it.href}
-                        onClick={onCerrar}
-                        aria-current={on ? "page" : undefined}
-                        aria-label={it.label}
-                        onMouseEnter={(e) => mostrar(e.currentTarget, it.label)}
-                        onMouseLeave={ocultar}
-                        onFocus={(e) => mostrar(e.currentTarget, it.label)}
-                        onBlur={ocultar}
-                        className={`group relative flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-[14.5px] font-medium outline-none transition
-                          focus-visible:ring-2 focus-visible:ring-white/70
-                          ${drawer ? "" : colapsado ? "justify-center" : "justify-center lg:justify-start"}
-                          ${
-                            on
-                              ? "bg-primary-600 text-white shadow-sm before:absolute before:-left-2.5 before:top-2 before:h-[calc(100%-1rem)] before:w-1 before:rounded-r before:bg-white"
-                              : "text-slate-300 hover:bg-white/[0.08] hover:text-white"
-                          }`}
-                      >
-                        <Icono size={19} className="shrink-0" aria-hidden />
-                        <span className={`truncate ${etiqueta}`}>{it.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })}
+        {secciones.map((s, i) => (
+          <div key={s.titulo} className={i ? "mt-4" : ""}>
+            <p className={`mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 ${soloExpandido}`}>
+              {s.titulo}
+            </p>
+            {!drawer && i > 0 && (
+              <div className={`mx-3 mb-2 h-px bg-white/10 ${colapsado ? "" : "lg:hidden"}`} aria-hidden />
+            )}
+            <ul className="space-y-0.5">
+              {s.items.map((it) => {
+                const Icono = it.icon;
+                const on = activo(it.href);
+                return (
+                  <li key={it.href}>
+                    <Link
+                      prefetch={false}
+                      href={it.href}
+                      onClick={onCerrar}
+                      aria-current={on ? "page" : undefined}
+                      aria-label={it.label}
+                      onMouseEnter={(e) => mostrar(e.currentTarget, it.label)}
+                      onMouseLeave={ocultar}
+                      onFocus={(e) => mostrar(e.currentTarget, it.label)}
+                      onBlur={ocultar}
+                      className={`group relative flex min-h-[44px] items-center gap-3 rounded-lg px-3 text-[14.5px] font-medium outline-none transition
+                        focus-visible:ring-2 focus-visible:ring-white/70
+                        ${drawer ? "" : colapsado ? "justify-center" : "justify-center lg:justify-start"}
+                        ${
+                          on
+                            ? "bg-primary-600 text-white shadow-sm before:absolute before:-left-2.5 before:top-2 before:h-[calc(100%-1rem)] before:w-1 before:rounded-r before:bg-white"
+                            : "text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                        }`}
+                    >
+                      <Icono size={19} className="shrink-0" aria-hidden />
+                      <span className={`truncate ${etiqueta}`}>{it.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {tip && (

@@ -101,7 +101,7 @@ export default function CapturaPage({ params }: Props) {
 
   const isPeriodLocked = useCallback(
     (periodId: number) => {
-      if (!profile || profile.role === "admin" || profile.role === "directora_anita") return false;
+      if (!profile || ["superadmin", "admin"].includes(profile.role) || profile.role === "direccion") return false;
       return !openPeriods.has(periodId);
     },
     [profile, openPeriods]
@@ -643,7 +643,7 @@ export default function CapturaPage({ params }: Props) {
 
       <main className="page-content animate-fade-in">
         {/* Banner de periodo cerrado */}
-        {(profile?.role === "teacher") && openPeriods.size > 0 && (() => {
+        {(profile?.role === "visor") && openPeriods.size > 0 && (() => {
           const ct = TRIMESTERS.find((t) => t.id === activeTab);
           const lockedPeriods = ct ? ct.periods.filter((p) => !openPeriods.has(p.id)) : [];
           if (lockedPeriods.length === 0) return null;
@@ -668,7 +668,7 @@ export default function CapturaPage({ params }: Props) {
           );
         })()}
 
-        {activePeriodInfo && profile?.role === "teacher" && (
+        {activePeriodInfo && profile?.role === "visor" && (
           <PeriodBanner
             periodName={activePeriodInfo.name}
             openDate={activePeriodInfo.open_date}

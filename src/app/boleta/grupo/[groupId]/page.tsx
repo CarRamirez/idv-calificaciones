@@ -21,7 +21,7 @@ export default async function BoletaGroupPage({ params }: Props) {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role === "viewer") redirect("/dashboard");
+  if (effectiveProfile.role === "visor") redirect("/dashboard");
 
   const { data: group } = await supabase
     .from("groups")

@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPeriodNotification } from "@/lib/email";
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 
 export async function POST(req: Request) {
   try {
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       const { data: teachers, error } = await admin
         .from("profiles")
         .select("id, full_name, email")
-        .eq("role", "teacher")
+        .eq("role", "visor")
         .not("email", "is", null);
 
       if (error) {

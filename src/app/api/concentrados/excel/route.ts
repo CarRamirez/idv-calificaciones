@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { fetchAllGrades } from "@/lib/fetch-all-grades";
 
-const ADMIN_ROLES = ["admin", "directora_anita"];
+const ADMIN_ROLES = ["superadmin", "admin"];
 const PENALTY_SHORT_NAMES = new Set(["TAR", "INAS", "INC"]);
 
 const TRIMESTERS = [

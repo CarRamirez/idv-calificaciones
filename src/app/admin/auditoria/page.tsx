@@ -94,7 +94,7 @@ export default function AuditoriaPage() {
       const { data } = await supabase
         .from("profiles")
         .select("id, full_name")
-        .in("role", ["teacher", "admin", "directora_anita"])
+        .in("role", ["visor", "admin", "direccion"])
         .order("full_name");
       setTeachers(data || []);
     }
@@ -105,7 +105,7 @@ export default function AuditoriaPage() {
     setLoading(true);
     const params = new URLSearchParams();
     params.set("page", page.toString());
-    if (teacherFilter) params.set("teacher", teacherFilter);
+    if (teacherFilter) params.set("visor", teacherFilter);
     if (periodFilter) params.set("period", periodFilter);
     if (actionFilter) params.set("action", actionFilter);
     if (dateFrom) params.set("from", dateFrom);

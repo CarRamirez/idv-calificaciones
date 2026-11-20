@@ -22,7 +22,7 @@ async function verifyPermission() {
 
   let effectiveRole = profile.role;
 
-  if (impersonateAs && impersonateAdminId === user.id && profile.role === "admin") {
+  if (impersonateAs && impersonateAdminId === user.id && ["superadmin", "admin"].includes(profile.role)) {
     const admin = createAdminClient();
     const { data: targetProfile } = await admin
       .from("profiles")
@@ -32,7 +32,7 @@ async function verifyPermission() {
     if (targetProfile) effectiveRole = targetProfile.role;
   }
 
-  const ROLES_WITH_PERM = ["admin", "directora_anita"];
+  const ROLES_WITH_PERM = ["superadmin", "admin"];
   if (ROLES_WITH_PERM.includes(effectiveRole)) return true;
 
   // Check custom role

@@ -20,11 +20,11 @@ export default async function BoletaIndexPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role === "viewer") redirect("/dashboard");
+  if (effectiveProfile.role === "visor") redirect("/dashboard");
 
   let groups: { id: string; grade: number; letter: string }[] = [];
 
-  if (effectiveProfile.role === "admin" || effectiveProfile.role === "directora_anita") {
+  if (["superadmin", "admin"].includes(effectiveProfile.role) || effectiveProfile.role === "direccion") {
     const { data } = await supabase
       .from("groups")
       .select("id, grade, letter")
@@ -32,7 +32,7 @@ export default async function BoletaIndexPage() {
       .order("grade")
       .order("letter");
     groups = data || [];
-  } else if (effectiveProfile.role === "teacher") {
+  } else if (effectiveProfile.role === "visor") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("groups ( id, grade, letter )")

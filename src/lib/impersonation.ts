@@ -15,7 +15,7 @@ export async function getEffectiveProfile(
   const impersonateAs = cookieStore.get("impersonate_as")?.value;
   const impersonateAdminId = cookieStore.get("impersonate_admin_id")?.value;
 
-  if (impersonateAs && impersonateAdminId === realUserId && realProfile.role === "admin") {
+  if (impersonateAs && impersonateAdminId === realUserId && ["superadmin", "admin"].includes(realProfile.role)) {
     const admin = createAdminClient();
     const { data: targetProfile } = await admin
       .from("profiles")

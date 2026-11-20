@@ -18,13 +18,13 @@ export default async function CalificacionesPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  const ADMIN_ROLES = ["admin", "directora_anita"];
-  if (!ADMIN_ROLES.includes(effectiveProfile.role) && effectiveProfile.role !== "teacher") {
+  const ADMIN_ROLES = ["superadmin", "admin"];
+  if (!ADMIN_ROLES.includes(effectiveProfile.role) && effectiveProfile.role !== "visor") {
     redirect("/dashboard");
   }
 
   const isAdmin = ADMIN_ROLES.includes(effectiveProfile.role);
-  const isTeacher = effectiveProfile.role === "teacher";
+  const isTeacher = effectiveProfile.role === "visor";
 
   const options = [
     {
@@ -39,7 +39,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "primary",
-      roles: ["admin", "directora_anita", "teacher"],
+      roles: ["superadmin", "admin", "direccion", "visor"],
     },
     {
       title: "Concentrado de Calificaciones",
@@ -53,7 +53,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "accent",
-      roles: ["admin", "directora_anita", "teacher"],
+      roles: ["superadmin", "admin", "direccion", "visor"],
     },
     {
       title: "Boleta de Calificaciones",
@@ -67,7 +67,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "success",
-      roles: ["admin", "directora_anita", "teacher"],
+      roles: ["superadmin", "admin", "direccion", "visor"],
     },
     {
       title: "Corrección de Calificaciones",
@@ -79,7 +79,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "warning",
-      roles: ["teacher"],
+      roles: ["visor"],
     },
     {
       title: "Materias",
@@ -91,7 +91,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "primary",
-      roles: ["admin", "directora_anita"],
+      roles: ["superadmin", "admin"],
     },
     {
       title: "Tareas",
