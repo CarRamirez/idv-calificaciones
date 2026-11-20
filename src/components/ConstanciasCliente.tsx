@@ -59,7 +59,7 @@ export default function ConstanciasCliente({ alumnos, profesores, cicloActual }:
     reader.readAsDataURL(file);
   }, []);
 
-  function generar(accion: "ver" | "imprimir") {
+  function generar() {
     const opciones: OpcionesConst = {
       tipo, fecha, expediente: expediente || "—", cicloActual,
       firmaNombre, firmaCargo,
@@ -131,7 +131,7 @@ export default function ConstanciasCliente({ alumnos, profesores, cicloActual }:
                   <p className="font-semibold text-sm text-slate-900">{selProfesor.full_name}</p>
                 </div>
               )}
-              <button className="btn-secondary text-xs px-3 py-1" onClick={() => { esParaAlumno ? setSelAlumno(null) : setSelProfesor(null); setQ(""); }}>
+              <button className="btn-secondary text-xs px-3 py-1" onClick={() => { if (esParaAlumno) { setSelAlumno(null); } else { setSelProfesor(null); } setQ(""); }}>
                 Cambiar
               </button>
             </div>
@@ -148,7 +148,7 @@ export default function ConstanciasCliente({ alumnos, profesores, cicloActual }:
                   {resultados.map((r) => (
                     <li key={r.id}>
                       <button className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50"
-                        onClick={() => { esParaAlumno ? setSelAlumno(r as AlumnoConst) : setSelProfesor(r as ProfesorConst); setQ(""); }}>
+                        onClick={() => { if (esParaAlumno) { setSelAlumno(r as AlumnoConst); } else { setSelProfesor(r as ProfesorConst); } setQ(""); }}>
                         {esParaAlumno && "grado" in r && (
                           <span className="font-bold text-primary-700">{(r as AlumnoConst).grado}°{(r as AlumnoConst).letra}</span>
                         )}
@@ -245,7 +245,7 @@ export default function ConstanciasCliente({ alumnos, profesores, cicloActual }:
                 <input type="date" className="input-field mt-1 w-full" value={fechaCte} onChange={(e) => setFechaCte(e.target.value)} />
               </label>
               <label className="text-sm">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sesión (ej. "Sesión Ordinaria 3")</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sesión (ej. &ldquo;Sesión Ordinaria 3&rdquo;)</span>
                 <input className="input-field mt-1 w-full" value={sesionCte} onChange={(e) => setSesionCte(e.target.value)} placeholder="Sesión Ordinaria 3" />
               </label>
             </div>
@@ -254,11 +254,11 @@ export default function ConstanciasCliente({ alumnos, profesores, cicloActual }:
 
         {/* Acciones */}
         <div className={`flex justify-end gap-2 ${listo ? "" : "opacity-50 pointer-events-none"}`}>
-          <button className="btn-secondary text-sm flex items-center gap-2" onClick={() => generar("ver")} disabled={!listo}>
+          <button className="btn-secondary text-sm flex items-center gap-2" onClick={() => generar()} disabled={!listo}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
             Vista previa
           </button>
-          <button className="btn-primary text-sm flex items-center gap-2" onClick={() => generar("imprimir")} disabled={!listo}>
+          <button className="btn-primary text-sm flex items-center gap-2" onClick={() => generar()} disabled={!listo}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
             Generar e Imprimir
           </button>
