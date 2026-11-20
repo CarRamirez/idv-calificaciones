@@ -13,6 +13,7 @@ import { Menu } from "lucide-react";
 type Props = {
   userName: string;
   userRole: string;
+  children?: React.ReactNode;
 };
 
 const SESSION_DURATION = 10 * 60 * 1000;
@@ -63,7 +64,7 @@ function setCookie(name: string, value: string, days = 365) {
   document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
 }
 
-export default function Navbar({ userName, userRole }: Props) {
+export default function Navbar({ userName, userRole, children }: Props) {
   const router = useRouter();
   const ruta = usePathname();
   const supabase = createClient();
@@ -644,6 +645,11 @@ export default function Navbar({ userName, userRole }: Props) {
           </div>
         </div>
       </header>
+
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div className={`transition-[margin-left] duration-200 ease-in-out ${colapsado ? "lg:ml-[76px]" : "lg:ml-[264px]"}`}>
+        {children}
+      </div>
 
       {/* Tutorial modal */}
       <Tutorial isOpen={showTutorial} onClose={() => setShowTutorial(false)} userRole={userRole} />
