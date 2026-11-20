@@ -66,7 +66,7 @@ export default function AdminMateriasPage() {
       .select("full_name, role")
       .eq("id", user.id)
       .single();
-    if (!data || data.role !== "admin") { router.push("/dashboard"); return; }
+    if (!data || !["superadmin", "admin", "direccion"].includes(data.role)) { router.push("/dashboard"); return; }
     setProfile(data);
   }, [supabase, router]);
 

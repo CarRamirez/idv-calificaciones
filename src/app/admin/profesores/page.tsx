@@ -79,7 +79,7 @@ export default function AdminProfesoresPage() {
       // Always check via permissions API (respects impersonation)
       const permRes = await fetch("/api/auth/permissions");
       const { permissions } = await permRes.json();
-      if (!permissions?.includes("admin_profesores")) {
+      if (!permissions?.includes("profesores") && !permissions?.includes("*")) {
         router.push("/dashboard"); return;
       }
       setProfile(prof);

@@ -58,7 +58,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
       .select("permissions")
       .eq("name", myProfile.role)
       .single();
-    if (callerRole?.permissions?.includes("admin_profesores")) {
+    if (callerRole?.permissions?.includes("profesores") || callerRole?.permissions?.includes("*")) {
       canEditContact = true;
     }
   }

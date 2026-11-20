@@ -135,7 +135,7 @@ export default function AdminAlumnosPage() {
       if (!prof) { router.push("/dashboard"); return; }
       const permRes = await fetch("/api/auth/permissions");
       const { permissions } = await permRes.json();
-      if (!permissions?.includes("admin_alumnos")) {
+      if (!permissions?.includes("alumnos") && !permissions?.includes("*")) {
         router.push("/dashboard"); return;
       }
       setProfile(prof);
