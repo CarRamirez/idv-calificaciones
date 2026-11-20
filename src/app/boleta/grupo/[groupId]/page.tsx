@@ -21,7 +21,7 @@ export default async function BoletaGroupPage({ params }: Props) {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role === "visor") redirect("/dashboard");
+  if (false) redirect("/dashboard") // profesor y visor pueden ver boletas;
 
   const { data: group } = await supabase
     .from("groups")

@@ -19,12 +19,12 @@ export default async function CalificacionesPage() {
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
   const ADMIN_ROLES = ["superadmin", "admin"];
-  if (!ADMIN_ROLES.includes(effectiveProfile.role) && effectiveProfile.role !== "visor") {
+  if (!ADMIN_ROLES.includes(effectiveProfile.role) && effectiveProfile.role !== "profesor" && effectiveProfile.role !== "visor") {
     redirect("/dashboard");
   }
 
   const isAdmin = ADMIN_ROLES.includes(effectiveProfile.role);
-  const isTeacher = effectiveProfile.role === "visor";
+  const isTeacher = effectiveProfile.role === "profesor";
 
   const options = [
     {
@@ -39,7 +39,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "primary",
-      roles: ["superadmin", "admin", "direccion", "visor"],
+      roles: ["superadmin", "admin", "direccion", "profesor", "visor"],
     },
     {
       title: "Concentrado de Calificaciones",
@@ -53,7 +53,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "accent",
-      roles: ["superadmin", "admin", "direccion", "visor"],
+      roles: ["superadmin", "admin", "direccion", "profesor", "visor"],
     },
     {
       title: "Boleta de Calificaciones",
@@ -67,7 +67,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "success",
-      roles: ["superadmin", "admin", "direccion", "visor"],
+      roles: ["superadmin", "admin", "direccion", "profesor", "visor"],
     },
     {
       title: "Corrección de Calificaciones",
@@ -79,7 +79,7 @@ export default async function CalificacionesPage() {
         </svg>
       ),
       color: "warning",
-      roles: ["visor"],
+      roles: ["profesor"],
     },
     {
       title: "Materias",

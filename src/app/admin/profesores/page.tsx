@@ -37,7 +37,7 @@ export default function AdminProfesoresPage() {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPass, setNewPass] = useState("");
-  const [newRole, setNewRole] = useState<string>("visor");
+  const [newRole, setNewRole] = useState<string>("profesor");
   const [newLabel, setNewLabel] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [newError, setNewError] = useState("");
@@ -129,7 +129,7 @@ export default function AdminProfesoresPage() {
 
     setSaving(false);
     setShowNew(false);
-    setNewName(""); setNewEmail(""); setNewPass(""); setNewRole("visor"); setNewLabel("");
+    setNewName(""); setNewEmail(""); setNewPass(""); setNewRole("profesor"); setNewLabel("");
     loadTeachers();
   }
 
@@ -178,7 +178,7 @@ export default function AdminProfesoresPage() {
       }
 
       const ROLE_MAP: Record<string, string> = {
-        profesor: "visor", teacher: "visor", maestro: "visor",
+        profesor: "profesor", teacher: "profesor", maestro: "profesor",
         admin: "admin", administrador: "admin",
         directora: "direccion", direccion: "direccion",
         viewer: "visor", observador: "visor",
@@ -190,7 +190,7 @@ export default function AdminProfesoresPage() {
           full_name: cols[nameIdx] || "",
           email: cols[emailIdx] || "",
           password: cols[passIdx] || "",
-          role: ROLE_MAP[rawRole] || "visor",
+          role: ROLE_MAP[rawRole] || "profesor",
           label: labelIdx !== -1 ? (cols[labelIdx] || "") : "",
         };
       }).filter((r) => r.full_name || r.email);
@@ -248,7 +248,7 @@ export default function AdminProfesoresPage() {
     setEditTeacher(t);
     setEditName(t.full_name);
     setEditEmail(t.email || "");
-    setEditRole(t.role || "visor");
+    setEditRole(t.role || "profesor");
     setEditLabel(t.label || "");
     setEditPass("");
     setEditShowPass(false);
@@ -420,11 +420,15 @@ export default function AdminProfesoresPage() {
                             ? "bg-purple-100 text-purple-700"
                             : t.role === "direccion"
                             ? "bg-emerald-100 text-emerald-700"
+                            : t.role === "profesor"
+                            ? "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300"
                             : t.role === "visor"
                             ? "bg-blue-100 text-blue-700"
                             : "bg-amber-100 text-amber-700"
                         }`}>
-                          {t.role === "superadmin" ? "Superadmin" : t.role === "admin" ? "Admin" : t.role === "direccion" ? "Dirección" : t.role === "secretaria" ? "Secretaría" : t.role === "visor" ? "Visor" : t.role}
+                          {t.role === "superadmin" ? "Superadmin" : t.role === "admin" ? "Admin" : t.role === "direccion" ? "Dirección" : t.role === "profesor" ? "Profesor" : t.role === "secretaria" ? "Secretaría" : t.role === "profesor"
+                            ? "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300"
+                            : t.role === "visor" ? "Visor" : t.role}
                         </span>
                       </div>
                       <p className="text-xs text-slate-400">{t.email || "Sin correo"}</p>
@@ -527,7 +531,8 @@ export default function AdminProfesoresPage() {
                     onChange={(e) => setNewRole(e.target.value)}
                     className="input-field"
                   >
-                    <option value="visor">Profesor</option>
+                    <option value="profesor">Profesor</option>
+                    <option value="visor">Visor</option>
                     {isFullAdmin && (
                       <option value="admin">Administrador</option>
                     )}
@@ -677,7 +682,8 @@ export default function AdminProfesoresPage() {
                     onChange={(e) => setEditRole(e.target.value)}
                     className="input-field"
                   >
-                    <option value="visor">Profesor</option>
+                    <option value="profesor">Profesor</option>
+                    <option value="visor">Visor</option>
                     {isFullAdmin && (
                       <option value="admin">Administrador</option>
                     )}

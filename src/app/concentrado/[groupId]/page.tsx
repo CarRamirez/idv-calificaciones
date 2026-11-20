@@ -38,7 +38,7 @@ export default async function ConcentradoPage({ params }: Props) {
 
   // For teachers, get their assigned subject IDs for this group
   let teacherSubjectIds: string[] | null = null;
-  if (effectiveProfile.role === "visor") {
+  if (effectiveProfile.role === "profesor") {
     const { data: assignments } = await supabase
       .from("teacher_assignments")
       .select("subject_id")

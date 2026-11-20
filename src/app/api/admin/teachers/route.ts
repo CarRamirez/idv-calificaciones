@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate role — non-admin callers can only create teachers
-  const validRoles = ["superadmin", "admin", "direccion", "visor"];
-  let finalRole = validRoles.includes(role) ? role : "visor";
+  const validRoles = ["superadmin", "admin", "direccion", "profesor", "secretaria", "visor"];
+  let finalRole = validRoles.includes(role) ? role : "profesor";
   if (!caller.isAdmin && ["superadmin", "admin"].includes(finalRole)) {
-    finalRole = "visor";
+    finalRole = "profesor";
   }
 
   const admin = createAdminClient();
@@ -140,7 +140,7 @@ export async function PUT(req: NextRequest) {
   if (role !== undefined) {
     // Non-admin callers cannot assign admin role
     if (!caller.isAdmin && ["superadmin", "admin"].includes(role)) {
-      updates.role = "visor";
+      updates.role = "profesor";
     } else {
       updates.role = role;
     }

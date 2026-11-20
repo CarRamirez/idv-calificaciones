@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   // ── Parse query params ──
   const sp = req.nextUrl.searchParams;
   const page = Math.max(1, parseInt(sp.get("page") || "1"));
-  const teacherId = sp.get("visor") || null;
+  const teacherId = sp.get("profesor") || null;
   const studentId = sp.get("student") || null;
   const period = sp.get("period") ? parseInt(sp.get("period")!) : null;
   const action = sp.get("action") || null;

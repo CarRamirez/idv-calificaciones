@@ -30,7 +30,7 @@ export default async function ConcentradoIndexPage() {
       .order("grade")
       .order("letter");
     groups = data || [];
-  } else if (effectiveProfile.role === "visor") {
+  } else if (effectiveProfile.role === "profesor") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("groups ( id, grade, letter )")
@@ -44,7 +44,7 @@ export default async function ConcentradoIndexPage() {
     });
     groups = groups.filter((g) => g.letter !== "Bajas");
     groups.sort((a, b) => a.grade - b.grade || a.letter.localeCompare(b.letter));
-  } else if (effectiveProfile.role === "visor") {
+  } else if (effectiveProfile.role === "profesor") {
     // Viewer: access via dashboard concentrado links
     const { data } = await supabase
       .from("groups")

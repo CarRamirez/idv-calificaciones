@@ -38,8 +38,8 @@ export async function GET() {
 
   const roleLabel = roleInfo?.display_name || (
     ["superadmin", "admin"].includes(targetProfile.role) ? "Administrador" :
-    targetProfile.role === "visor" ? "Profesor" :
-    targetProfile.role === "visor" ? "Consulta" : targetProfile.role
+    targetProfile.role === "profesor" ? "Profesor" : targetProfile.role === "visor" ? "Visor" :
+    targetProfile.role === "visor" ? "Visor" : targetProfile.role
   );
 
   return NextResponse.json({

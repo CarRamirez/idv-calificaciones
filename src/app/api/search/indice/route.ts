@@ -53,7 +53,7 @@ export async function GET() {
       : Promise.resolve({ data: [] }),
   ]);
 
-  const canViewBoleta = ["superadmin", "admin", "direccion", "visor"].includes(
+  const canViewBoleta = ["superadmin", "admin", "direccion", "profesor", "secretaria", "visor"].includes(
     profile.role
   );
 

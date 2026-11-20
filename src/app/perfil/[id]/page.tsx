@@ -42,8 +42,8 @@ export default async function PerfilPage({ params }: { params: { id: string } })
 
   const roleLabel = roleInfo?.display_name || (
     ["superadmin", "admin"].includes(profile.role) ? "Administrador" :
-    profile.role === "visor" ? "Profesor" :
-    profile.role === "visor" ? "Consulta" : profile.role
+    profile.role === "profesor" ? "Profesor" : profile.role === "visor" ? "Visor" :
+    profile.role === "visor" ? "Visor" : profile.role
   );
 
   // Determine permissions
@@ -142,7 +142,7 @@ export default async function PerfilPage({ params }: { params: { id: string } })
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                   ["superadmin", "admin"].includes(profile.role) ? "bg-purple-100 text-purple-700" :
-                  profile.role === "visor" ? "bg-blue-100 text-blue-700" :
+                  profile.role === "profesor" ? "bg-teal-100 text-teal-700" : profile.role === "visor" ? "bg-sky-100 text-sky-700" :
                   "bg-amber-100 text-amber-700"
                 }`}>
                   {roleLabel}

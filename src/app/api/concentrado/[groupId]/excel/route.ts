@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   if (!profile) return NextResponse.json({ error: "No profile" }, { status: 401 });
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role === "visor")
+  if (effectiveProfile.role === "profesor")
     return NextResponse.json({ error: "No access" }, { status: 403 });
 
   // ── Fetch data ──

@@ -53,8 +53,8 @@ export default async function AvancePage({
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
   if (
-    effectiveProfile.role === "visor" ||
-    effectiveProfile.role === "visor"
+    effectiveProfile.role === "profesor" ||
+    effectiveProfile.role === "profesor"
   )
     redirect("/dashboard");
 
@@ -175,7 +175,7 @@ export default async function AvancePage({
   const { data: teachers } = await admin
     .from("profiles")
     .select("id, full_name, email")
-    .eq("role", "visor")
+    .eq("role", "profesor")
     .order("full_name");
 
   // Assignments

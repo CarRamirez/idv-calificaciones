@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       const { data: teachers, error } = await admin
         .from("profiles")
         .select("id, full_name, email")
-        .eq("role", "visor")
+        .eq("role", "profesor")
         .not("email", "is", null);
 
       if (error) {

@@ -643,7 +643,7 @@ export default function CapturaPage({ params }: Props) {
 
       <main className="page-content animate-fade-in">
         {/* Banner de periodo cerrado */}
-        {(profile?.role === "visor") && openPeriods.size > 0 && (() => {
+        {(profile?.role === "profesor") && openPeriods.size > 0 && (() => {
           const ct = TRIMESTERS.find((t) => t.id === activeTab);
           const lockedPeriods = ct ? ct.periods.filter((p) => !openPeriods.has(p.id)) : [];
           if (lockedPeriods.length === 0) return null;
@@ -668,7 +668,7 @@ export default function CapturaPage({ params }: Props) {
           );
         })()}
 
-        {activePeriodInfo && profile?.role === "visor" && (
+        {activePeriodInfo && profile?.role === "profesor" && (
           <PeriodBanner
             periodName={activePeriodInfo.name}
             openDate={activePeriodInfo.open_date}

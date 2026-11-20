@@ -2,23 +2,24 @@
  * src/lib/roles.ts
  *
  * Sistema de roles y permisos de Mnemósine.
- * Basado en SIGEFCP — adaptado para Instituto Don Vasco (sin turno, sin profesor).
+ * Basado en SIGEFCP — adaptado para Instituto Don Vasco (sin turno).
  *
- * Roles: superadmin | admin | direccion | secretaria | visor
+ * Roles: superadmin | admin | direccion | profesor | secretaria | visor
  */
 
 /* ── Tipos ── */
-export type Rol = "superadmin" | "admin" | "direccion" | "secretaria" | "visor";
+export type Rol = "superadmin" | "admin" | "direccion" | "profesor" | "secretaria" | "visor";
 
-export const ROLES: Rol[] = ["superadmin", "admin", "direccion", "secretaria", "visor"];
+export const ROLES: Rol[] = ["superadmin", "admin", "direccion", "profesor", "secretaria", "visor"];
 
 /** Roles que pueden configurarse en la pantalla de permisos (no incluye superadmin) */
-export const PERFILES: Rol[] = ["admin", "direccion", "secretaria", "visor"];
+export const PERFILES: Rol[] = ["admin", "direccion", "profesor", "secretaria", "visor"];
 
 export const ROL_NOMBRE: Record<Rol, string> = {
   superadmin: "Superadministrador",
   admin: "Administrador",
   direccion: "Dirección",
+  profesor: "Profesor",
   secretaria: "Secretaría",
   visor: "Visor",
 };
@@ -27,6 +28,7 @@ export const ROL_COLOR: Record<Rol, { bg: string; text: string; dark_bg: string;
   superadmin: { bg: "bg-violet-100", text: "text-violet-700", dark_bg: "dark:bg-violet-900/40", dark_text: "dark:text-violet-300" },
   admin: { bg: "bg-blue-100", text: "text-blue-700", dark_bg: "dark:bg-blue-900/40", dark_text: "dark:text-blue-300" },
   direccion: { bg: "bg-emerald-100", text: "text-emerald-700", dark_bg: "dark:bg-emerald-900/40", dark_text: "dark:text-emerald-300" },
+  profesor: { bg: "bg-teal-100", text: "text-teal-700", dark_bg: "dark:bg-teal-900/40", dark_text: "dark:text-teal-300" },
   secretaria: { bg: "bg-amber-100", text: "text-amber-700", dark_bg: "dark:bg-amber-900/40", dark_text: "dark:text-amber-300" },
   visor: { bg: "bg-sky-100", text: "text-sky-700", dark_bg: "dark:bg-sky-900/40", dark_text: "dark:text-sky-300" },
 };
@@ -53,11 +55,11 @@ export const SECCIONES: Seccion[] = [
   {
     titulo: "Calificaciones",
     rutas: [
-      { id: "captura",       href: "/captura",       label: "Captura",       desc: "Captura de calificaciones",    roles: ["admin", "direccion", "secretaria"] },
+      { id: "captura",       href: "/captura",       label: "Captura",       desc: "Captura de calificaciones",    roles: ["admin", "direccion", "profesor", "secretaria"] },
       { id: "avance",        href: "/avance",        label: "Avance",        desc: "Avance de captura",            roles: ["admin", "direccion"] },
-      { id: "boleta",        href: "/boleta",        label: "Boletas",       desc: "Boletas de calificaciones",    roles: ["admin", "direccion", "secretaria", "visor"] },
-      { id: "concentrado",   href: "/concentrados",  label: "Concentrados",  desc: "Concentrados de grupo",        roles: ["admin", "direccion", "secretaria", "visor"] },
-      { id: "reportes",      href: "/rendimiento",   label: "Reportes",      desc: "Reportes de rendimiento",      roles: ["admin", "direccion", "visor"] },
+      { id: "boleta",        href: "/boleta",        label: "Boletas",       desc: "Boletas de calificaciones",    roles: ["admin", "direccion", "profesor", "secretaria", "visor"] },
+      { id: "concentrado",   href: "/concentrados",  label: "Concentrados",  desc: "Concentrados de grupo",        roles: ["admin", "direccion", "profesor", "secretaria", "visor"] },
+      { id: "reportes",      href: "/rendimiento",   label: "Reportes",      desc: "Reportes de rendimiento",      roles: ["admin", "direccion", "profesor", "visor"] },
       { id: "periodos",      href: "/periodos",      label: "Periodos",      desc: "Gestión de periodos",          roles: ["admin", "direccion"] },
     ],
   },
@@ -69,7 +71,7 @@ export const SECCIONES: Seccion[] = [
       { id: "profesores",    href: "/admin/profesores",      label: "Profesores",          desc: "Catálogo de profesores",         roles: ["admin", "direccion"] },
       { id: "asignar",       href: "/asignar",               label: "Asignar",             desc: "Asignar materias a profesores",  roles: ["admin", "direccion"] },
       { id: "alumnos",       href: "/admin/alumnos",         label: "Alumnos",             desc: "Gestión de alumnos",             roles: ["admin", "direccion", "secretaria"] },
-      { id: "directorio",    href: "/directorio",            label: "Directorio",          desc: "Directorio escolar",             roles: ["admin", "direccion", "secretaria", "visor"] },
+      { id: "directorio",    href: "/directorio",            label: "Directorio",          desc: "Directorio escolar",             roles: ["admin", "direccion", "profesor", "secretaria", "visor"] },
       { id: "servicios_escolares", href: "/servicios-escolares", label: "Servicios Escolares", desc: "Servicios escolares",        roles: ["admin", "direccion", "secretaria"] },
     ],
   },

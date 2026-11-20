@@ -31,7 +31,7 @@ export default async function AsignarPage() {
   const [groupsRes, subjectsRes, teachersRes, assignmentsRes] = await Promise.all([
     admin.from("groups").select("id, grade, letter").neq("letter", "Bajas").order("grade").order("letter"),
     admin.from("subjects").select("id, name, short_name, grade, sort_order, counts_for_avg").order("sort_order").order("name"),
-    admin.from("profiles").select("id, full_name").eq("role", "visor").order("full_name"),
+    admin.from("profiles").select("id, full_name").eq("role", "profesor").order("full_name"),
     admin.from("teacher_assignments").select("id, teacher_id, group_id, subject_id"),
   ]);
 

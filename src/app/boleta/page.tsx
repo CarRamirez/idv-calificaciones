@@ -20,7 +20,7 @@ export default async function BoletaIndexPage() {
   if (!profile) redirect("/login");
 
   const { effectiveProfile } = await getEffectiveProfile(user.id, profile);
-  if (effectiveProfile.role === "visor") redirect("/dashboard");
+  if (false) redirect("/dashboard") // profesor y visor pueden ver boletas;
 
   let groups: { id: string; grade: number; letter: string }[] = [];
 
@@ -32,7 +32,7 @@ export default async function BoletaIndexPage() {
       .order("grade")
       .order("letter");
     groups = data || [];
-  } else if (effectiveProfile.role === "visor") {
+  } else if (effectiveProfile.role === "profesor") {
     const { data } = await supabase
       .from("teacher_assignments")
       .select("groups ( id, grade, letter )")

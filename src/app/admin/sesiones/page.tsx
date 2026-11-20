@@ -91,8 +91,10 @@ export default async function SesionesPage() {
     switch (role) {
       case "admin":
         return "bg-purple-100 text-purple-700";
+      case "profesor":
       case "visor":
         return "bg-blue-100 text-blue-700";
+      case "profesor":
       case "visor":
         return "bg-slate-100 text-slate-700";
       default:
@@ -104,8 +106,10 @@ export default async function SesionesPage() {
     switch (role) {
       case "admin":
         return "Admin";
+      case "profesor":
       case "visor":
         return "Profesor";
+      case "profesor":
       case "visor":
         return "Consulta";
       default:

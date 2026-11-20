@@ -46,7 +46,7 @@ export async function GET() {
     const { data: teachers } = await admin
       .from("profiles")
       .select("id, full_name, email")
-      .eq("role", "visor")
+      .eq("role", "profesor")
       .order("full_name");
 
     // 2. Get all teacher assignments (teacher -> group -> subject)

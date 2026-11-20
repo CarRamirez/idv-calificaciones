@@ -46,10 +46,10 @@ export async function POST(req: NextRequest) {
     const email = (t.email || "").trim().toLowerCase();
     const full_name = (t.full_name || "").trim().toUpperCase();
     const password = (t.password || "").trim();
-    const VALID_ROLES = ["superadmin", "admin", "direccion", "visor"];
+    const VALID_ROLES = ["superadmin", "admin", "direccion", "profesor", "secretaria", "visor"];
     const role = VALID_ROLES.includes((t.role || "").trim().toLowerCase())
       ? (t.role || "").trim().toLowerCase()
-      : "visor";
+      : "profesor";
     const label = (t.label || "").trim();
 
     if (!email || !full_name || !password) {
