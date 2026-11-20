@@ -112,7 +112,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
   const activeTrimester = view === "t1" ? TRIMESTERS[0] : view === "t2" ? TRIMESTERS[1] : view === "t3" ? TRIMESTERS[2] : null;
 
   return (
-    <div>
+    <div className="pagina-apaisada">
       {/* Tabs */}
       <div className="flex gap-1 mb-4">
         {tabs.map((tab) => (
@@ -157,16 +157,24 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
       {/* Print styles */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          @page { size: landscape; margin: 6mm 4mm; }
+          @page { size: letter landscape; margin: 5mm 3mm; }
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .card { box-shadow: none !important; border: 1px solid #d1d5db !important; }
+          nav, aside, header, footer, .print\\:hidden { display: none !important; }
+          main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+          .card { box-shadow: none !important; border: none !important; overflow: visible !important; padding: 0 !important; }
           .concentrado-print-header { display: flex !important; }
-          .concentrado-print-footer { display: block !important; }
-          .grade-table { font-size: 13px !important; }
-          .grade-table th, .grade-table td { padding: 4px 6px !important; }
-          .grade-table th { font-weight: 700 !important; font-size: 13px !important; }
-          .grade-table thead th { border-bottom: 2px solid #4338ca !important; }
-          .grade-table tfoot td { font-size: 14px !important; padding: 6px !important; }
+          .concentrado-print-footer { display: block !important; margin-top: 4mm !important; }
+          .grade-table { font-size: 7.5px !important; width: 100% !important; border-collapse: collapse !important; }
+          .grade-table th, .grade-table td { padding: 1.5px 2px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+          .grade-table th { font-weight: 700 !important; font-size: 7px !important; }
+          .grade-table thead th { border-bottom: 1.5px solid #4338ca !important; }
+          .grade-table td.student-name { white-space: normal !important; word-break: break-word !important; font-size: 6.5px !important; line-height: 1.2 !important; max-width: 100px !important; }
+          .grade-table th, .grade-table td { min-width: 0 !important; }
+          .grade-table tfoot td { font-size: 7px !important; padding: 2px !important; }
+          .grade-table tbody tr { page-break-inside: avoid !important; }
+          .concentrado-print-header img { width: 10mm !important; height: 10mm !important; }
+          .concentrado-print-header h1 { font-size: 10px !important; }
+          .concentrado-print-header p { font-size: 8px !important; }
         }
       `}} />
 
@@ -206,7 +214,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
             <thead>
               <tr>
                 <th rowSpan={2} className="w-10">N°</th>
-                <th rowSpan={2} className="min-w-[180px]">Nombre</th>
+                <th rowSpan={2} className="min-w-[180px] print:min-w-0">Nombre</th>
                 {subjects.map((s) => (
                   <th key={s.id} className={`text-center text-xs border-l border-slate-200 ${!s.counts_for_avg ? "bg-slate-50 text-slate-400 italic" : ""}`}>
                     {s.short_name}
@@ -224,7 +232,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                 return (
                   <tr key={student.id}>
                     <td className="text-center text-slate-500 tabular-nums text-xs">{student.list_num}</td>
-                    <td className="text-xs font-medium text-slate-900">{formatStudentName(student.full_name)}</td>
+                    <td className="text-xs font-medium text-slate-900 student-name">{formatStudentName(student.full_name)}</td>
                     {subjects.map((s) => {
                       const curricular = getSubjectCurricular(student.id, s.id);
                       return (
@@ -269,7 +277,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
             <thead>
               <tr>
                 <th rowSpan={3} className="w-10">N°</th>
-                <th rowSpan={3} className="min-w-[180px]">Nombre</th>
+                <th rowSpan={3} className="min-w-[180px] print:min-w-0">Nombre</th>
                 {subjects.map((s) => (
                   <th
                     key={s.id}
@@ -304,7 +312,7 @@ export default function ConcentradoTable({ subjects, students, gradeMap, groupNa
                 return (
                   <tr key={student.id}>
                     <td className="text-center text-slate-500 tabular-nums text-xs">{student.list_num}</td>
-                    <td className="text-xs font-medium text-slate-900">{formatStudentName(student.full_name)}</td>
+                    <td className="text-xs font-medium text-slate-900 student-name">{formatStudentName(student.full_name)}</td>
                     {subjects.map((s) => {
                       const trimAvg = getTrimesterAvg(student.id, s.id, activeTrimester);
                       return (

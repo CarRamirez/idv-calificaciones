@@ -119,7 +119,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 @media print {
   @page { size: letter; margin: 12mm; }
-  @page apaisada { size: letter landscape; margin: 10mm; }
+  @page apaisada { size: letter landscape; margin: 5mm 3mm; }
   .pagina-apaisada { page: apaisada; }
   @page vertical { size: letter portrait; margin: 7mm 8mm; }
   .pagina-vertical { page: vertical; }

@@ -638,8 +638,7 @@ export default function CapturaPage({ params }: Props) {
   const stats = activeTab !== 0 ? getQuickStats() : null;
 
   return (
-    <div className="bg-mesh">
-      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role} />
+      <Navbar userName={(effectiveProfile || profile)!.full_name} userRole={(effectiveProfile || profile)!.role}>
 
       <main className="page-content animate-fade-in">
         {/* Banner de periodo cerrado */}
@@ -1251,6 +1250,6 @@ export default function CapturaPage({ params }: Props) {
           </div>
         </div>
       )}
-    </div>
+    </Navbar>
   );
 }
